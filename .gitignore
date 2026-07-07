@@ -1,0 +1,9 @@
+target/
+test-output/
+.idea/
+.vscode/
+*.iml
+*.log
+.env
+.selenium/
+screenshots/
