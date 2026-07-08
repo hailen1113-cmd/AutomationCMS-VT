@@ -2,6 +2,7 @@ package com.vuatho.config;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 public final class TestConfig {
     private static final String DEFAULT_BASE_URL = "https://erp-sandbox.vuatho.com/";
@@ -23,6 +24,12 @@ public final class TestConfig {
 
     public static boolean pauseOnFailure() {
         return Boolean.parseBoolean(value("pause.on.failure", "PAUSE_ON_FAILURE", "false"));
+    }
+
+    public static Duration pageLoadSla() {
+        int seconds = Integer.parseInt(
+                value("page.load.sla.seconds", "PAGE_LOAD_SLA_SECONDS", "30"));
+        return Duration.ofSeconds(seconds);
     }
 
     public static String seleniumProfileDirectory() {

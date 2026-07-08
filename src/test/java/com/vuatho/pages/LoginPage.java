@@ -3,6 +3,7 @@ package com.vuatho.pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
@@ -44,6 +45,11 @@ public class LoginPage {
     public void loginWithGoogle(String email, Supplier<String> passwordSupplier) {
         String erpWindow = driver.getWindowHandle();
         Set<String> windowsBeforeClick = driver.getWindowHandles();
+
+        wait.until(webDriver -> isOnErp() || firstVisible(GOOGLE_LOGIN_BUTTON) != null);
+        if (isOnErp()) {
+            return;
+        }
 
         wait.until(ExpectedConditions.elementToBeClickable(GOOGLE_LOGIN_BUTTON)).click();
         switchToGoogleWindow(windowsBeforeClick);
@@ -126,8 +132,7 @@ public class LoginPage {
             emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(GOOGLE_EMAIL));
         }
 
-        emailInput.clear();
-        emailInput.sendKeys(email);
+        replaceText(emailInput, email);
         wait.until(ExpectedConditions.attributeToBe(GOOGLE_EMAIL, "value", email));
         clickGoogleNext(GOOGLE_EMAIL_NEXT);
     }
@@ -142,8 +147,7 @@ public class LoginPage {
     }
 
     private void enterGooglePassword(WebElement passwordInput, String password) {
-        passwordInput.clear();
-        passwordInput.sendKeys(password);
+        replaceText(passwordInput, password);
         clickGoogleNext(GOOGLE_PASSWORD_NEXT);
     }
 
@@ -154,6 +158,12 @@ public class LoginPage {
         } catch (ElementClickInterceptedException exception) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", next);
         }
+    }
+
+    private void replaceText(WebElement input, String value) {
+        input.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        input.sendKeys(Keys.DELETE);
+        input.sendKeys(value);
     }
 
     private void returnToErpWindow(String erpWindow) {

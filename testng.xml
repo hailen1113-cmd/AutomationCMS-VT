@@ -9,6 +9,10 @@
             <class name="com.vuatho.tests.ErpSmokeTest"/>
             <class name="com.vuatho.tests.ErpLoginTest"/>
             <class name="com.vuatho.tests.DashboardTest"/>
+            <class name="com.vuatho.tests.MenuNavigationTest"/>
+            <class name="com.vuatho.tests.ReadOnlyFeatureTest"/>
+            <class name="com.vuatho.tests.DeepReadOnlyFeatureTest"/>
+            <class name="com.vuatho.tests.FilterBehaviorTest"/>
         </classes>
     </test>
 </suite>

@@ -3,11 +3,10 @@ package com.vuatho.tests;
 import com.vuatho.config.GoogleCredentialProvider;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.BaseTest;
+import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.DashboardPage;
 import com.vuatho.pages.LoginPage;
-import com.vuatho.reporting.ConsoleTestListener;
 import org.testng.Assert;
-import org.testng.TestNG;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -17,15 +16,7 @@ public class DashboardTest extends BaseTest {
     private DashboardPage dashboard;
 
     public static void main(String[] args) {
-        System.setProperty("headless", System.getProperty("headless", "false"));
-        System.setProperty("interactive", System.getProperty("interactive", "true"));
-        System.setProperty("pause.on.failure", System.getProperty("pause.on.failure", "false"));
-
-        TestNG testNG = new TestNG();
-        testNG.setDefaultSuiteName("ERP Dashboard Suite");
-        testNG.setTestClasses(new Class<?>[]{DashboardTest.class});
-        testNG.addListener(new ConsoleTestListener());
-        testNG.run();
+        TestNgRunner.run(DashboardTest.class, "ERP Dashboard Suite", "ERP Dashboard Test");
     }
 
     @BeforeMethod

@@ -1,12 +1,15 @@
 package com.vuatho.pages;
 
 import com.vuatho.config.TestConfig;
+import com.vuatho.components.SidebarComponent;
+import com.vuatho.utils.PageScroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -32,16 +35,26 @@ public class DashboardPage {
             "Marketing");
 
     private static final By DASHBOARD_TEXT = By.xpath("//*[normalize-space()='Dashboard']");
+    private static final By DASHBOARD_MENU = By.xpath(
+            "//a[normalize-space(.)='Dashboard'] | //button[normalize-space(.)='Dashboard']"
+                    + " | //*[@role='menuitem' and normalize-space(.)='Dashboard']");
     private static final By COMPANY_HEADER = By.xpath("//*[normalize-space()='Công ty Vua Thợ']");
+    private static final By HOME_CONTENT = By.xpath("//*[normalize-space()='Sơ Đồ Tổ Chức']");
+    private static final By DASHBOARD_CONTENT = By.xpath("//*[normalize-space()='Thống Kê Tổng Quan']");
     private static final By GOOGLE_LOGIN = By.xpath("//*[contains(normalize-space(.),'Google')]");
+    private static final By LOADING_INDICATORS = By.cssSelector(
+            "[role='progressbar'], .ant-spin-spinning, .ant-skeleton, .skeleton");
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+    private final SidebarComponent sidebar;
 
     public DashboardPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         this.wait.pollingEvery(Duration.ofMillis(200));
+        this.wait.ignoring(StaleElementReferenceException.class);
+        this.sidebar = new SidebarComponent(driver);
     }
 
     public DashboardPage open() {
@@ -51,8 +64,9 @@ public class DashboardPage {
 
     public boolean isLoaded() {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(DASHBOARD_TEXT));
             wait.until(ExpectedConditions.visibilityOfElementLocated(COMPANY_HEADER));
+            wait.until(webDriver -> isVisible(HOME_CONTENT) || isVisible(DASHBOARD_CONTENT));
+            sidebar.ensureExpanded();
             return true;
         } catch (org.openqa.selenium.TimeoutException ignored) {
             return false;
@@ -66,55 +80,68 @@ public class DashboardPage {
                 && !url.contains("login");
     }
 
+    public void openDashboardAndWaitForMetrics() {
+        wait.until(webDriver -> isVisible(HOME_CONTENT) || isVisible(DASHBOARD_CONTENT));
+        sidebar.ensureExpanded();
+        wait.until(ExpectedConditions.elementToBeClickable(DASHBOARD_MENU)).click();
+
+        WebDriverWait metricsWait = new WebDriverWait(driver, Duration.ofSeconds(45));
+        metricsWait.pollingEvery(Duration.ofMillis(300));
+        metricsWait.ignoring(StaleElementReferenceException.class);
+        metricsWait.until(webDriver -> hasDashboardMarker());
+        metricsWait.until(webDriver -> driver.findElements(LOADING_INDICATORS).stream()
+                .noneMatch(WebElement::isDisplayed));
+        metricsWait.until(webDriver -> visibleMetricValues() > 0);
+        PageScroller.slowlyToBottom(driver);
+    }
+
+    public boolean areMetricsDisplayed() {
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .until(webDriver -> visibleMetricValues() > 0);
+            return true;
+        } catch (TimeoutException ignored) {
+            return false;
+        }
+    }
+
+    public List<String> loadedMetrics() {
+        return mainContent().findElements(By.xpath(
+                        ".//*[not(*) and string-length(normalize-space()) > 0]"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .map(WebElement::getText)
+                .map(String::trim)
+                .filter(text -> !text.isBlank() && text.matches(".*\\d.*"))
+                .distinct()
+                .toList();
+    }
+
     public List<String> missingMenuGroups() {
-        String sidebarText = sidebar().getText();
+        String sidebarText = sidebar.text();
         return EXPECTED_MENU_GROUPS.stream()
                 .filter(item -> !sidebarText.contains(item))
                 .toList();
     }
 
     public boolean isLogoLoaded() {
-        return sidebar().findElements(By.tagName("img")).stream()
-                .filter(WebElement::isDisplayed)
-                .anyMatch(image -> ((Number) ((JavascriptExecutor) driver)
-                        .executeScript("return arguments[0].naturalWidth || 0;", image)).intValue() > 0);
+        return sidebar.isLogoLoaded();
     }
 
     public double sidebarWidth() {
-        return sidebar().getRect().getWidth();
+        return sidebar.width();
     }
 
     public void collapseSidebar() {
-        double widthBefore = sidebarWidth();
-        collapseButton().click();
-        wait.until(webDriver -> sidebarWidth() < widthBefore || !dashboardMenu().isDisplayed());
+        sidebar.collapse();
     }
 
     public void expandSidebar() {
-        double widthBefore = sidebarWidth();
-        collapseButton().click();
-        wait.until(webDriver -> sidebarWidth() > widthBefore && dashboardMenu().isDisplayed());
+        sidebar.expand();
     }
 
     public boolean isDashboardMenuActive() {
-        WebElement menu = dashboardMenu();
-        WebElement current = menu;
-        for (int level = 0; level < 4 && current != null; level++) {
-            String classes = String.valueOf(current.getAttribute("class")).toLowerCase();
-            String ariaCurrent = current.getAttribute("aria-current");
-            String selected = current.getAttribute("data-state");
-            if (classes.contains("active") || classes.contains("selected")
-                    || "page".equalsIgnoreCase(ariaCurrent)
-                    || "active".equalsIgnoreCase(selected)) {
-                return true;
-            }
-            current = current.findElement(By.xpath(".."));
-        }
-
-        String background = dashboardMenu().getCssValue("background-color");
-        return background != null
-                && !background.equals("rgba(0, 0, 0, 0)")
-                && !background.equals("transparent");
+        return sidebar.isDashboardActive();
     }
 
     public boolean hasCompanyHeader() {
@@ -141,56 +168,8 @@ public class DashboardPage {
     }
 
     public boolean hasDashboardMarker() {
-        return isVisible(DASHBOARD_TEXT) && isVisible(COMPANY_HEADER);
-    }
-
-    private WebElement dashboardMenu() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(DASHBOARD_TEXT));
-    }
-
-    private WebElement sidebar() {
-        WebElement menu = dashboardMenu();
-        List<WebElement> semanticParents = menu.findElements(By.xpath(
-                "ancestor::*[self::aside or self::nav or @role='navigation'"
-                        + " or contains(translate(@class,'SIDEBAR','sidebar'),'sidebar')][1]"));
-        if (!semanticParents.isEmpty()) {
-            return semanticParents.get(0);
-        }
-
-        WebElement inferred = (WebElement) ((JavascriptExecutor) driver).executeScript(
-                "let e=arguments[0]; while(e && e!==document.body){"
-                        + "const r=e.getBoundingClientRect();"
-                        + "if(r.height>innerHeight*.7 && r.width>150 && r.width<500) return e;"
-                        + "e=e.parentElement;} return null;", menu);
-        if (inferred == null) {
-            throw new NoSuchElementException("Không xác định được sidebar.");
-        }
-        return inferred;
-    }
-
-    private WebElement collapseButton() {
-        List<WebElement> namedButtons = driver.findElements(By.xpath(
-                "//button[contains(translate(@aria-label,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'collapse')"
-                        + " or contains(translate(@title,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'collapse')"
-                        + " or contains(@aria-label,'Thu gọn') or contains(@title,'Thu gọn')"
-                        + " or contains(@aria-label,'Mở rộng') or contains(@title,'Mở rộng')]"));
-        if (!namedButtons.isEmpty()) {
-            return namedButtons.stream().filter(WebElement::isDisplayed).findFirst().orElseThrow();
-        }
-
-        Rectangle sidebarRect = sidebar().getRect();
-        return driver.findElements(By.tagName("button")).stream()
-                .filter(WebElement::isDisplayed)
-                .filter(button -> button.getText().isBlank())
-                .filter(button -> {
-                    Rectangle rectangle = button.getRect();
-                    return rectangle.getWidth() >= 20 && rectangle.getWidth() <= 56
-                            && rectangle.getHeight() >= 20 && rectangle.getHeight() <= 56
-                            && rectangle.getY() < 260
-                            && rectangle.getX() <= sidebarRect.getX() + sidebarRect.getWidth();
-                })
-                .min(Comparator.comparingInt(button -> Math.abs(button.getRect().getY() - 140)))
-                .orElseThrow(() -> new NoSuchElementException("Không tìm thấy nút thu gọn sidebar."));
+        return isVisible(DASHBOARD_CONTENT)
+                || (isVisible(HOME_CONTENT) && isVisible(COMPANY_HEADER));
     }
 
     private WebElement logoutButton() {
@@ -214,5 +193,16 @@ public class DashboardPage {
 
     private boolean isVisible(By locator) {
         return driver.findElements(locator).stream().anyMatch(WebElement::isDisplayed);
+    }
+
+    private long visibleMetricValues() {
+        return loadedMetrics().size();
+    }
+
+    private WebElement mainContent() {
+        return driver.findElements(By.cssSelector("main, [role='main']")).stream()
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .orElseGet(() -> driver.findElement(By.tagName("body")));
     }
 }

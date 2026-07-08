@@ -1,29 +1,43 @@
 package com.vuatho.reporting;
 
 import org.testng.ITestContext;
+import org.testng.IExecutionListener;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class ConsoleTestListener implements ITestListener {
+public class ConsoleTestListener implements ITestListener, IExecutionListener {
+    private static final List<ITestResult> RESULTS = new CopyOnWriteArrayList<>();
+    private final HtmlSummaryReporter summaryReporter = new HtmlSummaryReporter();
+
+    @Override
+    public void onExecutionStart() {
+        RESULTS.clear();
+    }
     @Override
     public void onTestStart(ITestResult result) {
-        System.out.printf("%n[RUNNING] %s%n", displayName(result));
+        System.out.printf("%n[RUNNING] %s%n", TestResultFormatter.displayName(result));
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        System.out.printf("[PASS]    %s (%s)%n", displayName(result), duration(result));
+        RESULTS.add(result);
+        System.out.printf("[PASS]    %s (%s)%n", TestResultFormatter.displayName(result),
+                TestResultFormatter.duration(result));
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
+        RESULTS.add(result);
         String message = result.getThrowable() == null
                 ? "Không có chi tiết lỗi"
                 : result.getThrowable().getMessage();
         System.out.printf("[FAIL]    %s (%s)%n          %s%n",
-                displayName(result), duration(result), message);
+                TestResultFormatter.displayName(result), TestResultFormatter.duration(result), message);
         System.out.printf("          Screenshot: %s%n",
                 Path.of("target", "screenshots", result.getMethod().getMethodName() + ".png")
                         .toAbsolutePath());
@@ -31,7 +45,8 @@ public class ConsoleTestListener implements ITestListener {
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        System.out.printf("[SKIP]    %s%n", displayName(result));
+        RESULTS.add(result);
+        System.out.printf("[SKIP]    %s%n", TestResultFormatter.displayName(result));
     }
 
     @Override
@@ -49,15 +64,13 @@ public class ConsoleTestListener implements ITestListener {
         System.out.println("==================================================");
     }
 
-    private String displayName(ITestResult result) {
-        String description = result.getMethod().getDescription();
-        return description == null || description.isBlank()
-                ? result.getMethod().getMethodName()
-                : description;
+    @Override
+    public void onExecutionFinish() {
+        try {
+            System.out.println("Summary report: " + summaryReporter.write(RESULTS));
+        } catch (IOException exception) {
+            System.err.println("Cannot create summary report: " + exception.getMessage());
+        }
     }
 
-    private String duration(ITestResult result) {
-        double seconds = (result.getEndMillis() - result.getStartMillis()) / 1000.0;
-        return String.format("%.2fs", seconds);
-    }
 }
