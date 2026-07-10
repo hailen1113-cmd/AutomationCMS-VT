@@ -10,6 +10,8 @@ import static com.vuatho.navigation.MenuTarget.topLevel;
 
 public final class MenuCatalog {
     private static final List<MenuTarget> ALL = List.of(
+            topLevel("Dashboard"),
+            topLevel("Hiệu Quả Nguồn Thợ & Chi Phí"),
             topLevel("Tài chính"),
             childOf("Người Dùng", "Quản Lí Người Dùng"),
             childOf("Người Dùng", "Quản Lí eKYC"),
@@ -57,10 +59,22 @@ public final class MenuCatalog {
 
     public static Object[][] dataProviderRows() {
         String filter = System.getProperty("menu.filter", "").trim().toLowerCase(Locale.ROOT);
-        return ALL.stream()
+        Object[][] rows = ALL.stream()
+                .map(MenuCatalog::normalize)
                 .filter(menu -> filter.isBlank()
                         || menu.toString().toLowerCase(Locale.ROOT).contains(filter))
                 .map(menu -> new Object[]{menu})
                 .toArray(Object[][]::new);
+        System.out.printf("[MENU DATA] %d menu page(s)%s%n",
+                rows.length,
+                filter.isBlank() ? "" : " matched filter: " + filter);
+        return rows;
+    }
+
+    private static MenuTarget normalize(MenuTarget menu) {
+        if ("Marketing".equals(menu.parent()) && menu.name().contains("-")) {
+            return childOf("Marketing", "Hiệu suất Marketing");
+        }
+        return menu;
     }
 }

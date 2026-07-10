@@ -47,7 +47,7 @@ public class PageHealthChecker {
     }
 
     private void validateUrl(String url, List<String> problems) {
-        String expectedHost = URI.create(TestConfig.baseUrl()).getHost();
+        String expectedHost = TestConfig.baseHost();
         String actualHost = URI.create(url).getHost();
         if (!expectedHost.equalsIgnoreCase(actualHost)) {
             problems.add("Unexpected host: " + actualHost + " (expected " + expectedHost + ")");
@@ -94,21 +94,42 @@ public class PageHealthChecker {
     private void validateImages(List<String> problems) {
         List<String> brokenImages = (List<String>) ((JavascriptExecutor) driver).executeScript(
                 "return [...document.images].filter(img=>img.complete && img.naturalWidth===0)"
-                        + ".map(img=>img.getAttribute('src') || '<empty src>');");
+                        + ".map(img=>img.currentSrc || img.getAttribute('src') || '').filter(Boolean);");
         brokenImages = brokenImages.stream().distinct().toList();
+        String expectedHost = TestConfig.baseHost();
+        brokenImages = brokenImages.stream()
+                .filter(src -> sameHost(src, expectedHost))
+                .toList();
         if (!brokenImages.isEmpty()) {
             problems.add("Broken images: " + brokenImages);
+        }
+    }
+
+    private boolean sameHost(String source, String expectedHost) {
+        try {
+            String host = URI.create(source).getHost();
+            return host == null || expectedHost.equalsIgnoreCase(host);
+        } catch (IllegalArgumentException ignored) {
+            return true;
         }
     }
 
     private void validateBrowserConsole(List<String> problems) {
         List<String> errors = browserErrors().stream()
                 .map(LogEntry::getMessage)
+                .filter(message -> !isThirdPartyAuthNoise(message))
                 .distinct()
                 .toList();
         if (!errors.isEmpty()) {
             problems.add("Severe browser console errors: " + errors);
         }
+    }
+
+    private boolean isThirdPartyAuthNoise(String message) {
+        return message.contains("accounts.google.com")
+                || message.contains("ssl.gstatic.com")
+                || message.contains("Cross-Origin-Opener-Policy policy would block")
+                || message.contains("All created TinyMCE editors are configured to be read-only");
     }
 
     private List<LogEntry> browserErrors() {

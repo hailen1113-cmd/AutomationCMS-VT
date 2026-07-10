@@ -5,11 +5,11 @@ import org.testng.ITestResult;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-final class TestResultFormatter {
+public final class TestResultFormatter {
     private TestResultFormatter() {
     }
 
-    static String displayName(ITestResult result) {
+    public static String displayName(ITestResult result) {
         String description = result.getMethod().getDescription();
         String name = description == null || description.isBlank()
                 ? result.getMethod().getMethodName()
@@ -24,12 +24,12 @@ final class TestResultFormatter {
         return parameters.isBlank() ? name : name + " [" + parameters + "]";
     }
 
-    static String duration(ITestResult result) {
+    public static String duration(ITestResult result) {
         double seconds = (result.getEndMillis() - result.getStartMillis()) / 1000.0;
         return String.format("%.2fs", seconds);
     }
 
-    static String escapeHtml(String value) {
+    public static String escapeHtml(String value) {
         if (value == null) {
             return "";
         }

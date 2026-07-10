@@ -8,6 +8,7 @@ import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.MenuCatalog;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -19,20 +20,23 @@ public class FilterDiscoveryTest extends BaseTest {
                 "ERP Filter Discovery", "Read-only filter inventory");
     }
 
-    @Test
-    public void inventoryFiltersAcrossAllMenus() {
+    @DataProvider(name = "allMenus")
+    public Object[][] allMenus() {
+        return MenuCatalog.dataProviderRows();
+    }
+
+    @Test(dataProvider = "allMenus")
+    public void inventoryFiltersAcrossAllMenus(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         UiFeatureExplorer explorer = new UiFeatureExplorer(driver);
 
-        for (MenuTarget target : MenuCatalog.all()) {
-            new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
-            List<UiControl> filters = explorer.visibleControls().stream()
-                    .filter(this::isFilterControl)
-                    .toList();
-            if (!filters.isEmpty()) {
-                System.out.printf("%n[FILTER PAGE] %s | %s%n", target, driver.getCurrentUrl());
-                filters.forEach(control -> System.out.println("  " + control));
-            }
+        new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        List<UiControl> filters = explorer.visibleControls().stream()
+                .filter(this::isFilterControl)
+                .toList();
+        if (!filters.isEmpty()) {
+            System.out.printf("%n[FILTER PAGE] %s | %s%n", target, driver.getCurrentUrl());
+            filters.forEach(control -> System.out.println("  " + control));
         }
     }
 

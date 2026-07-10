@@ -41,11 +41,15 @@ public final class FilterCatalog {
 
     public static Object[][] searchFilterRows() {
         String requested = System.getProperty("filter.filter", "").trim().toLowerCase(Locale.ROOT);
-        return SEARCH_FILTERS.stream()
+        Object[][] rows = SEARCH_FILTERS.stream()
                 .filter(filter -> requested.isBlank()
                         || filter.toString().toLowerCase(Locale.ROOT).contains(requested))
                 .map(filter -> new Object[]{filter})
                 .toArray(Object[][]::new);
+        System.out.printf("[FILTER DATA] %d search filter(s)%s%n",
+                rows.length,
+                requested.isBlank() ? "" : " matched filter: " + requested);
+        return rows;
     }
 
     private static FilterTarget filter(String parent, String page, String placeholder) {

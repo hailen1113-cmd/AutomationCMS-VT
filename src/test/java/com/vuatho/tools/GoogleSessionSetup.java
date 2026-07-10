@@ -17,15 +17,17 @@ public final class GoogleSessionSetup {
                 .toAbsolutePath()
                 .normalize();
         Files.createDirectories(profile);
+        String url = TestConfig.entryUrl();
 
         new ProcessBuilder(
                 chrome.toString(),
                 "--user-data-dir=" + profile,
                 "--profile-directory=Default",
-                "https://accounts.google.com/")
+                url)
                 .start();
 
         System.out.println("Chrome thuong da duoc mo bang profile Selenium: " + profile);
+        System.out.println("URL dang mo: " + url);
         System.out.println("1. Dang nhap Google thu cong bang hailen1113@gmail.com.");
         System.out.println("2. Dong TOAN BO cua so Chrome cua profile nay.");
         System.out.println("3. Run Java lai ErpLoginTest.main().");

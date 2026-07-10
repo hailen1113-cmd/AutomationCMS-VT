@@ -15,18 +15,23 @@ public final class DriverFactory {
     }
 
     public static WebDriver createChromeDriver() {
-        ChromeOptions options = new ChromeOptions();
+        // Dùng profile Chrome riêng cho Selenium để cookie/token ERP được giữ giữa các test.
         Path profileDirectory = Path.of(TestConfig.seleniumProfileDirectory())
                 .toAbsolutePath()
                 .normalize();
 
+        ChromeOptions options = new ChromeOptions();
         options.addArguments("--user-data-dir=" + profileDirectory);
         options.addArguments("--profile-directory=Default");
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
+
+        // Chỉ lấy log browser mức SEVERE; log info/warning quá nhiều sẽ làm console khó đọc.
         LoggingPreferences logging = new LoggingPreferences();
         logging.enable(LogType.BROWSER, Level.SEVERE);
         options.setCapability("goog:loggingPrefs", logging);
+
+        // Headless cần kích thước cửa sổ cố định vì responsive layout có thể đổi vị trí element.
         if (TestConfig.headless()) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1440,1000");
@@ -36,6 +41,7 @@ public final class DriverFactory {
 
         WebDriver driver = new ChromeDriver(options);
         if (!TestConfig.headless()) {
+            // Maximize thêm lần nữa vì một số máy có thể bỏ qua --start-maximized lúc khởi động.
             driver.manage().window().maximize();
         }
         return driver;

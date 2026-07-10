@@ -33,6 +33,7 @@ public class MenuNavigationTest extends BaseTest {
     }
 
     @Test(dataProvider = "menuPages",
+            groups = {"smoke", "navigation", "loadpage"},
             description = "CMS-MENU: Menu destination loads and scrolls to the bottom")
     public void menuDestinationLoadsSuccessfully(MenuTarget target) {
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
@@ -47,6 +48,9 @@ public class MenuNavigationTest extends BaseTest {
 
         SoftAssert checks = new SoftAssert();
         checks.assertTrue(page.isLoaded(), "Trang " + target + " chưa load thành công.");
+        checks.assertTrue(page.urlMatchesExpectedDestination(),
+                "URL sau khi click menu khong khop href. Expected: "
+                        + page.expectedDestinationUrl() + " | Actual: " + page.currentUrl());
         checks.assertTrue(page.loadDuration().compareTo(TestConfig.pageLoadSla()) <= 0,
                 "Trang load quá SLA: " + page.loadDuration().toMillis() + "ms");
         checks.assertTrue(health.isHealthy(), health.summary());

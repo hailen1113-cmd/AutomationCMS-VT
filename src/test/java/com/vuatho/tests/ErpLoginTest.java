@@ -17,13 +17,14 @@ import java.util.List;
 public class ErpLoginTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(
-                "ERP End-to-End Suite",
-                "Login, Dashboard and Menu Navigation",
-                ErpLoginTest.class,
-                MenuNavigationTest.class,
-                ReadOnlyFeatureTest.class,
-                DeepReadOnlyFeatureTest.class,
-                FilterBehaviorTest.class);
+                "ERP Login and Dashboard Suite",
+                "Login and Dashboard Checks",
+                ErpLoginTest.class);
+    }
+
+    @Override
+    protected boolean reuseDriverBetweenTestMethods() {
+        return true;
     }
 
     @Test(priority = 1, description = "CMS-DASH-001: Login CMS successfully with Google")
@@ -33,7 +34,7 @@ public class ErpLoginTest extends BaseTest {
         LoginPage loginPage = openAndLogin();
 
         Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Đăng nhập không thành công: không tìm thấy Dashboard/Công ty Vua Thợ.");
+                "Login did not reach Dashboard.");
         assertHealthy(healthChecker.inspect());
     }
 
@@ -49,8 +50,7 @@ public class ErpLoginTest extends BaseTest {
         System.out.printf("%n[DASHBOARD METRICS] Loaded %d values:%n", metrics.size());
         metrics.forEach(metric -> System.out.println("  - " + metric));
 
-        Assert.assertFalse(metrics.isEmpty(),
-                "Dashboard đã mở nhưng các chỉ số chưa hiển thị.");
+        Assert.assertFalse(metrics.isEmpty(), "Dashboard opened but metrics were not displayed.");
         assertHealthy(healthChecker.inspect());
     }
 
@@ -59,17 +59,16 @@ public class ErpLoginTest extends BaseTest {
     public void sourceEfficiencyPageLoadsSuccessfully() {
         openAndLogin();
         DashboardPage dashboard = new DashboardPage(driver);
-        Assert.assertTrue(dashboard.isLoaded(), "Dashboard chưa sẵn sàng để mở menu.");
+        Assert.assertTrue(dashboard.isLoaded(), "Dashboard is not ready before opening source efficiency page.");
 
         PageHealthChecker healthChecker = new PageHealthChecker(driver);
         healthChecker.startObservation();
         SourceEfficiencyPage sourceEfficiencyPage = new SourceEfficiencyPage(driver)
                 .openAndWaitUntilLoaded();
 
-        Assert.assertTrue(sourceEfficiencyPage.isLoaded(),
-                "Trang Hiệu Quả Nguồn Thợ & Chi Phí chưa load thành công.");
+        Assert.assertTrue(sourceEfficiencyPage.isLoaded(), "Source efficiency page did not load successfully.");
         assertHealthy(healthChecker.inspect());
-        System.out.println("[PAGE LOADED] Hiệu Quả Nguồn Thợ & Chi Phí");
+        System.out.println("[PAGE LOADED] Source efficiency and cost");
     }
 
     private LoginPage openAndLogin() {

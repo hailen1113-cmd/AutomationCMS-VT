@@ -1,28 +1,24 @@
 package com.vuatho.core;
 
+import com.vuatho.config.TestConfig;
 import com.vuatho.reporting.ScreenshotManager;
+import com.vuatho.utils.OverlayCleaner;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.testng.ITestResult;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterMethod;
 
 import java.io.IOException;
-import java.time.Duration;
 
 public abstract class BaseTest {
     protected WebDriver driver;
 
     @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-        if (reuseDriverBetweenTestMethods() && driver != null) {
-            System.out.println("Reusing the current WebDriver for the next test case...");
-            return;
-        }
-        System.out.println("Opening a new WebDriver for the next test case...");
-        driver = DriverFactory.createChromeDriver();
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-        driver.manage().timeouts().implicitlyWait(Duration.ZERO);
+    public final void setUpBaseDriver() {
+        // Mỗi test method dùng lại browser cấp suite nếu browser đó vẫn còn sống.
+        driver = DriverSession.acquire();
+        OverlayCleaner.dismissBlockingOverlays(driver);
     }
 
     @AfterMethod(alwaysRun = true)
@@ -32,37 +28,31 @@ public abstract class BaseTest {
         }
 
         try {
-            if (!result.isSuccess()) {
-                ScreenshotManager.capture(driver, result.getMethod().getMethodName());
+            // Không quit Chrome ở đây. Chỉ lưu bằng chứng khi fail rồi để test tiếp theo chạy tiếp.
+            if (result.getStatus() == ITestResult.FAILURE) {
+                captureScreenshotIfEnabled(result);
                 FailurePause.awaitConfirmation();
             }
         } finally {
-            if (!reuseDriverBetweenTestMethods()) {
-                closeDriver("after: " + result.getMethod().getMethodName());
-            }
-        }
-    }
-
-    @AfterClass(alwaysRun = true)
-    public void tearDownClass() {
-        if (reuseDriverBetweenTestMethods()) {
-            closeDriver("after the final test case in " + getClass().getSimpleName());
+            driver = null;
         }
     }
 
     protected boolean reuseDriverBetweenTestMethods() {
-        return false;
+        return true;
     }
 
-    private void closeDriver(String reason) {
-        if (driver == null) {
+    // Không đặt driver.quit() trong BaseTest.
+    // DriverLifecycleListener sẽ đóng browser một lần duy nhất khi toàn bộ TestNG execution kết thúc.
+    private void captureScreenshotIfEnabled(ITestResult result) throws IOException {
+        if (!TestConfig.captureScreenshots()) {
             return;
         }
-        System.out.println("Closing WebDriver " + reason);
         try {
-            driver.quit();
-        } finally {
-            driver = null;
+            ScreenshotManager.capture(driver, result);
+        } catch (WebDriverException exception) {
+            System.out.println("Could not capture failure screenshot because WebDriver is not available: "
+                    + exception.getMessage());
         }
     }
 }

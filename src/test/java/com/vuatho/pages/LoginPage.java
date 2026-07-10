@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.config.TestConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -9,9 +10,11 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -64,9 +67,10 @@ public class LoginPage {
         if (passwordInput != null) {
             String password = passwordSupplier.get();
             if (password == null || password.isBlank()) {
-                throw new IllegalStateException("Chưa nhập mật khẩu Google.");
+                waitForManualGoogleCompletion();
+            } else {
+                enterGooglePassword(passwordInput, password);
             }
-            enterGooglePassword(passwordInput, password);
         }
 
         returnToErpWindow(erpWindow);
@@ -114,13 +118,9 @@ public class LoginPage {
             return;
         }
 
-        WebElement matchingAccount = driver.findElements(GOOGLE_ACCOUNT).stream()
-                .filter(WebElement::isDisplayed)
-                .filter(element -> email.equalsIgnoreCase(element.getAttribute("data-identifier")))
-                .findFirst()
-                .orElse(null);
+        WebElement matchingAccount = googleAccountFor(email);
         if (matchingAccount != null) {
-            matchingAccount.click();
+            clickElement(matchingAccount);
             return;
         }
 
@@ -141,8 +141,24 @@ public class LoginPage {
         try {
             wait.until(webDriver -> isOnErp() || firstVisible(GOOGLE_PASSWORD) != null);
             return isOnErp() ? null : firstVisible(GOOGLE_PASSWORD);
-        } catch (TimeoutException | NoSuchWindowException ignored) {
+        } catch (WebDriverException ignored) {
             return null;
+        }
+    }
+
+    private void waitForManualGoogleCompletion() {
+        if (TestConfig.headless()) {
+            throw new IllegalStateException(
+                    "Chua co GOOGLE_PASSWORD va browser dang chay headless. "
+                            + "Hay set GOOGLE_PASSWORD hoac chay -Dheadless=false -Dinteractive=true.");
+        }
+        System.out.println("Google dang yeu cau mat khau/xac minh. Hay hoan tat thu cong trong Chrome...");
+        try {
+            new WebDriverWait(driver, Duration.ofMinutes(2))
+                    .until(webDriver -> isOnErp() || firstVisible(GOOGLE_PASSWORD) == null);
+        } catch (TimeoutException timeout) {
+            throw new IllegalStateException(
+                    "Chua hoan tat dang nhap Google thu cong trong 2 phut.", timeout);
         }
     }
 
@@ -153,14 +169,24 @@ public class LoginPage {
 
     private void clickGoogleNext(By locator) {
         WebElement next = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        clickElement(next);
+    }
+
+    private void clickElement(WebElement element) {
         try {
-            next.click();
+            element.click();
         } catch (ElementClickInterceptedException exception) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", next);
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
         }
     }
 
     private void replaceText(WebElement input, String value) {
+        input.click();
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].value='';"
+                        + "arguments[0].dispatchEvent(new Event('input', {bubbles:true}));"
+                        + "arguments[0].dispatchEvent(new Event('change', {bubbles:true}));",
+                input);
         input.sendKeys(Keys.chord(Keys.CONTROL, "a"));
         input.sendKeys(Keys.DELETE);
         input.sendKeys(value);
@@ -170,7 +196,7 @@ public class LoginPage {
         try {
             new WebDriverWait(driver, Duration.ofMinutes(2)).until(webDriver -> {
                 try {
-                    return webDriver.getCurrentUrl().contains("erp-sandbox.vuatho.com")
+                    return switchToAppWindowIfPresent()
                             || !webDriver.getWindowHandles().contains(webDriver.getWindowHandle());
                 } catch (NoSuchWindowException ignored) {
                     return true;
@@ -187,6 +213,16 @@ public class LoginPage {
         }
     }
 
+    private boolean switchToAppWindowIfPresent() {
+        for (String window : driver.getWindowHandles()) {
+            driver.switchTo().window(window);
+            if (currentHostIsBase()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean hasVisibleText(String text) {
         return driver.findElements(By.xpath("//*[normalize-space()='" + text + "']")).stream()
                 .anyMatch(WebElement::isDisplayed);
@@ -199,12 +235,60 @@ public class LoginPage {
                 .orElse(null);
     }
 
+    private WebElement googleAccountFor(String email) {
+        WebElement byDataIdentifier = driver.findElements(GOOGLE_ACCOUNT).stream()
+                .filter(WebElement::isDisplayed)
+                .filter(element -> email.equalsIgnoreCase(element.getAttribute("data-identifier")))
+                .findFirst()
+                .orElse(null);
+        if (byDataIdentifier != null) {
+            return byDataIdentifier;
+        }
+
+        return driver.findElements(By.xpath("//*[contains(normalize-space(.),'" + email + "')]"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .map(this::clickableAccountContainer)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private WebElement clickableAccountContainer(WebElement element) {
+        return (WebElement) ((JavascriptExecutor) driver).executeScript(
+                "let e=arguments[0];"
+                        + "while(e && e!==document.body){"
+                        + " const role=e.getAttribute('role');"
+                        + " if(role==='link' || role==='button' || role==='option') return e;"
+                        + " if(e.tabIndex>=0) return e;"
+                        + " e=e.parentElement;"
+                        + "}"
+                        + "return arguments[0];",
+                element);
+    }
+
     private boolean isOnErp() {
         try {
-            return driver.getCurrentUrl().contains("erp-sandbox.vuatho.com")
+            String url = driver.getCurrentUrl();
+            if (currentHostIsBase()
+                    && !url.contains("login")
+                    && firstVisible(GOOGLE_LOGIN_BUTTON) == null) {
+                return true;
+            }
+            return currentHostIsBase()
                     && (hasVisibleText("Dashboard") || hasVisibleText("Công ty Vua Thợ"));
         } catch (NoSuchWindowException ignored) {
             return true;
+        } catch (WebDriverException ignored) {
+            return false;
+        }
+    }
+
+    private boolean currentHostIsBase() {
+        try {
+            String host = URI.create(driver.getCurrentUrl()).getHost();
+            return TestConfig.baseHost().equalsIgnoreCase(host);
+        } catch (IllegalArgumentException | WebDriverException exception) {
+            return false;
         }
     }
 }

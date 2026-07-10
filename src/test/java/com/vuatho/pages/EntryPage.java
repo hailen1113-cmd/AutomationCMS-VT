@@ -23,7 +23,7 @@ public class EntryPage {
     }
 
     public boolean isOnExpectedDomain() {
-        return driver.getCurrentUrl().contains("erp-sandbox.vuatho.com");
+        return driver.getCurrentUrl().contains(TestConfig.baseHost());
     }
 
     public boolean isBlockedByVercel() {

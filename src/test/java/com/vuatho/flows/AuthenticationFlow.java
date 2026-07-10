@@ -16,14 +16,18 @@ public class AuthenticationFlow {
     }
 
     public LoginPage openApplicationAndLogin() {
+        LoginPage loginPage = new LoginPage(driver);
+        if (loginPage.isDashboardVisibleNow()) {
+            return loginPage;
+        }
+
         EntryPage entryPage = new EntryPage(driver).open();
         handleInteractiveVercelLogin(entryPage);
         if (entryPage.isBlockedByVercel()) {
             throw new IllegalStateException(
-                    "Vercel đang chặn automation. Hãy cấu hình VERCEL_AUTOMATION_BYPASS_SECRET.");
+                    "Vercel is blocking automation. Configure VERCEL_AUTOMATION_BYPASS_SECRET.");
         }
 
-        LoginPage loginPage = new LoginPage(driver);
         if (!loginPage.isDashboardVisibleNow()) {
             loginPage.loginWithGoogle(TestConfig.loginEmail(), GoogleCredentialProvider::password);
         }
@@ -34,7 +38,7 @@ public class AuthenticationFlow {
         if (!entryPage.isBlockedByVercel() || !TestConfig.interactive()) {
             return;
         }
-        System.out.println("Hay dang nhap Vercel trong cua so Chrome. Test se cho toi da 2 phut...");
+        System.out.println("Please complete Vercel login in Chrome. Waiting up to 2 minutes...");
         entryPage.waitForVercelAccess(Duration.ofMinutes(2));
     }
 }

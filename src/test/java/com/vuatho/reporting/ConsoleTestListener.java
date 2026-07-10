@@ -1,5 +1,6 @@
 package com.vuatho.reporting;
 
+import com.vuatho.config.TestConfig;
 import org.testng.ITestContext;
 import org.testng.IExecutionListener;
 import org.testng.ITestListener;
@@ -38,9 +39,10 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
                 : result.getThrowable().getMessage();
         System.out.printf("[FAIL]    %s (%s)%n          %s%n",
                 TestResultFormatter.displayName(result), TestResultFormatter.duration(result), message);
-        System.out.printf("          Screenshot: %s%n",
-                Path.of("target", "screenshots", result.getMethod().getMethodName() + ".png")
-                        .toAbsolutePath());
+        if (TestConfig.captureScreenshots()) {
+            System.out.printf("          Screenshot: %s%n",
+                    ScreenshotManager.latestFor(result.getMethod().getMethodName()));
+        }
     }
 
     @Override

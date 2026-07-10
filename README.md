@@ -26,6 +26,31 @@ mvn test
 
 Never commit the secret. Failed-test screenshots are written to `target/screenshots/`.
 
+## Dashboard test-case catalog
+
+The supplied 222-case dashboard workbook is versioned at
+`src/test/resources/testcases/Test_Cases_Dashboard_Vua_Tho_Full.xlsx`.
+`DashboardTestCaseCatalogTest` verifies the exact case count, unique IDs,
+required fields, module totals, and automation-feasibility totals without
+starting a browser:
+
+```powershell
+mvn -q -Dtest=DashboardTestCaseCatalogTest test
+```
+
+The catalog is the traceability source. A case being present in the workbook
+does not by itself mean that its Selenium implementation is complete.
+
+Run the focused Dashboard suite (catalog, framework-quality checks, and live
+Selenium assertions) with:
+
+```powershell
+mvn clean -Pdashboard -Dheadless=true test
+```
+
+Use `-Dheadless=false` when you want to watch Chrome. Reports are generated at
+`test-output/index.html` and `target/reports/test-summary.html`.
+
 ## Login test
 
 The default test email is `hailen1113@gmail.com`. Store the password in an environment

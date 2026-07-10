@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.45.0</selenium.version>
         <testng.version>7.9.0</testng.version>
+        <poi.version>5.4.1</poi.version>
     </properties>
 
     <dependencies>
@@ -25,6 +26,12 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -42,14 +49,42 @@
                 <version>3.5.3</version>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemPropertyVariables>
                         <baseUrl>${baseUrl}</baseUrl>
                         <headless>${headless}</headless>
+                        <interactive>${interactive}</interactive>
+                        <capture.screenshots>${capture.screenshots}</capture.screenshots>
+                        <keep.browser.open>${keep.browser.open}</keep.browser.open>
+                        <run.logout.tests>${run.logout.tests}</run.logout.tests>
+                        <page.load.timeout.seconds>${page.load.timeout.seconds}</page.load.timeout.seconds>
+                        <script.timeout.seconds>${script.timeout.seconds}</script.timeout.seconds>
+                        <wait.timeout.seconds>${wait.timeout.seconds}</wait.timeout.seconds>
+                        <long.wait.timeout.seconds>${long.wait.timeout.seconds}</long.wait.timeout.seconds>
+                        <screenshot.dir>${screenshot.dir}</screenshot.dir>
+                        <summary.report.path>${summary.report.path}</summary.report.path>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>default-suite</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <suiteXmlFile>testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>dashboard</id>
+            <properties>
+                <suiteXmlFile>dashboard-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+    </profiles>
 </project>

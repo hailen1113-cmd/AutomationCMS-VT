@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Vua Tho Dashboard Suite" parallel="false" preserve-order="true"
+       configfailurepolicy="continue">
+    <listeners>
+        <listener class-name="com.vuatho.reporting.ConsoleTestListener"/>
+        <listener class-name="com.vuatho.tests.conditions.LogoutTestsEnabled"/>
+        <listener class-name="com.vuatho.core.DriverLifecycleListener"/>
+    </listeners>
+    <test name="Dashboard catalog and browser checks">
+        <classes>
+            <class name="com.vuatho.tests.DashboardTestCaseCatalogTest"/>
+            <class name="com.vuatho.tests.DashboardFrameworkQualityTest"/>
+            <class name="com.vuatho.tests.DashboardTest"/>
+        </classes>
+    </test>
+</suite>

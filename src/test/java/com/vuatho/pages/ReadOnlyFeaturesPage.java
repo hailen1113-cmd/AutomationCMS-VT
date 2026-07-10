@@ -23,15 +23,19 @@ public class ReadOnlyFeaturesPage {
     }
 
     public void searchAndReset(String placeholder, String query) {
+        PageLoadSynchronizer.prepareForAsyncAction(driver);
+        String stateBeforeSearch = PageLoadSynchronizer.mainContentState(driver);
         WebElement input = visibleInput(placeholder);
         input.clear();
         input.sendKeys(query);
         wait.until(webDriver -> query.equals(visibleInput(placeholder).getAttribute("value")));
-        PageLoadSynchronizer.waitForDataToSettle(driver);
+        PageLoadSynchronizer.waitForSearchResultsToLoad(driver, stateBeforeSearch);
 
+        PageLoadSynchronizer.prepareForAsyncAction(driver);
+        String stateBeforeReset = PageLoadSynchronizer.mainContentState(driver);
         clickMainButton("Reset");
         wait.until(webDriver -> visibleInput(placeholder).getAttribute("value").isBlank());
-        PageLoadSynchronizer.waitForDataToSettle(driver);
+        PageLoadSynchronizer.waitForSearchResultsToLoad(driver, stateBeforeReset);
     }
 
     public String switchRouteTab(String tabLabel) {

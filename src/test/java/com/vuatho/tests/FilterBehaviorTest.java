@@ -24,7 +24,7 @@ public class FilterBehaviorTest extends BaseTest {
         return true;
     }
 
-    @DataProvider(name = "searchFilters")
+    @DataProvider(name = "searchFilters", parallel = false)
     public Object[][] searchFilters() {
         return FilterCatalog.searchFilterRows();
     }
