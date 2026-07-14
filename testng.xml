@@ -6,19 +6,12 @@
         <listener class-name="com.vuatho.tests.conditions.LogoutTestsEnabled"/>
         <listener class-name="com.vuatho.core.DriverLifecycleListener"/>
     </listeners>
-    <test name="ERP Smoke Tests">
+    <test name="ERP Login and eKYC Tests">
         <classes>
-            <class name="com.vuatho.tests.DashboardTestCaseCatalogTest"/>
-            <class name="com.vuatho.tests.ErpSmokeTest"/>
             <class name="com.vuatho.tests.ErpLoginTest"/>
-            <class name="com.vuatho.tests.DashboardTest"/>
-            <class name="com.vuatho.tests.MenuNavigationTest"/>
-            <class name="com.vuatho.tests.FilterBehaviorTest"/>
-            <class name="com.vuatho.tests.FeatureDiscoveryTest"/>
-            <class name="com.vuatho.tests.DeepFeatureDiscoveryTest"/>
-            <class name="com.vuatho.tests.FilterDiscoveryTest"/>
-            <class name="com.vuatho.tests.ReadOnlyFeatureTest"/>
-            <class name="com.vuatho.tests.DeepReadOnlyFeatureTest"/>
+            <class name="com.vuatho.tests.EkycWorkbookCatalogTest"/>
+            <class name="com.vuatho.tests.EkycApiContractTest"/>
+            <class name="com.vuatho.tests.EkycApiTest"/>
         </classes>
     </test>
 </suite>

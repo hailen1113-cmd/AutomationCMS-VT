@@ -48,16 +48,24 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
                 <configuration>
+                    <argLine>-Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8</argLine>
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
                     <systemPropertyVariables>
                         <baseUrl>${baseUrl}</baseUrl>
+                        <api.baseUrl>${api.baseUrl}</api.baseUrl>
                         <headless>${headless}</headless>
                         <interactive>${interactive}</interactive>
                         <capture.screenshots>${capture.screenshots}</capture.screenshots>
                         <keep.browser.open>${keep.browser.open}</keep.browser.open>
                         <run.logout.tests>${run.logout.tests}</run.logout.tests>
+                        <run.mutating.api.tests>${run.mutating.api.tests}</run.mutating.api.tests>
+                        <ekyc.applicantId>${ekyc.applicantId}</ekyc.applicantId>
+                        <ekyc.testcase.workbook>${ekyc.testcase.workbook}</ekyc.testcase.workbook>
+                        <ekyc.case.id>${ekyc.case.id}</ekyc.case.id>
+                        <ekyc.case.family>${ekyc.case.family}</ekyc.case.family>
+                        <ekyc.run.group>${ekyc.run.group}</ekyc.run.group>
                         <page.load.timeout.seconds>${page.load.timeout.seconds}</page.load.timeout.seconds>
                         <script.timeout.seconds>${script.timeout.seconds}</script.timeout.seconds>
                         <wait.timeout.seconds>${wait.timeout.seconds}</wait.timeout.seconds>

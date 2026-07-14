@@ -44,6 +44,7 @@ public final class PageLoadSynchronizer {
                         + "};");
     }
 
+    @SuppressWarnings("null")
     public static void waitForDataToSettle(WebDriver driver) {
         WebDriverWait wait = Waits.standard(driver);
 
@@ -53,7 +54,7 @@ public final class PageLoadSynchronizer {
         try {
             new WebDriverWait(driver, Duration.ofSeconds(3)).until(webDriver ->
                     webDriver.findElements(LOADING_INDICATORS).stream()
-                            .noneMatch(WebElement::isDisplayed));
+                            .noneMatch(element -> element.isDisplayed()));
         } catch (org.openqa.selenium.TimeoutException ignored) {
             // Some dashboard cards retain a visible skeleton decoration even after
             // their route/content has updated. Callers still verify the resulting
@@ -120,9 +121,10 @@ public final class PageLoadSynchronizer {
                 .executeScript("return document.readyState")));
     }
 
+    @SuppressWarnings("null")
     private static boolean noLoadingIndicatorIsVisible(WebDriver driver) {
         return driver.findElements(LOADING_INDICATORS).stream()
-                .noneMatch(WebElement::isDisplayed);
+                .noneMatch(element -> element.isDisplayed());
     }
 
     private static long startedRequests(WebDriver driver) {

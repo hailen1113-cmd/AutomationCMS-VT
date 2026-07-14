@@ -41,6 +41,10 @@ public class DashboardTest extends BaseTest {
                 dashboard.open();
             }
             if (!dashboard.hasDashboardMarker()) {
+                if (TestConfig.loginPassword().isBlank() && !TestConfig.interactive()) {
+                    throw new SkipException(
+                            "Dashboard tests require an authenticated session or GOOGLE_PASSWORD/ERP_PASSWORD.");
+                }
                 LoginPage loginPage = new LoginPage(driver);
                 loginPage.loginWithGoogle(
                         TestConfig.loginEmail(),

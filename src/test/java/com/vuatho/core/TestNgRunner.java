@@ -1,6 +1,7 @@
 package com.vuatho.core;
 
 import com.vuatho.reporting.ConsoleTestListener;
+import com.vuatho.reporting.ConsoleEncoding;
 import com.vuatho.tests.conditions.LogoutTestsEnabled;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
@@ -18,6 +19,7 @@ public final class TestNgRunner {
     public static void run(String suiteName, String testName, Class<?>... testClasses) {
         // Mặc định mở Chrome thật để dễ quan sát, nhưng vẫn quit sau test cuối cùng.
         // Có thể ghi đè từ Maven/IDE bằng -Dheadless, -Dinteractive hoặc -Dkeep.browser.open.
+        ConsoleEncoding.useUtf8();
         System.setProperty("headless", System.getProperty("headless", "false"));
         System.setProperty("interactive", System.getProperty("interactive", "true"));
         System.setProperty("pause.on.failure", System.getProperty("pause.on.failure", "false"));

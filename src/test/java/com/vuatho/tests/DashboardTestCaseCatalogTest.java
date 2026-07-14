@@ -38,7 +38,7 @@ public class DashboardTestCaseCatalogTest {
         Assert.assertEquals(counts.get("Need API/Database"), Long.valueOf(28));
         Assert.assertEquals(counts.get("Need business requirement"), Long.valueOf(13));
         Assert.assertEquals(counts.get("Need API/Network simulation"), Long.valueOf(2));
-        Assert.assertEquals(counts.values().stream().mapToLong(Long::longValue).sum(),
+        Assert.assertEquals(counts.values().stream().mapToLong(value -> value.longValue()).sum(),
                 DashboardTestCaseCatalog.EXPECTED_CASE_COUNT);
 
         System.out.println("[DASHBOARD TEST CASES] modules="

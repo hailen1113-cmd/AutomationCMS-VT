@@ -52,9 +52,10 @@ public final class ElementActions {
         js().executeScript("arguments[0].scrollIntoView({block:'center'});", element);
     }
 
+    @SuppressWarnings("null")
     private java.util.stream.Stream<WebElement> visibleElements(By locator) {
         List<WebElement> elements = driver.findElements(locator);
-        return elements.stream().filter(WebElement::isDisplayed);
+        return elements.stream().filter(element -> element.isDisplayed());
     }
 
     private JavascriptExecutor js() {

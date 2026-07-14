@@ -31,6 +31,9 @@ public class LoginPage {
             "input[name='Passwd'], input[type='password']");
     private static final By GOOGLE_PASSWORD_NEXT = By.id("passwordNext");
     private static final By GOOGLE_ACCOUNT = By.cssSelector("[data-identifier]");
+    private static final By GOOGLE_REJECTED_SIGN_IN = By.xpath(
+            "//*[contains(normalize-space(.),\"Couldn't sign you in\")]"
+                    + " | //*[contains(normalize-space(.),'This browser or app may not be secure')]");
     private static final By USE_ANOTHER_ACCOUNT = By.xpath(
             "//*[contains(normalize-space(.),'Use another account')]"
                     + " | //*[contains(normalize-space(.),'Sử dụng một tài khoản khác')]");
@@ -61,8 +64,10 @@ public class LoginPage {
             return;
         }
 
+        failFastIfGoogleRejectsAutomatedBrowser();
         chooseAccountOrEnterEmail(email);
 
+        failFastIfGoogleRejectsAutomatedBrowser();
         WebElement passwordInput = waitForPasswordOrReturnToErp();
         if (passwordInput != null) {
             String password = passwordSupplier.get();
@@ -109,10 +114,12 @@ public class LoginPage {
 
     private void chooseAccountOrEnterEmail(String email) {
         wait.until(webDriver -> isOnErp()
+                || googleRejectedAutomatedBrowser()
                 || firstVisible(GOOGLE_EMAIL) != null
                 || firstVisible(GOOGLE_PASSWORD) != null
                 || firstVisible(GOOGLE_ACCOUNT) != null
                 || firstVisible(USE_ANOTHER_ACCOUNT) != null);
+        failFastIfGoogleRejectsAutomatedBrowser();
 
         if (isOnErp() || firstVisible(GOOGLE_PASSWORD) != null) {
             return;
@@ -139,11 +146,30 @@ public class LoginPage {
 
     private WebElement waitForPasswordOrReturnToErp() {
         try {
-            wait.until(webDriver -> isOnErp() || firstVisible(GOOGLE_PASSWORD) != null);
+            wait.until(webDriver -> isOnErp()
+                    || googleRejectedAutomatedBrowser()
+                    || firstVisible(GOOGLE_PASSWORD) != null);
+            failFastIfGoogleRejectsAutomatedBrowser();
             return isOnErp() ? null : firstVisible(GOOGLE_PASSWORD);
         } catch (WebDriverException ignored) {
             return null;
         }
+    }
+
+    private void failFastIfGoogleRejectsAutomatedBrowser() {
+        if (!googleRejectedAutomatedBrowser()) {
+            return;
+        }
+        throw new IllegalStateException(
+                "Google rejected automated sign-in. Run GoogleSessionSetup.main(), sign in manually, "
+                        + "close that Chrome window, then rerun tests with -Dheadless=false "
+                        + "or -Dselenium.profile.dir=.selenium/chrome-profile.");
+    }
+
+    private boolean googleRejectedAutomatedBrowser() {
+        return firstVisible(GOOGLE_REJECTED_SIGN_IN) != null
+                || driver.getCurrentUrl().contains("accounts.google.com")
+                && driver.getCurrentUrl().contains("/signin/rejected");
     }
 
     private void waitForManualGoogleCompletion() {

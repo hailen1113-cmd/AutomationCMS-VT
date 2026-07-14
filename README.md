@@ -71,5 +71,10 @@ profile directory is excluded from Git.
 
 If Google displays **This browser or app may not be secure**, stop the running test and
 Run Java on `GoogleSessionSetup.main()`. Sign in to Google manually in that normal
-Chrome window, close all its windows, then run `ErpLoginTest.main()` again. Google
-credentials must not be automated or committed to source control.
+Chrome window, close all its windows, then run tests with the same persistent profile:
+
+```powershell
+mvn test -Dheadless=false -Dselenium.profile.dir=.selenium/chrome-profile
+```
+
+Google credentials must not be automated or committed to source control.

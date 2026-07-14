@@ -25,6 +25,10 @@ public final class DriverFactory {
         options.addArguments("--profile-directory=Default");
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-first-run");
+        options.addArguments("--no-default-browser-check");
 
         // Chỉ lấy log browser mức SEVERE; log info/warning quá nhiều sẽ làm console khó đọc.
         LoggingPreferences logging = new LoggingPreferences();
@@ -35,6 +39,7 @@ public final class DriverFactory {
         if (TestConfig.headless()) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1440,1000");
+            options.addArguments("--remote-debugging-port=0");
         } else {
             options.addArguments("--start-maximized");
         }

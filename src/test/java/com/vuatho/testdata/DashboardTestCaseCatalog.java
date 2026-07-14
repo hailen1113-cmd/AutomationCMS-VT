@@ -36,13 +36,15 @@ public final class DashboardTestCaseCatalog {
 
     public static Map<String, Long> countByModule() {
         Map<String, Long> counts = new LinkedHashMap<>();
-        CASES.forEach(testCase -> counts.merge(testCase.module(), 1L, Long::sum));
+        CASES.forEach(testCase -> counts.merge(testCase.module(), 1L,
+                (currentCount, increment) -> currentCount + increment));
         return Collections.unmodifiableMap(counts);
     }
 
     public static Map<String, Long> countByAutomationFeasibility() {
         Map<String, Long> counts = new LinkedHashMap<>();
-        CASES.forEach(testCase -> counts.merge(testCase.automationFeasibility(), 1L, Long::sum));
+        CASES.forEach(testCase -> counts.merge(testCase.automationFeasibility(), 1L,
+                (currentCount, increment) -> currentCount + increment));
         return Collections.unmodifiableMap(counts);
     }
 

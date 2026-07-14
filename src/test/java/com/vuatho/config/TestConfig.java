@@ -83,7 +83,22 @@ public final class TestConfig {
     }
 
     public static String seleniumProfileDirectory() {
-        return value("selenium.profile.dir", "SELENIUM_PROFILE_DIR", ".selenium/chrome-profile");
+        String configured = value("selenium.profile.dir", "SELENIUM_PROFILE_DIR", "");
+        if (!configured.isBlank()) {
+            return configured;
+        }
+        if (!headless() || interactive()) {
+            return persistentSeleniumProfileDirectory();
+        }
+        return "target/selenium/chrome-profile-" + ProcessHandle.current().pid();
+    }
+
+    public static String persistentSeleniumProfileDirectory() {
+        return ".selenium/chrome-profile";
+    }
+
+    public static boolean hasVercelBypassSecret() {
+        return !value("vercel.bypass.secret", "VERCEL_AUTOMATION_BYPASS_SECRET", "").isBlank();
     }
 
     public static String loginEmail() {
@@ -97,7 +112,7 @@ public final class TestConfig {
 
     public static String entryUrl() {
         String secret = value("vercel.bypass.secret", "VERCEL_AUTOMATION_BYPASS_SECRET", "");
-        if (secret == null || secret.isBlank()) {
+        if (secret.isBlank()) {
             return baseUrl();
         }
 
@@ -106,6 +121,21 @@ public final class TestConfig {
                 + "x-vercel-protection-bypass="
                 + URLEncoder.encode(secret, StandardCharsets.UTF_8)
                 + "&x-vercel-set-bypass-cookie=true";
+    }
+
+    public static String apiBaseUrl() {
+        String configured = value("api.baseUrl", "API_BASE_URL", "").trim();
+        if (!configured.isBlank()) {
+            return configured;
+        }
+        if ("erp-sandbox.vuatho.com".equalsIgnoreCase(baseHost())) {
+            return "https://sandbox-api-cms.vuatho.com";
+        }
+        return baseUrl();
+    }
+
+    public static boolean runMutatingApiTests() {
+        return Boolean.parseBoolean(value("run.mutating.api.tests", "RUN_MUTATING_API_TESTS", "false"));
     }
 
     private static String value(String property, String environment, String defaultValue) {

@@ -54,6 +54,7 @@ public final class OverlayCleaner {
         }
     }
 
+    @SuppressWarnings("null")
     private static void sendEscape(WebDriver driver) {
         try {
             driver.findElement(BODY).sendKeys(Keys.ESCAPE);
@@ -74,6 +75,7 @@ public final class OverlayCleaner {
         }
     }
 
+    @SuppressWarnings("null")
     private static void waitUntilClear(WebDriver driver) {
         try {
             new WebDriverWait(driver, Duration.ofSeconds(3))

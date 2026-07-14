@@ -17,17 +17,18 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
 
     @Override
     public void onExecutionStart() {
+        ConsoleEncoding.useUtf8();
         RESULTS.clear();
     }
     @Override
     public void onTestStart(ITestResult result) {
-        System.out.printf("%n[RUNNING] %s%n", TestResultFormatter.displayName(result));
+        System.out.printf("%n[RUNNING] %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[PASS]    %s (%s)%n", TestResultFormatter.displayName(result),
+        System.out.printf("[PASS]    %s (%s)%n", TestResultFormatter.consoleDisplayName(result),
                 TestResultFormatter.duration(result));
     }
 
@@ -35,10 +36,12 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     public void onTestFailure(ITestResult result) {
         RESULTS.add(result);
         String message = result.getThrowable() == null
-                ? "Không có chi tiết lỗi"
+                ? "Khong co chi tiet loi"
                 : result.getThrowable().getMessage();
         System.out.printf("[FAIL]    %s (%s)%n          %s%n",
-                TestResultFormatter.displayName(result), TestResultFormatter.duration(result), message);
+                TestResultFormatter.consoleDisplayName(result),
+                TestResultFormatter.duration(result),
+                TestResultFormatter.consoleMessage(message));
         if (TestConfig.captureScreenshots()) {
             System.out.printf("          Screenshot: %s%n",
                     ScreenshotManager.latestFor(result.getMethod().getMethodName()));
@@ -48,7 +51,7 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onTestSkipped(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[SKIP]    %s%n", TestResultFormatter.displayName(result));
+        System.out.printf("[SKIP]    %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
     @Override
@@ -76,3 +79,4 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     }
 
 }
+

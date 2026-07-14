@@ -5,6 +5,7 @@ import com.vuatho.config.TestConfig;
 import com.vuatho.pages.EntryPage;
 import com.vuatho.pages.LoginPage;
 import org.openqa.selenium.WebDriver;
+import org.testng.SkipException;
 
 import java.time.Duration;
 
@@ -24,6 +25,10 @@ public class AuthenticationFlow {
         EntryPage entryPage = new EntryPage(driver).open();
         handleInteractiveVercelLogin(entryPage);
         if (entryPage.isBlockedByVercel()) {
+            if (!TestConfig.hasVercelBypassSecret() && !TestConfig.interactive()) {
+                throw new SkipException(
+                        "Vercel protection is blocking automation. Set VERCEL_AUTOMATION_BYPASS_SECRET.");
+            }
             throw new IllegalStateException(
                     "Vercel is blocking automation. Configure VERCEL_AUTOMATION_BYPASS_SECRET.");
         }

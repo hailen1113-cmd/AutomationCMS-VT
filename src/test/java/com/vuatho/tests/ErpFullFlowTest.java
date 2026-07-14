@@ -12,17 +12,10 @@ public final class ErpFullFlowTest {
 
     public static void runSuite() {
         TestNgRunner.run(
-                "ERP Full Automation Suite",
-                "Smoke, Login, Dashboard, Load Pages and Filters",
-                ErpSmokeTest.class,
+                "ERP Login and eKYC Suite",
+                "Login and eKYC Checks",
                 ErpLoginTest.class,
-                DashboardTest.class,
-                MenuNavigationTest.class,
-                FilterBehaviorTest.class,
-                FeatureDiscoveryTest.class,
-                DeepFeatureDiscoveryTest.class,
-                FilterDiscoveryTest.class,
-                ReadOnlyFeatureTest.class,
-                DeepReadOnlyFeatureTest.class);
+                EkycWorkbookCatalogTest.class,
+                EkycApiTest.class);
     }
 }

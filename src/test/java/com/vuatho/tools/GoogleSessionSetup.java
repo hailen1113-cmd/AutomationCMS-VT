@@ -13,7 +13,7 @@ public final class GoogleSessionSetup {
 
     public static void main(String[] args) throws IOException {
         Path chrome = findChrome();
-        Path profile = Path.of(TestConfig.seleniumProfileDirectory())
+        Path profile = Path.of(TestConfig.persistentSeleniumProfileDirectory())
                 .toAbsolutePath()
                 .normalize();
         Files.createDirectories(profile);
