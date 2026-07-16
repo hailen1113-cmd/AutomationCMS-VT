@@ -4,22 +4,18 @@ import com.vuatho.navigation.MenuTarget;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 import static com.vuatho.navigation.MenuTarget.childOf;
 import static com.vuatho.navigation.MenuTarget.topLevel;
 
 public final class MenuCatalog {
-    private static final List<MenuTarget> ALL = List.of(
+    private static final List<MenuTarget> GENERAL = List.of(
             topLevel("Dashboard"),
             topLevel("Hiệu Quả Nguồn Thợ & Chi Phí"),
             topLevel("Tài chính"),
             childOf("Người Dùng", "Quản Lí Người Dùng"),
             childOf("Người Dùng", "Quản Lí eKYC"),
-            childOf("Đối Tác - Thợ", "Quản Lí Hồ Sơ Thợ"),
-            childOf("Đối Tác - Thợ", "Quản Lí Thợ Vi Phạm"),
-            childOf("Đối Tác - Thợ", "Quản Lí Bài Training"),
-            childOf("Đối Tác - Thợ", "Quản Lí Bài Đăng"),
-            childOf("Đối Tác - Thợ", "Yêu Cầu Ngưng Hợp Tác"),
             topLevel("Bài Kiểm Tra"),
             topLevel("Nghiệp Vụ"),
             childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"),
@@ -49,6 +45,10 @@ public final class MenuCatalog {
             childOf("Marketing", "Tỏa Sáng Vua Thợ"),
             childOf("Marketing", "Quản Lí Vua Thợ Care"),
             childOf("Marketing", "Yêu Cầu Hỗ Trợ (SOS)"));
+    private static final List<MenuTarget> ALL = Stream.concat(
+                    GENERAL.stream(),
+                    PartnerWorkerTestData.menuPages().stream())
+            .toList();
 
     private MenuCatalog() {
     }

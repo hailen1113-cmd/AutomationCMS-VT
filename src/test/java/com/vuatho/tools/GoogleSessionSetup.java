@@ -30,7 +30,7 @@ public final class GoogleSessionSetup {
         System.out.println("URL dang mo: " + url);
         System.out.println("1. Dang nhap Google thu cong bang hailen1113@gmail.com.");
         System.out.println("2. Dong TOAN BO cua so Chrome cua profile nay.");
-        System.out.println("3. Run Java lai ErpLoginTest.main().");
+        System.out.println("3. Run Java lai LoginDashboardSourceAccessTest.main().");
     }
 
     private static Path findChrome() {

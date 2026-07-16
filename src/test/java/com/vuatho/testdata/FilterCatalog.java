@@ -7,13 +7,8 @@ import static com.vuatho.navigation.MenuTarget.childOf;
 import static com.vuatho.navigation.MenuTarget.topLevel;
 
 public final class FilterCatalog {
-    private static final List<FilterTarget> SEARCH_FILTERS = List.of(
-            filter("Người Dùng", "Quản Lí Người Dùng", "Tìm kiếm người dùng"),
+    private static final List<FilterTarget> GENERAL_SEARCH_FILTERS = List.of(
             filter("Người Dùng", "Quản Lí eKYC", "Tìm kiếm người dùng"),
-            filter("Đối Tác - Thợ", "Quản Lí Hồ Sơ Thợ", "Tìm kiếm thợ"),
-            filter("Đối Tác - Thợ", "Quản Lí Thợ Vi Phạm", "Tìm kiếm thợ"),
-            filter("Đối Tác - Thợ", "Quản Lí Bài Training", "Tìm kiếm bài training"),
-            filter("Đối Tác - Thợ", "Yêu Cầu Ngưng Hợp Tác", "Tìm kiếm thợ theo tên"),
             topLevelFilter("Bài Kiểm Tra", "Tìm kiếm bài kiểm tra"),
             topLevelFilter("Nghiệp Vụ", "Tìm kiếm nghiệp vụ"),
             filter("Đơn Dịch Vụ", "Đơn Khách - Thợ", "Tìm kiếm mã đơn dịch vụ"),
@@ -41,10 +36,10 @@ public final class FilterCatalog {
 
     public static Object[][] searchFilterRows() {
         String requested = System.getProperty("filter.filter", "").trim().toLowerCase(Locale.ROOT);
-        Object[][] rows = SEARCH_FILTERS.stream()
+        Object[][] rows = GENERAL_SEARCH_FILTERS.stream()
                 .filter(filter -> requested.isBlank()
                         || filter.toString().toLowerCase(Locale.ROOT).contains(requested))
-                .map(filter -> new Object[]{filter})
+                .map(filter -> new Object[] { filter })
                 .toArray(Object[][]::new);
         System.out.printf("[FILTER DATA] %d search filter(s)%s%n",
                 rows.length,

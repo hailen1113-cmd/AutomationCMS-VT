@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 
 public class LogoutTestsEnabled implements IAnnotationTransformer {
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings("rawtypes")
     public void transform(ITestAnnotation annotation, Class testClass,
                           Constructor testConstructor, Method testMethod) {
         if (testMethod == null || TestConfig.runLogoutTests()) {

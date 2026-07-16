@@ -23,7 +23,7 @@ final class DriverSession {
 
         // Chỉ mở browser mới khi chưa có browser hoặc browser cũ đã bị đóng/crash.
         if (!isAlive(sharedDriver)) {
-            System.out.println("Opening a new WebDriver for the test suite...");
+            System.out.println("Mo WebDriver moi cho bo test...");
             try {
                 sharedDriver = DriverFactory.createChromeDriver();
                 configureTimeouts(sharedDriver);
@@ -33,7 +33,7 @@ final class DriverSession {
                 throw exception;
             }
         } else {
-            System.out.println("Reusing the current WebDriver for the next test case...");
+            System.out.println("Dung lai WebDriver hien tai cho testcase tiep theo...");
         }
         return sharedDriver;
     }
@@ -44,11 +44,11 @@ final class DriverSession {
         }
         // Khi debug local thường cần giữ Chrome mở để kiểm tra màn hình cuối cùng.
         if (TestConfig.keepBrowserOpen()) {
-            System.out.println("Keeping WebDriver open after the suite because keep.browser.open=true");
+            System.out.println("Giu WebDriver mo sau bo test vi keep.browser.open=true");
             return;
         }
         // Chỉ đóng Chrome sau khi test cuối cùng trong suite đã chạy xong.
-        System.out.println("Closing WebDriver after the final test case in the suite");
+        System.out.println("Dong WebDriver sau testcase cuoi trong bo test");
         try {
             sharedDriver.quit();
         } finally {

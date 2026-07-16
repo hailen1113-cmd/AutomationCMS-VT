@@ -22,13 +22,13 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     }
     @Override
     public void onTestStart(ITestResult result) {
-        System.out.printf("%n[RUNNING] %s%n", TestResultFormatter.consoleDisplayName(result));
+        System.out.printf("%n[DANG CHAY] %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[PASS]    %s (%s)%n", TestResultFormatter.consoleDisplayName(result),
+        System.out.printf("[DAT]      %s (%s)%n", TestResultFormatter.consoleDisplayName(result),
                 TestResultFormatter.duration(result));
     }
 
@@ -38,12 +38,12 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
         String message = result.getThrowable() == null
                 ? "Khong co chi tiet loi"
                 : result.getThrowable().getMessage();
-        System.out.printf("[FAIL]    %s (%s)%n          %s%n",
+        System.out.printf("[LOI]      %s (%s)%n          %s%n",
                 TestResultFormatter.consoleDisplayName(result),
                 TestResultFormatter.duration(result),
                 TestResultFormatter.consoleMessage(message));
         if (TestConfig.captureScreenshots()) {
-            System.out.printf("          Screenshot: %s%n",
+            System.out.printf("          Anh loi: %s%n",
                     ScreenshotManager.latestFor(result.getMethod().getMethodName()));
         }
     }
@@ -51,7 +51,7 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onTestSkipped(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[SKIP]    %s%n", TestResultFormatter.consoleDisplayName(result));
+        System.out.printf("[BO QUA]   %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
     @Override
@@ -62,9 +62,9 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
         int total = passed + failed + skipped;
 
         System.out.println("\n==================================================");
-        System.out.printf("TEST SUMMARY: TOTAL=%d | PASS=%d | FAIL=%d | SKIP=%d%n",
+        System.out.printf("TONG KET TEST: TONG=%d | DAT=%d | LOI=%d | BO QUA=%d%n",
                 total, passed, failed, skipped);
-        System.out.println("HTML report: "
+        System.out.println("Bao cao HTML: "
                 + Path.of("test-output", "index.html").toAbsolutePath());
         System.out.println("==================================================");
     }
@@ -72,9 +72,9 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onExecutionFinish() {
         try {
-            System.out.println("Summary report: " + summaryReporter.write(RESULTS));
+            System.out.println("Bao cao tong ket: " + summaryReporter.write(RESULTS));
         } catch (IOException exception) {
-            System.err.println("Cannot create summary report: " + exception.getMessage());
+            System.err.println("Khong tao duoc bao cao tong ket: " + exception.getMessage());
         }
     }
 
