@@ -49,35 +49,83 @@ public class BrowserApiClient {
     private final WebDriver driver;
     private final String apiBaseUrl;
 
+    /**
+     * Khởi tạo BrowserApiClient với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public BrowserApiClient(WebDriver driver) {
         this.driver = driver;
         this.apiBaseUrl = normalizeBaseUrl(TestConfig.apiBaseUrl());
     }
 
+    /**
+     * Trả về get từ trạng thái hiện tại.
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @return kết quả get sau khi xử lý
+     */
     public ApiResponse get(String pathAndQuery) {
         return request("GET", pathAndQuery, null);
     }
 
+    /**
+     * Thực hiện xử lý post trong luồng kiểm thử.
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @param body giá trị body được truyền vào
+     * @return kết quả post sau khi xử lý
+     */
     public ApiResponse post(String pathAndQuery, String body) {
         return request("POST", pathAndQuery, body);
     }
 
+    /**
+     * Thực hiện xử lý put trong luồng kiểm thử.
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @param body giá trị body được truyền vào
+     * @return kết quả put sau khi xử lý
+     */
     public ApiResponse put(String pathAndQuery, String body) {
         return request("PUT", pathAndQuery, body);
     }
 
+    /**
+     * Trả về get without auth từ trạng thái hiện tại.
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @return kết quả get without auth sau khi xử lý
+     */
     public ApiResponse getWithoutAuth(String pathAndQuery) {
         return requestWithoutAuth("GET", pathAndQuery, null);
     }
 
+    /**
+     * Thực hiện xử lý request trong luồng kiểm thử.
+     * @param method giá trị method được truyền vào
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @param body giá trị body được truyền vào
+     * @return kết quả request sau khi xử lý
+     */
     private ApiResponse request(String method, String pathAndQuery, String body) {
         return request(method, pathAndQuery, body, true);
     }
 
+    /**
+     * Thực hiện xử lý request without auth trong luồng kiểm thử.
+     * @param method giá trị method được truyền vào
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @param body giá trị body được truyền vào
+     * @return kết quả request without auth sau khi xử lý
+     */
     private ApiResponse requestWithoutAuth(String method, String pathAndQuery, String body) {
         return request(method, pathAndQuery, body, false);
     }
 
+    /**
+     * Thực hiện xử lý request trong luồng kiểm thử.
+     * @param method giá trị method được truyền vào
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @param body giá trị body được truyền vào
+     * @param authenticated giá trị authenticated được truyền vào
+     * @return kết quả request sau khi xử lý
+     */
     private ApiResponse request(String method, String pathAndQuery, String body, boolean authenticated) {
         Object result = ((JavascriptExecutor) driver).executeAsyncScript(
                 REQUEST_SCRIPT,
@@ -95,6 +143,11 @@ public class BrowserApiClient {
         return new ApiResponse(status, ok, contentType, responseBody);
     }
 
+    /**
+     * Thực hiện xử lý absolute url trong luồng kiểm thử.
+     * @param pathAndQuery giá trị path and query được truyền vào
+     * @return kết quả absolute url sau khi xử lý
+     */
     private String absoluteUrl(String pathAndQuery) {
         if (pathAndQuery.startsWith("http://") || pathAndQuery.startsWith("https://")) {
             return pathAndQuery;
@@ -103,6 +156,11 @@ public class BrowserApiClient {
         return apiBaseUrl + normalizedPath;
     }
 
+    /**
+     * Thực hiện xử lý normalize base url trong luồng kiểm thử.
+     * @param baseUrl giá trị base url được truyền vào
+     * @return kết quả normalize base url sau khi xử lý
+     */
     private String normalizeBaseUrl(String baseUrl) {
         String normalized = baseUrl;
         if (!normalized.startsWith("http://") && !normalized.startsWith("https://")) {

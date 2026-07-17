@@ -14,6 +14,9 @@ import java.io.IOException;
 public abstract class BaseTest {
     protected WebDriver driver;
 
+    /**
+     * Cập nhật up base driver trong luồng kiểm thử.
+     */
     @BeforeMethod(alwaysRun = true)
     public final void setUpBaseDriver() {
         // Mỗi test method dùng lại browser cấp suite nếu browser đó vẫn còn sống.
@@ -21,6 +24,10 @@ public abstract class BaseTest {
         OverlayCleaner.dismissBlockingOverlays(driver);
     }
 
+    /**
+     * Thực hiện xử lý tear down trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) throws IOException {
         if (driver == null) {
@@ -38,12 +45,20 @@ public abstract class BaseTest {
         }
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
     // Không đặt driver.quit() trong BaseTest.
     // DriverLifecycleListener sẽ đóng browser một lần duy nhất khi toàn bộ TestNG execution kết thúc.
+    /**
+     * Thu thập screenshot if enabled trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     private void captureScreenshotIfEnabled(ITestResult result) throws IOException {
         if (!TestConfig.captureScreenshots()) {
             return;

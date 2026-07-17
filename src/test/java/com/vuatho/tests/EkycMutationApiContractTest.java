@@ -6,6 +6,9 @@ import com.vuatho.core.TestNgRunner;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/**
+ * Kiểm tra hợp đồng các API làm thay đổi hồ sơ eKYC, gồm validation và response.
+ */
 public class EkycMutationApiContractTest extends EkycApiTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(EkycMutationApiContractTest.class,
@@ -13,6 +16,9 @@ public class EkycMutationApiContractTest extends EkycApiTestSupport {
                 "Kiem tra update/rerun eKYC API");
     }
 
+    /**
+     * Cập nhật rejects invalid review payload trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract", "mutation"})
     public void updateRejectsInvalidReviewPayload() {
         String applicantId = mutationApplicantId();
@@ -22,6 +28,9 @@ public class EkycMutationApiContractTest extends EkycApiTestSupport {
                 "Invalid review result should be rejected. Body: " + response.preview());
     }
 
+    /**
+     * Cập nhật can approve all document sides for seed applicant trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract", "mutation"})
     public void updateCanApproveAllDocumentSidesForSeedApplicant() {
         String applicantId = mutationApplicantId();
@@ -30,6 +39,9 @@ public class EkycMutationApiContractTest extends EkycApiTestSupport {
         ApiAssertions.assertOkJson(response, "PUT /ekyc approve all sides");
     }
 
+    /**
+     * Cập nhật can reject with document reason for seed applicant trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract", "mutation"})
     public void updateCanRejectWithDocumentReasonForSeedApplicant() {
         String applicantId = mutationApplicantId();
@@ -39,6 +51,9 @@ public class EkycMutationApiContractTest extends EkycApiTestSupport {
         ApiAssertions.assertOkJson(response, "PUT /ekyc reject document");
     }
 
+    /**
+     * Cập nhật info can patch seven editable fields for seed applicant trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract", "mutation"})
     public void updateInfoCanPatchSevenEditableFieldsForSeedApplicant() {
         String applicantId = mutationApplicantId();
@@ -56,6 +71,9 @@ public class EkycMutationApiContractTest extends EkycApiTestSupport {
         ApiAssertions.assertOkJson(response, "PUT /ekyc UPDATE_INFO");
     }
 
+    /**
+     * Thực hiện xử lý rerun ai dispatches or returns business validation for seed applicant trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract", "mutation"})
     public void rerunAiDispatchesOrReturnsBusinessValidationForSeedApplicant() {
         String applicantId = mutationApplicantId();

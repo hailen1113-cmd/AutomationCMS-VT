@@ -14,14 +14,24 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Đọc workbook eKYC, ánh xạ từng dòng thành test case và kiểm tra dữ liệu bắt buộc.
+ */
 public final class EkycWorkbookCatalog {
     private static final String DEFAULT_WORKBOOK =
             "C:\\Users\\Lenovo\\Downloads\\Testcase_eKYC_Senior_Automation_574_Cases_Chi_Tiet_7_Truong.xlsx";
     private static final String SHEET_NAME = "Tất_cả_testcase";
 
+    /**
+     * Khởi tạo EkycWorkbookCatalog với các phụ thuộc cần thiết.
+     */
     private EkycWorkbookCatalog() {
     }
 
+    /**
+     * Thực hiện xử lý data provider rows trong luồng kiểm thử.
+     * @return kết quả data provider rows sau khi xử lý
+     */
     public static Object[][] dataProviderRows() {
         List<EkycWorkbookCase> cases = filteredLoad();
         Object[][] rows = new Object[cases.size()][1];
@@ -31,6 +41,10 @@ public final class EkycWorkbookCatalog {
         return rows;
     }
 
+    /**
+     * Đọc  trong luồng kiểm thử.
+     * @return kết quả load sau khi xử lý
+     */
     public static List<EkycWorkbookCase> load() {
         Path workbookPath = workbookPath();
         if (!Files.isRegularFile(workbookPath)) {
@@ -80,6 +94,10 @@ public final class EkycWorkbookCatalog {
         return cases;
     }
 
+    /**
+     * Thực hiện xử lý filtered load trong luồng kiểm thử.
+     * @return kết quả filtered load sau khi xử lý
+     */
     public static List<EkycWorkbookCase> filteredLoad() {
         List<EkycWorkbookCase> cases = load();
         String caseId = configured("ekyc.case.id", "EKYC_CASE_ID");
@@ -92,6 +110,10 @@ public final class EkycWorkbookCatalog {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý workbook path trong luồng kiểm thử.
+     * @return kết quả workbook path sau khi xử lý
+     */
     private static Path workbookPath() {
         String configured = configured("ekyc.testcase.workbook", "EKYC_TESTCASE_WORKBOOK");
         if (configured == null || configured.isBlank()) {
@@ -100,6 +122,12 @@ public final class EkycWorkbookCatalog {
         return Path.of(configured).toAbsolutePath().normalize();
     }
 
+    /**
+     * Thực hiện xử lý configured trong luồng kiểm thử.
+     * @param property giá trị property được truyền vào
+     * @param environment giá trị environment được truyền vào
+     * @return kết quả configured sau khi xử lý
+     */
     private static String configured(String property, String environment) {
         String configured = System.getProperty(property);
         if (configured == null || configured.isBlank() || configured.startsWith("${")) {
@@ -108,6 +136,13 @@ public final class EkycWorkbookCatalog {
         return configured == null ? "" : configured.trim();
     }
 
+    /**
+     * Thực hiện xử lý cell trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @param index giá trị index được truyền vào
+     * @param formatter giá trị formatter được truyền vào
+     * @return kết quả cell sau khi xử lý
+     */
     private static String cell(Row row, int index, DataFormatter formatter) {
         Cell cell = row.getCell(index);
         if (cell == null) {

@@ -13,6 +13,9 @@ final class DriverSession {
     private static RuntimeException startupFailure;
     private static boolean shutdownHookRegistered;
 
+    /**
+     * Khởi tạo DriverSession với các phụ thuộc cần thiết.
+     */
     private DriverSession() {
     }
 
@@ -57,6 +60,9 @@ final class DriverSession {
         }
     }
 
+    /**
+     * Thực hiện xử lý register shutdown hook trong luồng kiểm thử.
+     */
     private static void registerShutdownHook() {
         if (shutdownHookRegistered) {
             return;
@@ -69,6 +75,10 @@ final class DriverSession {
         shutdownHookRegistered = true;
     }
 
+    /**
+     * Thực hiện xử lý configure timeouts trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     private static void configureTimeouts(WebDriver driver) {
         // Dùng explicit wait trong page/action; tắt implicit wait để tránh delay ẩn khó debug.
         driver.manage().timeouts().pageLoadTimeout(TestConfig.pageLoadTimeout());
@@ -76,6 +86,11 @@ final class DriverSession {
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
     }
 
+    /**
+     * Kiểm tra điều kiện is alive.
+     * @param candidate giá trị candidate được truyền vào
+     * @return kết quả is alive sau khi xử lý
+     */
     private static boolean isAlive(WebDriver candidate) {
         if (candidate == null) {
             return false;

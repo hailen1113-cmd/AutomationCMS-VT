@@ -10,14 +10,24 @@ import org.testng.annotations.BeforeMethod;
 
 import java.time.Duration;
 
+/**
+ * Cung cấp thiết lập, dữ liệu và thao tác dùng chung cho các test hồ sơ nhân sự.
+ */
 abstract class WorkerProfileTestSupport extends BaseTest {
     protected WorkerProfilePage workerProfilePage;
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý prepare worker profile page trong luồng kiểm thử.
+     */
     @BeforeMethod(alwaysRun = true)
     public void prepareWorkerProfilePage() {
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
@@ -26,6 +36,9 @@ abstract class WorkerProfileTestSupport extends BaseTest {
         workerProfilePage = new WorkerProfilePage(driver).openFromMenu();
     }
 
+    /**
+     * Thực hiện xử lý clean worker profile state trong luồng kiểm thử.
+     */
     @AfterMethod(alwaysRun = true)
     public void cleanWorkerProfileState() {
         try {

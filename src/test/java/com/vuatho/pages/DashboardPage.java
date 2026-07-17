@@ -66,6 +66,10 @@ public class DashboardPage {
     private final ElementActions actions;
     private final SidebarComponent sidebar;
 
+    /**
+     * Khởi tạo DashboardPage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public DashboardPage(WebDriver driver) {
         this.driver = driver;
         this.wait = Waits.standard(driver);
@@ -73,11 +77,19 @@ public class DashboardPage {
         this.sidebar = new SidebarComponent(driver);
     }
 
+    /**
+     * Mở  trong luồng kiểm thử.
+     * @return kết quả open sau khi xử lý
+     */
     public DashboardPage open() {
         driver.get(TestConfig.entryUrl());
         return this;
     }
 
+    /**
+     * Kiểm tra điều kiện is loaded.
+     * @return kết quả is loaded sau khi xử lý
+     */
     public boolean isLoaded() {
         try {
             wait.until(webDriver -> hasDashboardMarker());
@@ -88,6 +100,10 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Kiểm tra điều kiện has valid dashboard url.
+     * @return kết quả has valid dashboard url sau khi xử lý
+     */
     public boolean hasValidDashboardUrl() {
         String url = driver.getCurrentUrl().toLowerCase();
         return url.contains(TestConfig.baseHost().toLowerCase())
@@ -96,6 +112,9 @@ public class DashboardPage {
                 && !url.contains("login");
     }
 
+    /**
+     * Mở dashboard and wait for metrics trong luồng kiểm thử.
+     */
     public void openDashboardAndWaitForMetrics() {
         wait.until(webDriver -> isVisible(HOME_CONTENT) || isVisible(DASHBOARD_CONTENT));
         sidebar.ensureExpanded();
@@ -106,6 +125,10 @@ public class DashboardPage {
         PageScroller.slowlyToBottom(driver);
     }
 
+    /**
+     * Kích hoạt summary cards and wait for destinations trong luồng kiểm thử.
+     * @return kết quả click summary cards and wait for destinations sau khi xử lý
+     */
     public List<String> clickSummaryCardsAndWaitForDestinations() {
         openDashboardAndWaitForSummaryCards();
         for (String card : SUMMARY_CARDS) {
@@ -120,6 +143,9 @@ public class DashboardPage {
         return SUMMARY_CARDS;
     }
 
+    /**
+     * Mở dashboard and wait for summary cards trong luồng kiểm thử.
+     */
     public void openDashboardAndWaitForSummaryCards() {
         OverlayCleaner.dismissBlockingOverlays(driver);
         driver.get(dashboardUrl());
@@ -128,6 +154,9 @@ public class DashboardPage {
         waitForSummaryCards();
     }
 
+    /**
+     * Chờ for summary cards trong luồng kiểm thử.
+     */
     private void waitForSummaryCards() {
         WebDriverWait metricsWait = Waits.longWait(driver);
         metricsWait.until(webDriver -> hasDashboardMarker());
@@ -137,6 +166,10 @@ public class DashboardPage {
         metricsWait.until(webDriver -> SUMMARY_CARDS.stream().allMatch(this::summaryCardIsVisible));
     }
 
+    /**
+     * Kích hoạt summary card and wait trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     */
     private void clickSummaryCardAndWait(String label) {
         OverlayCleaner.dismissBlockingOverlays(driver);
         WebElement card = summaryCard(label);
@@ -154,12 +187,21 @@ public class DashboardPage {
         System.out.println("[DASHBOARD CARD LOADED] " + label + " -> " + driver.getCurrentUrl());
     }
 
+    /**
+     * Thực hiện xử lý exercise chart filters trong luồng kiểm thử.
+     * @param cardLabel giá trị card label được truyền vào
+     */
     private void exerciseChartFilters(String cardLabel) {
         clickPeriodFilterIfPresent("Tuần", cardLabel);
         clickPeriodFilterIfPresent("Tháng", cardLabel);
         openDateRangeFilterIfPresent(cardLabel);
     }
 
+    /**
+     * Kích hoạt period filter if present trong luồng kiểm thử.
+     * @param filter giá trị filter được truyền vào
+     * @param cardLabel giá trị card label được truyền vào
+     */
     private void clickPeriodFilterIfPresent(String filter, String cardLabel) {
         WebElement control = visibleMainControl(filter);
         if (control == null) {
@@ -173,6 +215,10 @@ public class DashboardPage {
         System.out.println("[DASHBOARD FILTER LOADED] " + cardLabel + " | " + filter);
     }
 
+    /**
+     * Mở date range filter if present trong luồng kiểm thử.
+     * @param cardLabel giá trị card label được truyền vào
+     */
     private void openDateRangeFilterIfPresent(String cardLabel) {
         WebElement dateRange = visibleDateRangeControl();
         if (dateRange == null) {
@@ -197,6 +243,9 @@ public class DashboardPage {
         System.out.println("[DASHBOARD FILTER LOADED] " + cardLabel + " | Date range");
     }
 
+    /**
+     * Kích hoạt month and year in date picker trong luồng kiểm thử.
+     */
     private void selectMonthAndYearInDatePicker() {
         boolean changedMonth = selectDatePickerDropdownOption(0);
         boolean changedYear = selectDatePickerDropdownOption(1);
@@ -208,6 +257,10 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý are metrics displayed trong luồng kiểm thử.
+     * @return kết quả are metrics displayed sau khi xử lý
+     */
     public boolean areMetricsDisplayed() {
         try {
             new WebDriverWait(driver, Duration.ofSeconds(5))
@@ -218,6 +271,10 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Trả về loaded metrics từ trạng thái hiện tại.
+     * @return kết quả loaded metrics sau khi xử lý
+     */
     public List<String> loadedMetrics() {
         return mainContent().findElements(By.xpath(
                         ".//*[not(*) and string-length(normalize-space()) > 0]"))
@@ -230,6 +287,11 @@ public class DashboardPage {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý summary card has numeric value trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả summary card has numeric value sau khi xử lý
+     */
     public boolean summaryCardHasNumericValue(String label) {
         try {
             WebElement card = summaryCard(label);
@@ -239,12 +301,22 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý section is visible trong luồng kiểm thử.
+     * @param title giá trị title được truyền vào
+     * @return kết quả section is visible sau khi xử lý
+     */
     public boolean sectionIsVisible(String title) {
         return driver.findElements(By.xpath("//*[normalize-space()='" + title + "']"))
                 .stream()
                 .anyMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Kích hoạt period trong luồng kiểm thử.
+     * @param groupIndex giá trị group index được truyền vào
+     * @param label giá trị label được truyền vào
+     */
     public void selectPeriod(int groupIndex, String label) {
         WebElement control = periodControl(groupIndex, label);
         if (control == null) {
@@ -254,6 +326,12 @@ public class DashboardPage {
         wait.until(webDriver -> periodIsSelected(groupIndex, label));
     }
 
+    /**
+     * Thực hiện xử lý period is selected trong luồng kiểm thử.
+     * @param groupIndex giá trị group index được truyền vào
+     * @param label giá trị label được truyền vào
+     * @return kết quả period is selected sau khi xử lý
+     */
     public boolean periodIsSelected(int groupIndex, String label) {
         WebElement control = periodControl(groupIndex, label);
         if (control == null) {
@@ -268,6 +346,12 @@ public class DashboardPage {
                 control));
     }
 
+    /**
+     * Thực hiện xử lý period control trong luồng kiểm thử.
+     * @param groupIndex giá trị group index được truyền vào
+     * @param label giá trị label được truyền vào
+     * @return kết quả period control sau khi xử lý
+     */
     private WebElement periodControl(int groupIndex, String label) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const index=arguments[0],label=arguments[1];"
@@ -284,6 +368,10 @@ public class DashboardPage {
                 groupIndex, label);
     }
 
+    /**
+     * Thực hiện xử lý missing menu groups trong luồng kiểm thử.
+     * @return kết quả missing menu groups sau khi xử lý
+     */
     public List<String> missingMenuGroups() {
         String sidebarText = sidebar.text();
         return EXPECTED_MENU_GROUPS.stream()
@@ -291,35 +379,64 @@ public class DashboardPage {
                 .toList();
     }
 
+    /**
+     * Kiểm tra điều kiện is logo loaded.
+     * @return kết quả is logo loaded sau khi xử lý
+     */
     public boolean isLogoLoaded() {
         return sidebar.isLogoLoaded();
     }
 
+    /**
+     * Thực hiện xử lý sidebar width trong luồng kiểm thử.
+     * @return kết quả sidebar width sau khi xử lý
+     */
     public double sidebarWidth() {
         return sidebar.width();
     }
 
+    /**
+     * Thực hiện xử lý ensure sidebar expanded trong luồng kiểm thử.
+     */
     public void ensureSidebarExpanded() {
         sidebar.ensureExpanded();
     }
 
+    /**
+     * Thực hiện xử lý collapse sidebar trong luồng kiểm thử.
+     */
     public void collapseSidebar() {
         sidebar.collapse();
     }
 
+    /**
+     * Thực hiện xử lý expand sidebar trong luồng kiểm thử.
+     */
     public void expandSidebar() {
         sidebar.expand();
     }
 
+    /**
+     * Kiểm tra điều kiện is dashboard menu active.
+     * @return kết quả is dashboard menu active sau khi xử lý
+     */
     public boolean isDashboardMenuActive() {
         return sidebar.isDashboardActive()
                 || (hasValidDashboardUrl() && hasDashboardMarker() && isVisible(DASHBOARD_TEXT));
     }
 
+    /**
+     * Kiểm tra điều kiện has company header.
+     * @return kết quả has company header sau khi xử lý
+     */
     public boolean hasCompanyHeader() {
         return isVisible(COMPANY_HEADER) || hasCurrentUserAndEnvironment();
     }
 
+    /**
+     * Kiểm tra điều kiện has current user and environment.
+     * @return kết quả has current user and environment sau khi xử lý
+     */
     public boolean hasCurrentUserAndEnvironment() {
         String accountText = actions.textInTopRightHeader();
         if (accountText.contains("H\u1ea3i") && accountText.contains("DEV")) {
@@ -333,6 +450,9 @@ public class DashboardPage {
                 && isVisible(By.xpath("//*[contains(normalize-space(.),'DEV')]"));
     }
 
+    /**
+     * Thực hiện xử lý logout trong luồng kiểm thử.
+     */
     public void logout() {
         logoutButton().click();
         WebElement confirmButton = confirmLogoutButton();
@@ -342,16 +462,28 @@ public class DashboardPage {
         wait.until(webDriver -> isLoginVisible() || !hasDashboardMarker());
     }
 
+    /**
+     * Kiểm tra điều kiện is login visible.
+     * @return kết quả is login visible sau khi xử lý
+     */
     public boolean isLoginVisible() {
         return isVisible(GOOGLE_LOGIN);
     }
 
+    /**
+     * Kiểm tra điều kiện has dashboard marker.
+     * @return kết quả has dashboard marker sau khi xử lý
+     */
     public boolean hasDashboardMarker() {
         return isVisible(DASHBOARD_CONTENT)
                 || (isVisible(DASHBOARD_TEXT) && visibleMetricValues() > 0)
                 || (isVisible(HOME_CONTENT) && isVisible(COMPANY_HEADER));
     }
 
+    /**
+     * Thực hiện xử lý logout button trong luồng kiểm thử.
+     * @return kết quả logout button sau khi xử lý
+     */
     private WebElement logoutButton() {
         List<WebElement> namedButtons = driver.findElements(By.xpath(
                 "//button[contains(translate(@aria-label,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'logout')"
@@ -371,6 +503,10 @@ public class DashboardPage {
                 .orElseThrow(() -> new NoSuchElementException("Không tìm thấy nút logout."));
     }
 
+    /**
+     * Thực hiện xử lý confirm logout button trong luồng kiểm thử.
+     * @return kết quả confirm logout button sau khi xử lý
+     */
     private WebElement confirmLogoutButton() {
         try {
             return new WebDriverWait(driver, Duration.ofSeconds(5))
@@ -389,14 +525,27 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Kiểm tra điều kiện is visible.
+     * @param locator locator xác định phần tử
+     * @return kết quả is visible sau khi xử lý
+     */
     private boolean isVisible(By locator) {
         return actions.isVisible(locator);
     }
 
+    /**
+     * Trả về visible metric values từ trạng thái hiện tại.
+     * @return kết quả visible metric values sau khi xử lý
+     */
     private long visibleMetricValues() {
         return loadedMetrics().size();
     }
 
+    /**
+     * Thực hiện xử lý main content trong luồng kiểm thử.
+     * @return kết quả main content sau khi xử lý
+     */
     private WebElement mainContent() {
         return driver.findElements(By.cssSelector("main, [role='main']")).stream()
                 .filter(WebElement::isDisplayed)
@@ -404,6 +553,10 @@ public class DashboardPage {
                 .orElseGet(() -> driver.findElement(By.tagName("body")));
     }
 
+    /**
+     * Thực hiện xử lý dashboard menu trong luồng kiểm thử.
+     * @return kết quả dashboard menu sau khi xử lý
+     */
     private WebElement dashboardMenu() {
         WebElement byHref = driver.findElements(DASHBOARD_MENU).stream()
                 .filter(WebElement::isDisplayed)
@@ -418,6 +571,11 @@ public class DashboardPage {
                 .orElse(null);
     }
 
+    /**
+     * Trả về visible main control từ trạng thái hiện tại.
+     * @param label giá trị label được truyền vào
+     * @return kết quả visible main control sau khi xử lý
+     */
     private WebElement visibleMainControl(String label) {
         WebElement periodControl = visiblePeriodControl(label);
         if (periodControl != null) {
@@ -433,6 +591,11 @@ public class DashboardPage {
                 .orElse(null);
     }
 
+    /**
+     * Trả về visible period control từ trạng thái hiện tại.
+     * @param label giá trị label được truyền vào
+     * @return kết quả visible period control sau khi xử lý
+     */
     private WebElement visiblePeriodControl(String label) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const label=arguments[0];"
@@ -453,6 +616,10 @@ public class DashboardPage {
                 label);
     }
 
+    /**
+     * Trả về visible date range control từ trạng thái hiện tại.
+     * @return kết quả visible date range control sau khi xử lý
+     */
     private WebElement visibleDateRangeControl() {
         WebElement control = (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const root=document.querySelector('main,[role=main]') || document.body;"
@@ -464,10 +631,19 @@ public class DashboardPage {
         return control;
     }
 
+    /**
+     * Thực hiện xử lý overlay is visible trong luồng kiểm thử.
+     * @return kết quả overlay is visible sau khi xử lý
+     */
     private boolean overlayIsVisible() {
         return driver.findElements(OPEN_OVERLAYS).stream().anyMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Kích hoạt date picker dropdown option trong luồng kiểm thử.
+     * @param dropdownIndex giá trị dropdown index được truyền vào
+     * @return kết quả select date picker dropdown option sau khi xử lý
+     */
     private boolean selectDatePickerDropdownOption(int dropdownIndex) {
         WebElement dropdown = datePickerDropdown(dropdownIndex);
         if (dropdown == null) {
@@ -492,6 +668,11 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý date picker dropdown trong luồng kiểm thử.
+     * @param index giá trị index được truyền vào
+     * @return kết quả date picker dropdown sau khi xử lý
+     */
     private WebElement datePickerDropdown(int index) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);"
@@ -512,6 +693,11 @@ public class DashboardPage {
                 index);
     }
 
+    /**
+     * Thực hiện xử lý date picker dropdown option trong luồng kiểm thử.
+     * @param previousText giá trị previous text được truyền vào
+     * @return kết quả date picker dropdown option sau khi xử lý
+     */
     private WebElement datePickerDropdownOption(String previousText) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const previous=arguments[0];"
@@ -528,6 +714,9 @@ public class DashboardPage {
                 previousText);
     }
 
+    /**
+     * Kích hoạt date picker navigation if present trong luồng kiểm thử.
+     */
     private void clickDatePickerNavigationIfPresent() {
         WebElement next = (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);"
@@ -541,6 +730,10 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý date picker text trong luồng kiểm thử.
+     * @return kết quả date picker text sau khi xử lý
+     */
     private String datePickerText() {
         Object text = ((JavascriptExecutor) driver).executeScript(
                 "const overlays=[...document.querySelectorAll('.ant-picker-dropdown,[role=dialog],"
@@ -552,6 +745,11 @@ public class DashboardPage {
         return String.valueOf(text);
     }
 
+    /**
+     * Kích hoạt date cell trong luồng kiểm thử.
+     * @param index giá trị index được truyền vào
+     * @return kết quả selectable date cell sau khi xử lý
+     */
     private WebElement selectableDateCell(int index) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);"
@@ -575,6 +773,11 @@ public class DashboardPage {
                 index);
     }
 
+    /**
+     * Kiểm tra điều kiện is selected.
+     * @param element phần tử cần thao tác
+     * @return kết quả is selected sau khi xử lý
+     */
     private boolean isSelected(WebElement element) {
         if (element == null) {
             return false;
@@ -597,10 +800,19 @@ public class DashboardPage {
         return false;
     }
 
+    /**
+     * Thực hiện xử lý chart state trong luồng kiểm thử.
+     * @return kết quả chart state sau khi xử lý
+     */
     private String chartState() {
         return driver.getCurrentUrl() + "|" + mainContent().getText().hashCode();
     }
 
+    /**
+     * Thực hiện xử lý summary card is visible trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả summary card is visible sau khi xử lý
+     */
     private boolean summaryCardIsVisible(String label) {
         try {
             return summaryCard(label).isDisplayed();
@@ -609,6 +821,11 @@ public class DashboardPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý summary card trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả summary card sau khi xử lý
+     */
     private WebElement summaryCard(String label) {
         WebElement card = (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const label=arguments[0];"
@@ -634,6 +851,10 @@ public class DashboardPage {
         return card;
     }
 
+    /**
+     * Thực hiện xử lý dashboard url trong luồng kiểm thử.
+     * @return kết quả dashboard url sau khi xử lý
+     */
     private String dashboardUrl() {
         String baseUrl = TestConfig.baseUrl();
         if (baseUrl.contains("/vuatho/dashboard")) {

@@ -15,6 +15,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Đọc catalog test Dashboard từ workbook và chuyển thành dữ liệu chạy TestNG.
+ */
 public final class DashboardTestCaseCatalog {
     public static final String RESOURCE =
             "/testcases/Test_Cases_Dashboard_Vua_Tho_Full.xlsx";
@@ -23,17 +26,32 @@ public final class DashboardTestCaseCatalog {
 
     private static final List<DashboardTestCase> CASES = loadCases();
 
+    /**
+     * Khởi tạo DashboardTestCaseCatalog với các phụ thuộc cần thiết.
+     */
     private DashboardTestCaseCatalog() {
     }
 
+    /**
+     * Thực hiện xử lý all trong luồng kiểm thử.
+     * @return kết quả all sau khi xử lý
+     */
     public static List<DashboardTestCase> all() {
         return CASES;
     }
 
+    /**
+     * Thực hiện xử lý directly automatable trong luồng kiểm thử.
+     * @return kết quả directly automatable sau khi xử lý
+     */
     public static List<DashboardTestCase> directlyAutomatable() {
         return CASES.stream().filter(DashboardTestCase::isDirectlyAutomatable).toList();
     }
 
+    /**
+     * Thực hiện xử lý count by module trong luồng kiểm thử.
+     * @return kết quả count by module sau khi xử lý
+     */
     public static Map<String, Long> countByModule() {
         Map<String, Long> counts = new LinkedHashMap<>();
         CASES.forEach(testCase -> counts.merge(testCase.module(), 1L,
@@ -41,6 +59,10 @@ public final class DashboardTestCaseCatalog {
         return Collections.unmodifiableMap(counts);
     }
 
+    /**
+     * Thực hiện xử lý count by automation feasibility trong luồng kiểm thử.
+     * @return kết quả count by automation feasibility sau khi xử lý
+     */
     public static Map<String, Long> countByAutomationFeasibility() {
         Map<String, Long> counts = new LinkedHashMap<>();
         CASES.forEach(testCase -> counts.merge(testCase.automationFeasibility(), 1L,
@@ -48,6 +70,10 @@ public final class DashboardTestCaseCatalog {
         return Collections.unmodifiableMap(counts);
     }
 
+    /**
+     * Đọc cases trong luồng kiểm thử.
+     * @return kết quả load cases sau khi xử lý
+     */
     private static List<DashboardTestCase> loadCases() {
         try (InputStream input = DashboardTestCaseCatalog.class.getResourceAsStream(RESOURCE)) {
             if (input == null) {
@@ -65,6 +91,11 @@ public final class DashboardTestCaseCatalog {
         }
     }
 
+    /**
+     * Đọc cases trong luồng kiểm thử.
+     * @param sheet giá trị sheet được truyền vào
+     * @return kết quả read cases sau khi xử lý
+     */
     private static List<DashboardTestCase> readCases(Sheet sheet) {
         DataFormatter formatter = new DataFormatter();
         int headerIndex = findHeaderRow(sheet, formatter);
@@ -86,6 +117,12 @@ public final class DashboardTestCaseCatalog {
         return result;
     }
 
+    /**
+     * Tìm header row trong luồng kiểm thử.
+     * @param sheet giá trị sheet được truyền vào
+     * @param formatter giá trị formatter được truyền vào
+     * @return kết quả find header row sau khi xử lý
+     */
     private static int findHeaderRow(Sheet sheet, DataFormatter formatter) {
         for (Row row : sheet) {
             if ("Test Case ID".equals(value(row, 0, formatter))) {
@@ -95,6 +132,13 @@ public final class DashboardTestCaseCatalog {
         throw new IllegalStateException("Cannot find 'Test Case ID' header in " + SHEET);
     }
 
+    /**
+     * Thực hiện xử lý value trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @param column giá trị column được truyền vào
+     * @param formatter giá trị formatter được truyền vào
+     * @return kết quả value sau khi xử lý
+     */
     private static String value(Row row, int column, DataFormatter formatter) {
         if (row.getCell(column) == null) {
             return "";

@@ -6,13 +6,24 @@ import org.openqa.selenium.WebDriver;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Quét DOM để nhận diện và in các control tương tác đang hiển thị trên màn hình.
+ */
 public class UiFeatureExplorer {
     private final WebDriver driver;
 
+    /**
+     * Khởi tạo UiFeatureExplorer với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public UiFeatureExplorer(WebDriver driver) {
         this.driver = driver;
     }
 
+    /**
+     * Trả về visible controls từ trạng thái hiện tại.
+     * @return kết quả visible controls sau khi xử lý
+     */
     @SuppressWarnings("unchecked")
     public List<UiControl> visibleControls() {
         List<Map<String, String>> controls = (List<Map<String, String>>) ((JavascriptExecutor) driver)
@@ -33,6 +44,10 @@ public class UiFeatureExplorer {
                 .toList();
     }
 
+    /**
+     * Ghi hoặc định dạng inventory trong luồng kiểm thử.
+     * @param pageName giá trị page name được truyền vào
+     */
     public void printInventory(String pageName) {
         List<UiControl> controls = visibleControls();
         System.out.printf("%n[FEATURE INVENTORY] %s | %s | %d controls%n",

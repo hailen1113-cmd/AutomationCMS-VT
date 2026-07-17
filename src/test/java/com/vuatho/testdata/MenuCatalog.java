@@ -9,6 +9,9 @@ import java.util.stream.Stream;
 import static com.vuatho.navigation.MenuTarget.childOf;
 import static com.vuatho.navigation.MenuTarget.topLevel;
 
+/**
+ * Khai báo tập trung các menu ERP được dùng bởi test điều hướng và kiểm tra chéo.
+ */
 public final class MenuCatalog {
     private static final List<MenuTarget> GENERAL = List.of(
             topLevel("Dashboard"),
@@ -50,13 +53,24 @@ public final class MenuCatalog {
                     PartnerWorkerTestData.menuPages().stream())
             .toList();
 
+    /**
+     * Khởi tạo MenuCatalog với các phụ thuộc cần thiết.
+     */
     private MenuCatalog() {
     }
 
+    /**
+     * Thực hiện xử lý all trong luồng kiểm thử.
+     * @return kết quả all sau khi xử lý
+     */
     public static List<MenuTarget> all() {
         return ALL;
     }
 
+    /**
+     * Thực hiện xử lý data provider rows trong luồng kiểm thử.
+     * @return kết quả data provider rows sau khi xử lý
+     */
     public static Object[][] dataProviderRows() {
         String filter = System.getProperty("menu.filter", "").trim().toLowerCase(Locale.ROOT);
         Object[][] rows = ALL.stream()
@@ -71,6 +85,11 @@ public final class MenuCatalog {
         return rows;
     }
 
+    /**
+     * Thực hiện xử lý normalize trong luồng kiểm thử.
+     * @param menu giá trị menu được truyền vào
+     * @return kết quả normalize sau khi xử lý
+     */
     private static MenuTarget normalize(MenuTarget menu) {
         if ("Marketing".equals(menu.parent()) && menu.name().contains("-")) {
             return childOf("Marketing", "Hiệu suất Marketing");

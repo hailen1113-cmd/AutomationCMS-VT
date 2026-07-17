@@ -15,6 +15,10 @@ public class ReadOnlyFeaturesPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
+    /**
+     * Khởi tạo ReadOnlyFeaturesPage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public ReadOnlyFeaturesPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -22,6 +26,11 @@ public class ReadOnlyFeaturesPage {
         this.wait.ignoring(StaleElementReferenceException.class);
     }
 
+    /**
+     * Thực hiện xử lý search and reset trong luồng kiểm thử.
+     * @param placeholder giá trị placeholder được truyền vào
+     * @param query giá trị query được truyền vào
+     */
     public void searchAndReset(String placeholder, String query) {
         PageLoadSynchronizer.prepareForAsyncAction(driver);
         String stateBeforeSearch = PageLoadSynchronizer.mainContentState(driver);
@@ -38,6 +47,11 @@ public class ReadOnlyFeaturesPage {
         PageLoadSynchronizer.waitForSearchResultsToLoad(driver, stateBeforeReset);
     }
 
+    /**
+     * Thực hiện xử lý switch route tab trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @return kết quả switch route tab sau khi xử lý
+     */
     public String switchRouteTab(String tabLabel) {
         String previousState = pageState(tabLabel);
         clickMainButton(tabLabel);
@@ -46,6 +60,10 @@ public class ReadOnlyFeaturesPage {
         return pageState(tabLabel);
     }
 
+    /**
+     * Thực hiện xử lý switch view trong luồng kiểm thử.
+     * @param viewLabel giá trị view label được truyền vào
+     */
     public void switchView(String viewLabel) {
         String previousContent = mainText();
         clickMainButton(viewLabel);
@@ -53,6 +71,10 @@ public class ReadOnlyFeaturesPage {
                 || !mainText().equals(previousContent));
     }
 
+    /**
+     * Thực hiện xử lý go to pagination page trong luồng kiểm thử.
+     * @param pageNumber giá trị page number được truyền vào
+     */
     public void goToPaginationPage(String pageNumber) {
         WebElement page = wait.until(webDriver -> visibleElement(By.xpath(
                 "//*[@role='button' and normalize-space()='" + pageNumber + "']")));
@@ -63,6 +85,11 @@ public class ReadOnlyFeaturesPage {
                 "//*[@role='button' and normalize-space()='" + pageNumber + "']"))));
     }
 
+    /**
+     * Mở dropdown and verify option trong luồng kiểm thử.
+     * @param dropdownLabel giá trị dropdown label được truyền vào
+     * @param optionLabel giá trị option label được truyền vào
+     */
     public void openDropdownAndVerifyOption(String dropdownLabel, String optionLabel) {
         clickMainButton(dropdownLabel);
         wait.until(webDriver -> visibleContentElement(By.xpath(
@@ -70,22 +97,42 @@ public class ReadOnlyFeaturesPage {
         driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
     }
 
+    /**
+     * Thực hiện xử lý input is empty trong luồng kiểm thử.
+     * @param placeholder giá trị placeholder được truyền vào
+     * @return kết quả input is empty sau khi xử lý
+     */
     public boolean inputIsEmpty(String placeholder) {
         return visibleInput(placeholder).getAttribute("value").isBlank();
     }
 
+    /**
+     * Kiểm tra điều kiện is control selected.
+     * @param label giá trị label được truyền vào
+     * @return kết quả is control selected sau khi xử lý
+     */
     public boolean isControlSelected(String label) {
         return isSelected(mainButton(label));
     }
 
+    /**
+     * Mở control trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     */
     public void openControl(String label) {
         clickMainButton(label);
     }
 
+    /**
+     * Thực hiện xử lý close overlay trong luồng kiểm thử.
+     */
     public void closeOverlay() {
         driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
     }
 
+    /**
+     * Mở first text input trong luồng kiểm thử.
+     */
     public void openFirstTextInput() {
         WebElement input = (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "return [...document.querySelectorAll('input')].find(e=>{"
@@ -98,6 +145,10 @@ public class ReadOnlyFeaturesPage {
         input.click();
     }
 
+    /**
+     * Kích hoạt main button trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     */
     private void clickMainButton(String label) {
         WebElement button = wait.until(webDriver -> mainButton(label));
         ((JavascriptExecutor) driver).executeScript(
@@ -105,6 +156,11 @@ public class ReadOnlyFeaturesPage {
         wait.until(webDriver -> mainButton(label)).click();
     }
 
+    /**
+     * Thực hiện xử lý main button trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả main button sau khi xử lý
+     */
     private WebElement mainButton(String label) {
         return visibleContentElement(By.xpath(
                 "//button[normalize-space(.)='" + label + "' or .//*[normalize-space()='" + label + "']"
@@ -112,6 +168,11 @@ public class ReadOnlyFeaturesPage {
                         + " | //*[@role='tab' and normalize-space()='" + label + "']"));
     }
 
+    /**
+     * Trả về visible input từ trạng thái hiện tại.
+     * @param placeholder giá trị placeholder được truyền vào
+     * @return kết quả visible input sau khi xử lý
+     */
     private WebElement visibleInput(String placeholder) {
         WebElement input = (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const expected=arguments[0].toLocaleLowerCase();"
@@ -130,6 +191,11 @@ public class ReadOnlyFeaturesPage {
         return input;
     }
 
+    /**
+     * Trả về visible element từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả visible element sau khi xử lý
+     */
     private WebElement visibleElement(By locator) {
         return driver.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -137,6 +203,11 @@ public class ReadOnlyFeaturesPage {
                 .orElse(null);
     }
 
+    /**
+     * Trả về visible content element từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả visible content element sau khi xử lý
+     */
     private WebElement visibleContentElement(By locator) {
         return driver.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -145,6 +216,11 @@ public class ReadOnlyFeaturesPage {
                 .orElse(null);
     }
 
+    /**
+     * Kiểm tra điều kiện is selected.
+     * @param element phần tử cần thao tác
+     * @return kết quả is selected sau khi xử lý
+     */
     private boolean isSelected(WebElement element) {
         if (element == null) {
             return false;
@@ -167,11 +243,20 @@ public class ReadOnlyFeaturesPage {
         return false;
     }
 
+    /**
+     * Thực hiện xử lý main text trong luồng kiểm thử.
+     * @return kết quả main text sau khi xử lý
+     */
     private String mainText() {
         WebElement main = visibleElement(By.cssSelector("main, [role='main']"));
         return main == null ? "" : main.getText();
     }
 
+    /**
+     * Thực hiện xử lý page state trong luồng kiểm thử.
+     * @param controlLabel giá trị control label được truyền vào
+     * @return kết quả page state sau khi xử lý
+     */
     private String pageState(String controlLabel) {
         WebElement control = mainButton(controlLabel);
         String controlState = control == null ? "missing"

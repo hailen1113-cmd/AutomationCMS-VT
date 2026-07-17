@@ -9,13 +9,24 @@ import org.testng.SkipException;
 
 import java.time.Duration;
 
+/**
+ * Đóng gói luồng mở ứng dụng, kiểm tra phiên hiện tại và đăng nhập Google khi cần.
+ */
 public class AuthenticationFlow {
     private final WebDriver driver;
 
+    /**
+     * Khởi tạo AuthenticationFlow với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public AuthenticationFlow(WebDriver driver) {
         this.driver = driver;
     }
 
+    /**
+     * Mở application and login trong luồng kiểm thử.
+     * @return kết quả open application and login sau khi xử lý
+     */
     public LoginPage openApplicationAndLogin() {
         LoginPage loginPage = new LoginPage(driver);
         if (loginPage.isDashboardVisibleNow()) {
@@ -39,6 +50,10 @@ public class AuthenticationFlow {
         return loginPage;
     }
 
+    /**
+     * Thực hiện xử lý handle interactive vercel login trong luồng kiểm thử.
+     * @param entryPage giá trị entry page được truyền vào
+     */
     private void handleInteractiveVercelLogin(EntryPage entryPage) {
         if (!entryPage.isBlockedByVercel() || !TestConfig.interactive()) {
             return;

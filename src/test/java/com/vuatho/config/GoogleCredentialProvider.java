@@ -4,10 +4,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import java.util.Arrays;
 
+/**
+ * Đọc mật khẩu Google từ nguồn cấu hình an toàn và báo lỗi rõ ràng khi chưa thiết lập.
+ */
 public final class GoogleCredentialProvider {
     private GoogleCredentialProvider() {
     }
 
+    /**
+     * Thực hiện xử lý password trong luồng kiểm thử.
+     * @return kết quả password sau khi xử lý
+     */
     public static String password() {
         if (!TestConfig.loginPassword().isBlank()) {
             return TestConfig.loginPassword();

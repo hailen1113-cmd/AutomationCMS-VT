@@ -24,14 +24,25 @@ public class PageHealthChecker {
 
     private final WebDriver driver;
 
+    /**
+     * Khởi tạo PageHealthChecker với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public PageHealthChecker(WebDriver driver) {
         this.driver = driver;
     }
 
+    /**
+     * Thực hiện xử lý start observation trong luồng kiểm thử.
+     */
     public void startObservation() {
         browserErrors();
     }
 
+    /**
+     * Thu thập  trong luồng kiểm thử.
+     * @return kết quả inspect sau khi xử lý
+     */
     public PageHealthReport inspect() {
         List<String> problems = new ArrayList<>();
         String url = driver.getCurrentUrl();
@@ -46,6 +57,11 @@ public class PageHealthChecker {
         return new PageHealthReport(url, List.copyOf(problems));
     }
 
+    /**
+     * Thực hiện xử lý validate url trong luồng kiểm thử.
+     * @param url giá trị url được truyền vào
+     * @param problems giá trị problems được truyền vào
+     */
     private void validateUrl(String url, List<String> problems) {
         String expectedHost = TestConfig.baseHost();
         String actualHost = URI.create(url).getHost();
@@ -57,6 +73,10 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý validate document trong luồng kiểm thử.
+     * @param problems giá trị problems được truyền vào
+     */
     private void validateDocument(List<String> problems) {
         Object state = ((JavascriptExecutor) driver).executeScript("return document.readyState");
         if (!"complete".equals(state)) {
@@ -67,6 +87,10 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý validate main content trong luồng kiểm thử.
+     * @param problems giá trị problems được truyền vào
+     */
     private void validateMainContent(List<String> problems) {
         String text = driver.findElements(MAIN_CONTENT).stream()
                 .filter(WebElement::isDisplayed)
@@ -79,6 +103,10 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý validate error page trong luồng kiểm thử.
+     * @param problems giá trị problems được truyền vào
+     */
     private void validateErrorPage(List<String> problems) {
         List<String> errors = driver.findElements(ERROR_MESSAGES).stream()
                 .filter(WebElement::isDisplayed)
@@ -90,6 +118,10 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý validate images trong luồng kiểm thử.
+     * @param problems giá trị problems được truyền vào
+     */
     @SuppressWarnings("unchecked")
     private void validateImages(List<String> problems) {
         List<String> brokenImages = (List<String>) ((JavascriptExecutor) driver).executeScript(
@@ -105,6 +137,12 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý same host trong luồng kiểm thử.
+     * @param source giá trị source được truyền vào
+     * @param expectedHost giá trị expected host được truyền vào
+     * @return kết quả same host sau khi xử lý
+     */
     private boolean sameHost(String source, String expectedHost) {
         try {
             String host = URI.create(source).getHost();
@@ -114,6 +152,10 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Thực hiện xử lý validate browser console trong luồng kiểm thử.
+     * @param problems giá trị problems được truyền vào
+     */
     private void validateBrowserConsole(List<String> problems) {
         List<String> errors = browserErrors().stream()
                 .map(LogEntry::getMessage)
@@ -125,6 +167,11 @@ public class PageHealthChecker {
         }
     }
 
+    /**
+     * Kiểm tra điều kiện is third party auth noise.
+     * @param message giá trị message được truyền vào
+     * @return kết quả is third party auth noise sau khi xử lý
+     */
     private boolean isThirdPartyAuthNoise(String message) {
         return message.contains("accounts.google.com")
                 || message.contains("ssl.gstatic.com")
@@ -132,6 +179,10 @@ public class PageHealthChecker {
                 || message.contains("All created TinyMCE editors are configured to be read-only");
     }
 
+    /**
+     * Thực hiện xử lý browser errors trong luồng kiểm thử.
+     * @return kết quả browser errors sau khi xử lý
+     */
     private List<LogEntry> browserErrors() {
         try {
             return driver.manage().logs().get(LogType.BROWSER).getAll().stream()

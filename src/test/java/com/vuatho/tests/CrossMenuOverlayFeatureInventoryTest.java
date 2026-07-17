@@ -12,17 +12,28 @@ import org.testng.annotations.Test;
 
 import static com.vuatho.navigation.MenuTarget.childOf;
 
+/**
+ * Mở các overlay trên nhiều menu và lập danh mục control nằm bên trong.
+ */
 public class CrossMenuOverlayFeatureInventoryTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(CrossMenuOverlayFeatureInventoryTest.class,
                 "ERP Cross-menu Overlay Feature Discovery", "Read-only cross-menu overlays and filters");
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý overlays trong luồng kiểm thử.
+     * @return kết quả overlays sau khi xử lý
+     */
     @DataProvider(name = "overlays")
     public Object[][] overlays() {
         return new Object[][]{
@@ -35,6 +46,11 @@ public class CrossMenuOverlayFeatureInventoryTest extends BaseTest {
         };
     }
 
+    /**
+     * Thu thập overlay features trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     * @param controlLabel giá trị control label được truyền vào
+     */
     @Test(dataProvider = "overlays")
     public void inventoryOverlayFeatures(MenuTarget target, String controlLabel) {
         new AuthenticationFlow(driver).openApplicationAndLogin();

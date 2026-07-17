@@ -10,9 +10,17 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Tổng hợp kết quả TestNG thành báo cáo HTML ngắn gọn sau khi suite hoàn tất.
+ */
 public final class HtmlSummaryReporter {
     private static final Path REPORT_PATH = Path.of(TestConfig.summaryReportPath());
 
+    /**
+     * Ghi hoặc định dạng  trong luồng kiểm thử.
+     * @param results giá trị results được truyền vào
+     * @return kết quả write sau khi xử lý
+     */
     public Path write(List<ITestResult> results) throws IOException {
         Path report = REPORT_PATH.toAbsolutePath();
         Files.createDirectories(report.getParent());
@@ -20,6 +28,11 @@ public final class HtmlSummaryReporter {
         return report;
     }
 
+    /**
+     * Thực hiện xử lý render trong luồng kiểm thử.
+     * @param results giá trị results được truyền vào
+     * @return kết quả render sau khi xử lý
+     */
     private String render(List<ITestResult> results) {
         long passed = count(results, ITestResult.SUCCESS);
         long failed = count(results, ITestResult.FAILURE);
@@ -50,10 +63,21 @@ public final class HtmlSummaryReporter {
                 + "</tr></thead><tbody>" + rows + "</tbody></table></body></html>";
     }
 
+    /**
+     * Thực hiện xử lý count trong luồng kiểm thử.
+     * @param results giá trị results được truyền vào
+     * @param status giá trị status được truyền vào
+     * @return kết quả count sau khi xử lý
+     */
     private long count(List<ITestResult> results, int status) {
         return results.stream().filter(result -> result.getStatus() == status).count();
     }
 
+    /**
+     * Thực hiện xử lý status trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     * @return kết quả status sau khi xử lý
+     */
     private String status(ITestResult result) {
         return switch (result.getStatus()) {
             case ITestResult.SUCCESS -> "PASS";
@@ -62,6 +86,11 @@ public final class HtmlSummaryReporter {
         };
     }
 
+    /**
+     * Thực hiện xử lý screenshot cell trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     * @return kết quả screenshot cell sau khi xử lý
+     */
     private String screenshotCell(ITestResult result) {
         if (result.getStatus() != ITestResult.FAILURE || !TestConfig.captureScreenshots()) {
             return "";

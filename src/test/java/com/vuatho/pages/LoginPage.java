@@ -41,6 +41,10 @@ public class LoginPage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
+    /**
+     * Khởi tạo LoginPage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public LoginPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -48,6 +52,11 @@ public class LoginPage {
         this.wait.ignoring(StaleElementReferenceException.class);
     }
 
+    /**
+     * Thực hiện xử lý login with google trong luồng kiểm thử.
+     * @param email giá trị email được truyền vào
+     * @param passwordSupplier giá trị password supplier được truyền vào
+     */
     public void loginWithGoogle(String email, Supplier<String> passwordSupplier) {
         String erpWindow = driver.getWindowHandle();
         Set<String> windowsBeforeClick = driver.getWindowHandles();
@@ -81,6 +90,11 @@ public class LoginPage {
         returnToErpWindow(erpWindow);
     }
 
+    /**
+     * Kiểm tra điều kiện is dashboard visible.
+     * @param timeout thời gian chờ tối đa
+     * @return kết quả is dashboard visible sau khi xử lý
+     */
     public boolean isDashboardVisible(Duration timeout) {
         try {
             new WebDriverWait(driver, timeout).until(webDriver ->
@@ -93,10 +107,18 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Kiểm tra điều kiện is dashboard visible now.
+     * @return kết quả is dashboard visible now sau khi xử lý
+     */
     public boolean isDashboardVisibleNow() {
         return isOnErp();
     }
 
+    /**
+     * Thực hiện xử lý switch to google window trong luồng kiểm thử.
+     * @param windowsBeforeClick giá trị windows before click được truyền vào
+     */
     private void switchToGoogleWindow(Set<String> windowsBeforeClick) {
         wait.until(webDriver ->
                 webDriver.getWindowHandles().size() > windowsBeforeClick.size()
@@ -112,6 +134,10 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Kích hoạt account or enter email trong luồng kiểm thử.
+     * @param email giá trị email được truyền vào
+     */
     private void chooseAccountOrEnterEmail(String email) {
         wait.until(webDriver -> isOnErp()
                 || googleRejectedAutomatedBrowser()
@@ -144,6 +170,10 @@ public class LoginPage {
         clickGoogleNext(GOOGLE_EMAIL_NEXT);
     }
 
+    /**
+     * Chờ for password or return to erp trong luồng kiểm thử.
+     * @return kết quả wait for password or return to erp sau khi xử lý
+     */
     private WebElement waitForPasswordOrReturnToErp() {
         try {
             wait.until(webDriver -> isOnErp()
@@ -156,6 +186,9 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý fail fast if google rejects automated browser trong luồng kiểm thử.
+     */
     private void failFastIfGoogleRejectsAutomatedBrowser() {
         if (!googleRejectedAutomatedBrowser()) {
             return;
@@ -166,12 +199,19 @@ public class LoginPage {
                         + "or -Dselenium.profile.dir=.selenium/chrome-profile.");
     }
 
+    /**
+     * Thực hiện xử lý google rejected automated browser trong luồng kiểm thử.
+     * @return kết quả google rejected automated browser sau khi xử lý
+     */
     private boolean googleRejectedAutomatedBrowser() {
         return firstVisible(GOOGLE_REJECTED_SIGN_IN) != null
                 || driver.getCurrentUrl().contains("accounts.google.com")
                 && driver.getCurrentUrl().contains("/signin/rejected");
     }
 
+    /**
+     * Chờ for manual google completion trong luồng kiểm thử.
+     */
     private void waitForManualGoogleCompletion() {
         if (TestConfig.headless()) {
             throw new IllegalStateException(
@@ -188,16 +228,29 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Cập nhật google password trong luồng kiểm thử.
+     * @param passwordInput giá trị password input được truyền vào
+     * @param password giá trị password được truyền vào
+     */
     private void enterGooglePassword(WebElement passwordInput, String password) {
         replaceText(passwordInput, password);
         clickGoogleNext(GOOGLE_PASSWORD_NEXT);
     }
 
+    /**
+     * Kích hoạt google next trong luồng kiểm thử.
+     * @param locator locator xác định phần tử
+     */
     private void clickGoogleNext(By locator) {
         WebElement next = wait.until(ExpectedConditions.elementToBeClickable(locator));
         clickElement(next);
     }
 
+    /**
+     * Kích hoạt element trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     */
     private void clickElement(WebElement element) {
         try {
             element.click();
@@ -206,6 +259,11 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý replace text trong luồng kiểm thử.
+     * @param input giá trị input được truyền vào
+     * @param value giá trị đầu vào
+     */
     private void replaceText(WebElement input, String value) {
         input.click();
         ((JavascriptExecutor) driver).executeScript(
@@ -218,6 +276,10 @@ public class LoginPage {
         input.sendKeys(value);
     }
 
+    /**
+     * Thực hiện xử lý return to erp window trong luồng kiểm thử.
+     * @param erpWindow giá trị erp window được truyền vào
+     */
     private void returnToErpWindow(String erpWindow) {
         try {
             new WebDriverWait(driver, Duration.ofMinutes(2)).until(webDriver -> {
@@ -239,6 +301,10 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý switch to app window if present trong luồng kiểm thử.
+     * @return kết quả switch to app window if present sau khi xử lý
+     */
     private boolean switchToAppWindowIfPresent() {
         for (String window : driver.getWindowHandles()) {
             driver.switchTo().window(window);
@@ -249,11 +315,21 @@ public class LoginPage {
         return false;
     }
 
+    /**
+     * Kiểm tra điều kiện has visible text.
+     * @param text nội dung cần xử lý
+     * @return kết quả has visible text sau khi xử lý
+     */
     private boolean hasVisibleText(String text) {
         return driver.findElements(By.xpath("//*[normalize-space()='" + text + "']")).stream()
                 .anyMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Trả về first visible từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả first visible sau khi xử lý
+     */
     private WebElement firstVisible(By locator) {
         return driver.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -261,6 +337,11 @@ public class LoginPage {
                 .orElse(null);
     }
 
+    /**
+     * Thực hiện xử lý google account for trong luồng kiểm thử.
+     * @param email giá trị email được truyền vào
+     * @return kết quả google account for sau khi xử lý
+     */
     private WebElement googleAccountFor(String email) {
         WebElement byDataIdentifier = driver.findElements(GOOGLE_ACCOUNT).stream()
                 .filter(WebElement::isDisplayed)
@@ -279,6 +360,11 @@ public class LoginPage {
                 .orElse(null);
     }
 
+    /**
+     * Kích hoạt account container trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     * @return kết quả clickable account container sau khi xử lý
+     */
     private WebElement clickableAccountContainer(WebElement element) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "let e=arguments[0];"
@@ -292,6 +378,10 @@ public class LoginPage {
                 element);
     }
 
+    /**
+     * Kiểm tra điều kiện is on erp.
+     * @return kết quả is on erp sau khi xử lý
+     */
     private boolean isOnErp() {
         try {
             String url = driver.getCurrentUrl();
@@ -309,6 +399,10 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Trả về current host is base từ trạng thái hiện tại.
+     * @return kết quả current host is base sau khi xử lý
+     */
     private boolean currentHostIsBase() {
         try {
             String host = URI.create(driver.getCurrentUrl()).getHost();

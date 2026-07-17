@@ -14,9 +14,16 @@ import java.time.Duration;
 public final class OverlayCleaner {
     private static final By BODY = By.tagName("body");
 
+    /**
+     * Khởi tạo OverlayCleaner với các phụ thuộc cần thiết.
+     */
     private OverlayCleaner() {
     }
 
+    /**
+     * Thực hiện xử lý dismiss blocking overlays trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public static void dismissBlockingOverlays(WebDriver driver) {
         if (driver == null || !documentIsReady(driver) || !blockingOverlayIsVisible(driver)) {
             return;
@@ -28,6 +35,10 @@ public final class OverlayCleaner {
         waitUntilClear(driver);
     }
 
+    /**
+     * Kích hoạt top right close button trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     private static void clickTopRightCloseButton(WebDriver driver) {
         try {
             Object closeButton = ((JavascriptExecutor) driver).executeScript(
@@ -54,6 +65,10 @@ public final class OverlayCleaner {
         }
     }
 
+    /**
+     * Thực hiện xử lý send escape trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     @SuppressWarnings("null")
     private static void sendEscape(WebDriver driver) {
         try {
@@ -64,6 +79,10 @@ public final class OverlayCleaner {
         }
     }
 
+    /**
+     * Thực hiện xử lý dispatch escape trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     private static void dispatchEscape(WebDriver driver) {
         try {
             ((JavascriptExecutor) driver).executeScript(
@@ -75,6 +94,10 @@ public final class OverlayCleaner {
         }
     }
 
+    /**
+     * Chờ until clear trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     @SuppressWarnings("null")
     private static void waitUntilClear(WebDriver driver) {
         try {
@@ -85,6 +108,11 @@ public final class OverlayCleaner {
         }
     }
 
+    /**
+     * Thực hiện xử lý blocking overlay is visible trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @return kết quả blocking overlay is visible sau khi xử lý
+     */
     private static boolean blockingOverlayIsVisible(WebDriver driver) {
         try {
             Object visible = ((JavascriptExecutor) driver).executeScript(
@@ -103,6 +131,11 @@ public final class OverlayCleaner {
         }
     }
 
+    /**
+     * Thực hiện xử lý document is ready trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @return kết quả document is ready sau khi xử lý
+     */
     private static boolean documentIsReady(WebDriver driver) {
         try {
             Object readyState = ((JavascriptExecutor) driver).executeScript("return document.readyState");

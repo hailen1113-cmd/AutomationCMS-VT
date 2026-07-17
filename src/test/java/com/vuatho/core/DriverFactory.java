@@ -11,9 +11,16 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 
 public final class DriverFactory {
+    /**
+     * Khởi tạo DriverFactory với các phụ thuộc cần thiết.
+     */
     private DriverFactory() {
     }
 
+    /**
+     * Tạo chrome driver trong luồng kiểm thử.
+     * @return kết quả create chrome driver sau khi xử lý
+     */
     public static WebDriver createChromeDriver() {
         // Dùng profile Chrome riêng cho Selenium để cookie/token ERP được giữ giữa các test.
         Path profileDirectory = Path.of(TestConfig.seleniumProfileDirectory())
@@ -21,8 +28,12 @@ public final class DriverFactory {
                 .normalize();
 
         ChromeOptions options = new ChromeOptions();
+        System.out.println("Su dung Chrome profile luu session: " + profileDirectory);
         options.addArguments("--user-data-dir=" + profileDirectory);
         options.addArguments("--profile-directory=Default");
+        // Khôi phục phiên trước, bao gồm các session-cookie mà Chrome chỉ giữ khi
+        // trình duyệt được cấu hình tiếp tục phiên làm việc cũ.
+        options.addArguments("--restore-last-session");
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");

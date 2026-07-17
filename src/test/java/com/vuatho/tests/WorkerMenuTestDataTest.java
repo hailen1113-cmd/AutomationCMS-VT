@@ -8,8 +8,14 @@ import org.testng.annotations.Test;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Kiểm tra dữ liệu test của nhóm Đối tác - Thợ không trùng lặp hoặc thiếu trường bắt buộc.
+ */
 public class WorkerMenuTestDataTest {
 
+    /**
+     * Thực hiện xử lý worker menu test data has unique ids and worker profile coverage trong luồng kiểm thử.
+     */
     @Test
     public void workerMenuTestDataHasUniqueIdsAndWorkerProfileCoverage() {
         var cases = PartnerWorkerTestData.cases();

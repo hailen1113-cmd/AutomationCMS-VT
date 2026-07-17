@@ -6,6 +6,9 @@ import javax.swing.JOptionPane;
 import java.awt.GraphicsEnvironment;
 
 final class FailurePause {
+    /**
+     * Khởi tạo FailurePause với các phụ thuộc cần thiết.
+     */
     private FailurePause() {
     }
 

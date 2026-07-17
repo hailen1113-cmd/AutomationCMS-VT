@@ -15,9 +15,16 @@ public final class PageLoadSynchronizer {
     private static final Duration SEARCH_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration POST_RESULT_PAUSE = Duration.ofSeconds(2);
 
+    /**
+     * Khởi tạo PageLoadSynchronizer với các phụ thuộc cần thiết.
+     */
     private PageLoadSynchronizer() {
     }
 
+    /**
+     * Thực hiện xử lý prepare for async action trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public static void prepareForAsyncAction(WebDriver driver) {
         ((JavascriptExecutor) driver).executeScript(
                 "if (window.__automationNetworkTrackerInstalled) return;"
@@ -43,6 +50,10 @@ public final class PageLoadSynchronizer {
                         + "};");
     }
 
+    /**
+     * Chờ for data to settle trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     @SuppressWarnings("null")
     public static void waitForDataToSettle(WebDriver driver) {
         WebDriverWait wait = Waits.standard(driver);
@@ -61,6 +72,11 @@ public final class PageLoadSynchronizer {
         }
     }
 
+    /**
+     * Thực hiện xử lý main content state trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @return kết quả main content state sau khi xử lý
+     */
     public static String mainContentState(WebDriver driver) {
         Object state = ((JavascriptExecutor) driver).executeScript(
                 "const root = document.querySelector('main,[role=main]') || document.body;"
@@ -72,6 +88,11 @@ public final class PageLoadSynchronizer {
         return String.valueOf(state);
     }
 
+    /**
+     * Chờ for search results to load trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @param previousState giá trị previous state được truyền vào
+     */
     public static void waitForSearchResultsToLoad(WebDriver driver, String previousState) {
         waitForDocumentReady(driver);
         pauseForDebounce();
@@ -115,17 +136,31 @@ public final class PageLoadSynchronizer {
                 + SEARCH_TIMEOUT.toSeconds() + " seconds.");
     }
 
+    /**
+     * Chờ for document ready trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     private static void waitForDocumentReady(WebDriver driver) {
         Waits.standard(driver).until(webDriver -> "complete".equals(((JavascriptExecutor) webDriver)
                 .executeScript("return document.readyState")));
     }
 
+    /**
+     * Thực hiện xử lý no loading indicator is visible trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @return kết quả no loading indicator is visible sau khi xử lý
+     */
     @SuppressWarnings("null")
     private static boolean noLoadingIndicatorIsVisible(WebDriver driver) {
         return driver.findElements(LOADING_INDICATORS).stream()
                 .noneMatch(element -> element.isDisplayed());
     }
 
+    /**
+     * Thực hiện xử lý started requests trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     * @return kết quả started requests sau khi xử lý
+     */
     private static long startedRequests(WebDriver driver) {
         try {
             Object started = ((JavascriptExecutor) driver)
@@ -136,14 +171,25 @@ public final class PageLoadSynchronizer {
         }
     }
 
+    /**
+     * Thực hiện xử lý pause after results trong luồng kiểm thử.
+     */
     private static void pauseAfterResults() {
         sleep(POST_RESULT_PAUSE, "Interrupted during post-search result pause.");
     }
 
+    /**
+     * Thực hiện xử lý pause for debounce trong luồng kiểm thử.
+     */
     private static void pauseForDebounce() {
         sleep(Duration.ofMillis(500), "Interrupted while waiting for filter debounce.");
     }
 
+    /**
+     * Thực hiện xử lý sleep trong luồng kiểm thử.
+     * @param duration giá trị duration được truyền vào
+     * @param message giá trị message được truyền vào
+     */
     private static void sleep(Duration duration, String message) {
         try {
             Thread.sleep(duration.toMillis());

@@ -12,17 +12,28 @@ import org.testng.annotations.Test;
 import static com.vuatho.navigation.MenuTarget.childOf;
 import static com.vuatho.navigation.MenuTarget.topLevel;
 
+/**
+ * Quét từng trang menu để lập danh mục chức năng và control hiển thị trực tiếp.
+ */
 public class CrossMenuPageFeatureInventoryTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(CrossMenuPageFeatureInventoryTest.class,
                 "ERP Cross-menu Feature Discovery", "Read-only cross-menu UI feature inventory");
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý representative pages trong luồng kiểm thử.
+     * @return kết quả representative pages sau khi xử lý
+     */
     @DataProvider(name = "representativePages")
     public Object[][] representativePages() {
         return new Object[][]{
@@ -35,6 +46,10 @@ public class CrossMenuPageFeatureInventoryTest extends BaseTest {
         };
     }
 
+    /**
+     * Thu thập visible features trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     */
     @Test(dataProvider = "representativePages")
     public void inventoryVisibleFeatures(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();

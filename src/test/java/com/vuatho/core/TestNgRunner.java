@@ -9,13 +9,28 @@ import org.testng.xml.XmlSuite;
 import java.util.Arrays;
 
 public final class TestNgRunner {
+    /**
+     * Khởi tạo TestNgRunner với các phụ thuộc cần thiết.
+     */
     private TestNgRunner() {
     }
 
+    /**
+     * Thực thi  trong luồng kiểm thử.
+     * @param testClass giá trị test class được truyền vào
+     * @param suiteName giá trị suite name được truyền vào
+     * @param testName giá trị test name được truyền vào
+     */
     public static void run(Class<?> testClass, String suiteName, String testName) {
         run(suiteName, testName, testClass);
     }
 
+    /**
+     * Thực thi  trong luồng kiểm thử.
+     * @param suiteName giá trị suite name được truyền vào
+     * @param testName giá trị test name được truyền vào
+     * @param testClasses giá trị test classes được truyền vào
+     */
     public static void run(String suiteName, String testName, Class<?>... testClasses) {
         // Mặc định mở Chrome thật để dễ quan sát, nhưng vẫn quit sau test cuối cùng.
         // Có thể ghi đè từ Maven/IDE bằng -Dheadless, -Dinteractive hoặc -Dkeep.browser.open.

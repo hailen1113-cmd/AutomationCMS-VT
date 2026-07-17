@@ -7,6 +7,9 @@ import org.testng.annotations.Test;
 
 import java.time.Duration;
 
+/**
+ * Kiểm tra danh sách hồ sơ thợ, mở bản ghi đầu tiên và xác nhận chi tiết hiển thị.
+ */
 public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
     private static final Duration DETAIL_DATA_VIEW_DURATION = Duration.ofSeconds(3);
     private static final String[] BASIC_WORKER_DETAIL_TABS = {
@@ -19,12 +22,20 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
             "Xu ly vi pham"
     };
 
+    /**
+     * Cho phép chạy trực tiếp lớp này từ IDE mà không cần cấu hình TestNG XML.
+     * @param args các tham số dòng lệnh
+     */
     public static void main(String[] args) {
         TestNgRunner.run(WorkerProfileListDetailTest.class,
                 "Bo test danh sach va chi tiet ho so tho ERP",
                 "Kiem tra danh sach va chi tiet ho so tho");
     }
 
+    /**
+     * Thực hiện xử lý worker detail tabs trong luồng kiểm thử.
+     * @return kết quả worker detail tabs sau khi xử lý
+     */
     @DataProvider(name = "workerDetailTabs", parallel = false)
     public Object[][] workerDetailTabs() {
         Object[][] tabs = new Object[BASIC_WORKER_DETAIL_TABS.length][1];
@@ -34,6 +45,9 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
         return tabs;
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-list" },
             description = "WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang")
     public void workerProfileListShowsSummaryAndTable() {
@@ -47,6 +61,9 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
                 "Bang ho so tho khong co dong hien thi.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
             description = "WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho")
     public void workerInformationCanBeOpened() {
@@ -60,6 +77,10 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
                 "Chi tiet tho da mo nhung khong co noi dung hien thi.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-TAB-001: Mo duoc cac tab chi tiet tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param tabLabel giá trị tab label được truyền vào
+     */
     @Test(dataProvider = "workerDetailTabs",
             groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
             description = "WORKER-PROFILE-DETAIL-TAB-001: Mo duoc cac tab chi tiet tho")
@@ -78,6 +99,9 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
                 "Danh sach tho khong tai lai sau khi dong chi tiet.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
             description = "WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach")
     public void workerDetailTabsCanBeSwitchedWithoutReturningToList() {

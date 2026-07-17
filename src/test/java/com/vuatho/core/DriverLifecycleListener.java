@@ -1,19 +1,15 @@
 package com.vuatho.core;
 
 import org.testng.IExecutionListener;
-import org.testng.ISuite;
-import org.testng.ISuiteListener;
 
-public final class DriverLifecycleListener implements ISuiteListener, IExecutionListener {
-    @Override
-    public void onFinish(ISuite suite) {
-        // Điểm cuối của một TestNG suite: mọi testcase trong suite đã được lên lịch và thực thi/skip.
-        DriverSession.releaseAfterSuite();
-    }
-
+public final class DriverLifecycleListener implements IExecutionListener {
+    /**
+     * Thực hiện xử lý on execution finish trong luồng kiểm thử.
+     */
     @Override
     public void onExecutionFinish() {
-        // Idempotent fallback cho các runner không phát sự kiện suite như mong đợi.
+        // Chỉ đóng sau khi toàn bộ TestNG execution kết thúc. Nếu một execution chứa
+        // nhiều suite, tất cả suite vẫn dùng cùng browser và cùng session đăng nhập.
         DriverSession.releaseAfterSuite();
     }
 }

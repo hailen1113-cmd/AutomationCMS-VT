@@ -3,6 +3,9 @@ package com.vuatho.testdata;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Tạo các bộ dữ liệu đầu vào cho workflow xem, duyệt và cập nhật hồ sơ người dùng.
+ */
 public final class UserProfileTestData {
     private static final List<UserProfileCase> CASES = List.of(
             viewCase(
@@ -37,23 +40,46 @@ public final class UserProfileTestData {
                     UserProfileFeature.AVATAR_UPDATE,
                     UserProfileRejectReasonMode.OTHER));
 
+    /**
+     * Khởi tạo UserProfileTestData với các phụ thuộc cần thiết.
+     */
     private UserProfileTestData() {
     }
 
+    /**
+     * Thực hiện xử lý cases trong luồng kiểm thử.
+     * @return kết quả cases sau khi xử lý
+     */
     public static List<UserProfileCase> cases() {
         return CASES;
     }
 
+    /**
+     * Tìm by id trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @return kết quả find by id sau khi xử lý
+     */
     public static Optional<UserProfileCase> findById(String id) {
         return CASES.stream()
                 .filter(testCase -> testCase.id().equalsIgnoreCase(id))
                 .findFirst();
     }
 
+    /**
+     * Thực hiện xử lý contains id trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @return kết quả contains id sau khi xử lý
+     */
     public static boolean containsId(String id) {
         return findById(id).isPresent();
     }
 
+    /**
+     * Thực hiện xử lý view case trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @param scenario giá trị scenario được truyền vào
+     * @return kết quả view case sau khi xử lý
+     */
     private static UserProfileCase viewCase(String id, String scenario) {
         return new UserProfileCase(
                 id,

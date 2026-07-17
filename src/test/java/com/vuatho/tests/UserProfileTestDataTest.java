@@ -11,8 +11,14 @@ import org.testng.annotations.Test;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Kiểm tra catalog dữ liệu hồ sơ người dùng đầy đủ, duy nhất và phù hợp với từng workflow.
+ */
 public class UserProfileTestDataTest {
 
+    /**
+     * Thực hiện xử lý user profile test data has unique ids and required coverage trong luồng kiểm thử.
+     */
     @Test
     public void userProfileTestDataHasUniqueIdsAndRequiredCoverage() {
         var cases = UserProfileTestData.cases();

@@ -9,6 +9,9 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+/**
+ * Kiểm tra workflow mở hồ sơ eKYC, duyệt hoặc từ chối và xác nhận trạng thái sau xử lý.
+ */
 public class EkycReviewWorkflowTest extends EkycWorkflowTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(EkycReviewWorkflowTest.class,
@@ -16,6 +19,10 @@ public class EkycReviewWorkflowTest extends EkycWorkflowTestSupport {
                 "Kiem tra approve va reject eKYC");
     }
 
+    /**
+     * Thực hiện xử lý ekyc review cases trong luồng kiểm thử.
+     * @return kết quả ekyc review cases sau khi xử lý
+     */
     @DataProvider(name = "ekycReviewCases", parallel = false)
     public Object[][] ekycReviewCases() {
         List<EkycWorkbookCase> cases = EkycWorkbookCatalog.filteredLoad().stream()
@@ -29,6 +36,10 @@ public class EkycReviewWorkflowTest extends EkycWorkflowTestSupport {
         return rows;
     }
 
+    /**
+     * Thực thi test “EKYC-REVIEW: Approve va reject testcase tu workbook” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param testCase test case đang thực thi
+     */
     @Test(dataProvider = "ekycReviewCases",
             groups = {"ekyc", "workbook", "review"},
             description = "EKYC-REVIEW: Approve va reject testcase tu workbook")

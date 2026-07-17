@@ -7,6 +7,9 @@ import com.vuatho.core.TestNgRunner;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+/**
+ * Kiểm tra cấu trúc và dữ liệu tổng hợp của API Dashboard eKYC.
+ */
 public class EkycDashboardApiContractTest extends EkycApiTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(EkycDashboardApiContractTest.class,
@@ -14,6 +17,9 @@ public class EkycDashboardApiContractTest extends EkycApiTestSupport {
                 "Kiem tra contract API dashboard/kyc");
     }
 
+    /**
+     * Thực hiện xử lý dashboard kyc returns statistic contract trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract"})
     public void dashboardKycReturnsStatisticContract() {
         ApiResponse response = api.get("/dashboard/kyc");

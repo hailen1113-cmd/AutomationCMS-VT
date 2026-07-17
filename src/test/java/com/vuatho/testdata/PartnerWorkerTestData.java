@@ -8,6 +8,9 @@ import java.util.Optional;
 
 import static com.vuatho.navigation.MenuTarget.childOf;
 
+/**
+ * Cung cấp catalog và DataProvider cho các màn hình thuộc nhóm Đối tác - Thợ.
+ */
 public final class PartnerWorkerTestData {
     public static final String PARENT_MENU = "Đối Tác - Thợ";
     public static final MenuTarget WORKER_PROFILE = childOf(PARENT_MENU, "Quản Lí Hồ Sơ Thợ");
@@ -43,25 +46,45 @@ public final class PartnerWorkerTestData {
                     STOP_REQUEST,
                     "Tìm kiếm thợ theo tên"));
 
+    /**
+     * Khởi tạo PartnerWorkerTestData với các phụ thuộc cần thiết.
+     */
     private PartnerWorkerTestData() {
     }
 
+    /**
+     * Thực hiện xử lý cases trong luồng kiểm thử.
+     * @return kết quả cases sau khi xử lý
+     */
     public static List<PartnerWorkerCase> cases() {
         return CASES;
     }
 
+    /**
+     * Tìm by id trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @return kết quả find by id sau khi xử lý
+     */
     public static Optional<PartnerWorkerCase> findById(String id) {
         return CASES.stream()
                 .filter(testCase -> testCase.id().equalsIgnoreCase(id))
                 .findFirst();
     }
 
+    /**
+     * Thực hiện xử lý menu pages trong luồng kiểm thử.
+     * @return kết quả menu pages sau khi xử lý
+     */
     public static List<MenuTarget> menuPages() {
         return CASES.stream()
                 .map(PartnerWorkerCase::page)
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý search filters trong luồng kiểm thử.
+     * @return kết quả search filters sau khi xử lý
+     */
     public static List<FilterTarget> searchFilters() {
         return CASES.stream()
                 .filter(PartnerWorkerCase::hasSearchFilter)
@@ -69,6 +92,10 @@ public final class PartnerWorkerTestData {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý data provider rows trong luồng kiểm thử.
+     * @return kết quả data provider rows sau khi xử lý
+     */
     public static Object[][] dataProviderRows() {
         String filter = System.getProperty("partner.worker.case.id", "").trim().toLowerCase(Locale.ROOT);
         return CASES.stream()

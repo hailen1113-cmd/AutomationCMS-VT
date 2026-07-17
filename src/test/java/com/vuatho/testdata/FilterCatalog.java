@@ -6,6 +6,9 @@ import java.util.Locale;
 import static com.vuatho.navigation.MenuTarget.childOf;
 import static com.vuatho.navigation.MenuTarget.topLevel;
 
+/**
+ * Khai báo tập trung các màn hình có bộ lọc và dữ liệu dùng để kiểm tra chéo.
+ */
 public final class FilterCatalog {
     private static final List<FilterTarget> GENERAL_SEARCH_FILTERS = List.of(
             filter("Người Dùng", "Quản Lí eKYC", "Tìm kiếm người dùng"),
@@ -31,9 +34,16 @@ public final class FilterCatalog {
             filter("Marketing", "Quản Lí Cuộc Thi", "Tìm kiếm cuộc thi"),
             filter("Marketing", "Yêu Cầu Hỗ Trợ (SOS)", "Tìm kiếm thông tin thợ"));
 
+    /**
+     * Khởi tạo FilterCatalog với các phụ thuộc cần thiết.
+     */
     private FilterCatalog() {
     }
 
+    /**
+     * Thực hiện xử lý search filter rows trong luồng kiểm thử.
+     * @return kết quả search filter rows sau khi xử lý
+     */
     public static Object[][] searchFilterRows() {
         String requested = System.getProperty("filter.filter", "").trim().toLowerCase(Locale.ROOT);
         Object[][] rows = GENERAL_SEARCH_FILTERS.stream()
@@ -47,10 +57,23 @@ public final class FilterCatalog {
         return rows;
     }
 
+    /**
+     * Thực hiện xử lý filter trong luồng kiểm thử.
+     * @param parent giá trị parent được truyền vào
+     * @param page giá trị page được truyền vào
+     * @param placeholder giá trị placeholder được truyền vào
+     * @return kết quả filter sau khi xử lý
+     */
     private static FilterTarget filter(String parent, String page, String placeholder) {
         return new FilterTarget(childOf(parent, page), placeholder);
     }
 
+    /**
+     * Thực hiện xử lý top level filter trong luồng kiểm thử.
+     * @param page giá trị page được truyền vào
+     * @param placeholder giá trị placeholder được truyền vào
+     * @return kết quả top level filter sau khi xử lý
+     */
     private static FilterTarget topLevelFilter(String page, String placeholder) {
         return new FilterTarget(topLevel(page), placeholder);
     }

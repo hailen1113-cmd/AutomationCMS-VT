@@ -10,8 +10,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Kiểm tra workbook Dashboard được đọc đúng và catalog không thiếu dữ liệu bắt buộc.
+ */
 public class DashboardWorkbookCatalogTest {
 
+    /**
+     * Thực thi test “The supplied dashboard workbook contains exactly 222 unique test cases” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "The supplied dashboard workbook contains exactly 222 unique test cases")
     public void workbookContainsAllExpectedTestCases() {
         List<DashboardTestCase> cases = DashboardTestCaseCatalog.all();
@@ -28,6 +34,9 @@ public class DashboardWorkbookCatalogTest {
                 "Every dashboard test case must have an expected result");
     }
 
+    /**
+     * Thực thi test “The dashboard automation feasibility inventory is explicit and stable” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(dependsOnMethods = "workbookContainsAllExpectedTestCases",
             description = "The dashboard automation feasibility inventory is explicit and stable")
     public void automationFeasibilityIsAccountedFor() {

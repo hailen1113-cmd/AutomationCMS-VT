@@ -11,20 +11,34 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Lắng nghe vòng đời TestNG và in trạng thái bắt đầu, thành công, bỏ qua hoặc thất bại của từng test.
+ */
 public class ConsoleTestListener implements ITestListener, IExecutionListener {
     private static final List<ITestResult> RESULTS = new CopyOnWriteArrayList<>();
     private final HtmlSummaryReporter summaryReporter = new HtmlSummaryReporter();
 
+    /**
+     * Thực hiện xử lý on execution start trong luồng kiểm thử.
+     */
     @Override
     public void onExecutionStart() {
         ConsoleEncoding.useUtf8();
         RESULTS.clear();
     }
+    /**
+     * Thực hiện xử lý on test start trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     @Override
     public void onTestStart(ITestResult result) {
         System.out.printf("%n[DANG CHAY] %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
+    /**
+     * Thực hiện xử lý on test success trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     @Override
     public void onTestSuccess(ITestResult result) {
         RESULTS.add(result);
@@ -32,6 +46,10 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
                 TestResultFormatter.duration(result));
     }
 
+    /**
+     * Thực hiện xử lý on test failure trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     @Override
     public void onTestFailure(ITestResult result) {
         RESULTS.add(result);
@@ -48,12 +66,20 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
         }
     }
 
+    /**
+     * Thực hiện xử lý on test skipped trong luồng kiểm thử.
+     * @param result giá trị result được truyền vào
+     */
     @Override
     public void onTestSkipped(ITestResult result) {
         RESULTS.add(result);
         System.out.printf("[BO QUA]   %s%n", TestResultFormatter.consoleDisplayName(result));
     }
 
+    /**
+     * Thực hiện xử lý on finish trong luồng kiểm thử.
+     * @param context giá trị context được truyền vào
+     */
     @Override
     public void onFinish(ITestContext context) {
         int passed = context.getPassedTests().size();
@@ -69,6 +95,9 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
         System.out.println("==================================================");
     }
 
+    /**
+     * Thực hiện xử lý on execution finish trong luồng kiểm thử.
+     */
     @Override
     public void onExecutionFinish() {
         try {

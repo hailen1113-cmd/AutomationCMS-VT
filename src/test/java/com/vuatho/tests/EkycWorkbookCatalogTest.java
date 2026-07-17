@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Kiểm tra workbook eKYC được đọc đúng và mỗi dòng tạo ra test case hợp lệ.
+ */
 public class EkycWorkbookCatalogTest {
     @Test(description = "EKYC-CATALOG-001: Senior eKYC workbook has 574 unique testcases")
     public void seniorWorkbookHasExpectedCaseCountAndUniqueIds() {

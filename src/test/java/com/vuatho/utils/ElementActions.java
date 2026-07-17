@@ -9,13 +9,24 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Đóng gói click, nhập liệu và đọc trạng thái element với cơ chế chờ và xử lý lỗi thống nhất.
+ */
 public final class ElementActions {
     private final WebDriver driver;
 
+    /**
+     * Khởi tạo ElementActions với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public ElementActions(WebDriver driver) {
         this.driver = driver;
     }
 
+    /**
+     * Kích hoạt  trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     */
     public void click(WebElement element) {
         scrollToCenter(element);
         try {
@@ -25,14 +36,28 @@ public final class ElementActions {
         }
     }
 
+    /**
+     * Kiểm tra điều kiện is visible.
+     * @param locator locator xác định phần tử
+     * @return kết quả is visible sau khi xử lý
+     */
     public boolean isVisible(By locator) {
         return visibleElements(locator).findAny().isPresent();
     }
 
+    /**
+     * Trả về first visible từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả first visible sau khi xử lý
+     */
     public Optional<WebElement> firstVisible(By locator) {
         return visibleElements(locator).findFirst();
     }
 
+    /**
+     * Thực hiện xử lý text in top right header trong luồng kiểm thử.
+     * @return kết quả text in top right header sau khi xử lý
+     */
     public String textInTopRightHeader() {
         Object value = js().executeScript(
                 "return Array.from(document.querySelectorAll('body *'))"
@@ -48,16 +73,29 @@ public final class ElementActions {
         return String.valueOf(value);
     }
 
+    /**
+     * Cuộn to center trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     */
     public void scrollToCenter(WebElement element) {
         js().executeScript("arguments[0].scrollIntoView({block:'center'});", element);
     }
 
+    /**
+     * Trả về visible elements từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả visible elements sau khi xử lý
+     */
     @SuppressWarnings("null")
     private java.util.stream.Stream<WebElement> visibleElements(By locator) {
         List<WebElement> elements = driver.findElements(locator);
         return elements.stream().filter(element -> element.isDisplayed());
     }
 
+    /**
+     * Thực hiện xử lý js trong luồng kiểm thử.
+     * @return kết quả js sau khi xử lý
+     */
     private JavascriptExecutor js() {
         return (JavascriptExecutor) driver;
     }

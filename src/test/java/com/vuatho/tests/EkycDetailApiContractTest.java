@@ -8,6 +8,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+/**
+ * Kiểm tra hợp đồng API chi tiết eKYC với ID hợp lệ, không tồn tại và sai định dạng.
+ */
 public class EkycDetailApiContractTest extends EkycApiTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(EkycDetailApiContractTest.class,
@@ -15,6 +18,10 @@ public class EkycDetailApiContractTest extends EkycApiTestSupport {
                 "Kiem tra detail eKYC API");
     }
 
+    /**
+     * Thực hiện xử lý invalid applicant ids trong luồng kiểm thử.
+     * @return kết quả invalid applicant ids sau khi xử lý
+     */
     @DataProvider(name = "invalidApplicantIds", parallel = false)
     public Object[][] invalidApplicantIds() {
         return new Object[][]{
@@ -24,6 +31,9 @@ public class EkycDetailApiContractTest extends EkycApiTestSupport {
         };
     }
 
+    /**
+     * Thực hiện xử lý detail returns applicant personal info images and decision state trong luồng kiểm thử.
+     */
     @Test(groups = {"ekyc", "api", "contract"})
     public void detailReturnsApplicantPersonalInfoImagesAndDecisionState() {
         String applicantId = firstApplicantIdFromList();
@@ -42,6 +52,11 @@ public class EkycDetailApiContractTest extends EkycApiTestSupport {
                 "Detail personal_info should expose phone.");
     }
 
+    /**
+     * Thực hiện xử lý detail rejects invalid or unknown applicant id trong luồng kiểm thử.
+     * @param applicantId giá trị applicant id được truyền vào
+     * @param expectedStatus giá trị expected status được truyền vào
+     */
     @Test(dataProvider = "invalidApplicantIds", groups = {"ekyc", "api", "contract"})
     public void detailRejectsInvalidOrUnknownApplicantId(String applicantId, int expectedStatus) {
         ApiResponse response = api.get("/ekyc/" + applicantId);

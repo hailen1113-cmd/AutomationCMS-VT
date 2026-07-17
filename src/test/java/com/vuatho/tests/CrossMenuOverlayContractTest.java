@@ -13,17 +13,27 @@ import org.testng.annotations.Test;
 
 import static com.vuatho.navigation.MenuTarget.childOf;
 
+/**
+ * Xác nhận popup, drawer và modal trên nhiều menu tuân thủ cùng hợp đồng mở, hiển thị và đóng.
+ */
 public class CrossMenuOverlayContractTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(CrossMenuOverlayContractTest.class,
                 "ERP Cross-menu Overlay Contracts", "Filter and Statistics Contracts across menus");
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực thi test “CMS-USER-FILTER: User filter exposes status and date controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-USER-FILTER: User filter exposes status and date controls")
     public void userFilterHasExpectedControls() {
         open(childOf("Người Dùng", "Quản Lí Người Dùng"));
@@ -36,6 +46,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         panel.close();
     }
 
+    /**
+     * Thực thi test “CMS-ORDER-FILTER: Order filter exposes service/status/agreement controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-ORDER-FILTER: Order filter exposes service/status/agreement controls")
     public void orderFilterHasExpectedControls() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
@@ -49,6 +62,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         panel.close();
     }
 
+    /**
+     * Thực thi test “CMS-ORDER-STATS: Order statistics modal exposes its report cards” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-ORDER-STATS: Order statistics modal exposes its report cards")
     public void orderStatisticsHasExpectedCards() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
@@ -60,6 +76,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         modal.close();
     }
 
+    /**
+     * Thực thi test “CMS-TRANSACTION-FILTER: Transaction status filter exposes all statuses” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-TRANSACTION-FILTER: Transaction status filter exposes all statuses")
     public void transactionStatusHasExpectedOptions() {
         open(childOf("Giao Dịch", "Lịch Sử Giao Dịch"));
@@ -71,6 +90,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         dropdown.close();
     }
 
+    /**
+     * Thực thi test “CMS-BLOG-FILTER: Blog filter exposes language/category/date controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-BLOG-FILTER: Blog filter exposes language/category/date controls")
     public void blogFilterHasExpectedControls() {
         open(childOf("Website", "Quản Lí Bài Viết Nội Bộ"));
@@ -83,6 +105,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         panel.close();
     }
 
+    /**
+     * Thực thi test “CMS-MARKETING-FILTER: Marketing filter exposes demographic controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-MARKETING-FILTER: Marketing filter exposes demographic controls")
     public void marketingFilterHasExpectedControls() {
         open(childOf("Marketing", "Thống Kê Thợ - Khách"));
@@ -96,6 +121,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         panel.close();
     }
 
+    /**
+     * Thực thi test “CMS-PROFILE-POST-FILTER: Profile post reset waits for data reload” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-PROFILE-POST-FILTER: Profile post reset waits for data reload")
     public void profilePostResetWaitsForReload() {
         open(childOf("Đối Tác - Thợ", "Quản Lí Bài Đăng"));
@@ -105,6 +133,9 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         PageLoadSynchronizer.waitForDataToSettle(driver);
     }
 
+    /**
+     * Thực thi test “CMS-PROMOTION-FILTER: Promotion filter control opens safely” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-PROMOTION-FILTER: Promotion filter control opens safely")
     public void promotionFilterControlCanBeOpened() {
         open(childOf("Marketing", "Chương Trình Khuyến Mãi"));
@@ -115,6 +146,10 @@ public class CrossMenuOverlayContractTest extends BaseTest {
         PageLoadSynchronizer.waitForDataToSettle(driver);
     }
 
+    /**
+     * Mở  trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     */
     private void open(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);

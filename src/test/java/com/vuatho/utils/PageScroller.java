@@ -8,14 +8,24 @@ import org.openqa.selenium.interactions.WheelInput.ScrollOrigin;
 
 import java.time.Duration;
 
+/**
+ * Cung cấp thao tác cuộn trang hoặc vùng nội dung đến đầu, cuối và element mục tiêu.
+ */
 public final class PageScroller {
     private static final int SCROLL_STEP_PIXELS = 350;
     private static final Duration STEP_DELAY = Duration.ofMillis(200);
     private static final Duration MAX_SCROLL_TIME = Duration.ofSeconds(45);
 
+    /**
+     * Khởi tạo PageScroller với các phụ thuộc cần thiết.
+     */
     private PageScroller() {
     }
 
+    /**
+     * Thực hiện xử lý slowly to bottom trong luồng kiểm thử.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public static void slowlyToBottom(WebDriver driver) {
         JavascriptExecutor javascript = (JavascriptExecutor) driver;
         WebElement scrollContainer = findScrollContainer(javascript);
@@ -59,6 +69,11 @@ public final class PageScroller {
                 scrollTop(javascript, scrollContainer));
     }
 
+    /**
+     * Tìm scroll container trong luồng kiểm thử.
+     * @param javascript giá trị javascript được truyền vào
+     * @return kết quả find scroll container sau khi xử lý
+     */
     private static WebElement findScrollContainer(JavascriptExecutor javascript) {
         return (WebElement) javascript.executeScript(
                 "const vw=window.innerWidth, vh=window.innerHeight;"
@@ -73,6 +88,10 @@ public final class PageScroller {
                         + "return candidates[0] || document.scrollingElement || document.documentElement;");
     }
 
+    /**
+     * Cuộn last content into view trong luồng kiểm thử.
+     * @param javascript giá trị javascript được truyền vào
+     */
     private static void scrollLastContentIntoView(JavascriptExecutor javascript) {
         javascript.executeScript(
                 "const root=document.querySelector('main,[role=main]') || document.body;"
@@ -83,22 +102,48 @@ public final class PageScroller {
                         + "if(last) last.scrollIntoView({behavior:'smooth',block:'end'});");
     }
 
+    /**
+     * Cuộn top trong luồng kiểm thử.
+     * @param javascript giá trị javascript được truyền vào
+     * @param container giá trị container được truyền vào
+     * @return kết quả scroll top sau khi xử lý
+     */
     private static long scrollTop(JavascriptExecutor javascript, WebElement container) {
         return number(javascript.executeScript("return arguments[0].scrollTop;", container));
     }
 
+    /**
+     * Cuộn height trong luồng kiểm thử.
+     * @param javascript giá trị javascript được truyền vào
+     * @param container giá trị container được truyền vào
+     * @return kết quả scroll height sau khi xử lý
+     */
     private static long scrollHeight(JavascriptExecutor javascript, WebElement container) {
         return number(javascript.executeScript("return arguments[0].scrollHeight;", container));
     }
 
+    /**
+     * Thực hiện xử lý client height trong luồng kiểm thử.
+     * @param javascript giá trị javascript được truyền vào
+     * @param container giá trị container được truyền vào
+     * @return kết quả client height sau khi xử lý
+     */
     private static long clientHeight(JavascriptExecutor javascript, WebElement container) {
         return number(javascript.executeScript("return arguments[0].clientHeight;", container));
     }
 
+    /**
+     * Thực hiện xử lý number trong luồng kiểm thử.
+     * @param value giá trị đầu vào
+     * @return kết quả number sau khi xử lý
+     */
     private static long number(Object value) {
         return ((Number) value).longValue();
     }
 
+    /**
+     * Thực hiện xử lý pause trong luồng kiểm thử.
+     */
     private static void pause() {
         try {
             Thread.sleep(STEP_DELAY.toMillis());

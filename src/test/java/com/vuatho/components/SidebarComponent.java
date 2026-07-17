@@ -26,16 +26,28 @@ public class SidebarComponent {
     private final WebDriverWait toggleWait;
     private WebElement cachedRoot;
 
+    /**
+     * Khởi tạo SidebarComponent với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public SidebarComponent(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
         this.toggleWait = new WebDriverWait(driver, TOGGLE_TIMEOUT);
     }
 
+    /**
+     * Thực hiện xử lý text trong luồng kiểm thử.
+     * @return kết quả text sau khi xử lý
+     */
     public String text() {
         return root().getText();
     }
 
+    /**
+     * Kiểm tra điều kiện is logo loaded.
+     * @return kết quả is logo loaded sau khi xử lý
+     */
     public boolean isLogoLoaded() {
         return driver.findElements(By.cssSelector("img, svg")).stream()
                 .filter(WebElement::isDisplayed)
@@ -47,10 +59,17 @@ public class SidebarComponent {
                                 .executeScript("return arguments[0].naturalWidth || 0;", element)).intValue() > 0);
     }
 
+    /**
+     * Thực hiện xử lý width trong luồng kiểm thử.
+     * @return kết quả width sau khi xử lý
+     */
     public double width() {
         return root().getRect().getWidth();
     }
 
+    /**
+     * Thực hiện xử lý ensure expanded trong luồng kiểm thử.
+     */
     public void ensureExpanded() {
         if (root().getRect().getWidth() > 180 && dashboardMenuIsVisible()) {
             return;
@@ -59,6 +78,9 @@ public class SidebarComponent {
         toggleWait.until(webDriver -> root().getRect().getWidth() > 180 && dashboardMenuIsVisible());
     }
 
+    /**
+     * Thực hiện xử lý collapse trong luồng kiểm thử.
+     */
     public void collapse() {
         WebElement sidebar = root();
         double widthBefore = sidebar.getRect().getWidth();
@@ -66,6 +88,9 @@ public class SidebarComponent {
         toggleWait.until(webDriver -> sidebar.getRect().getWidth() < widthBefore);
     }
 
+    /**
+     * Thực hiện xử lý expand trong luồng kiểm thử.
+     */
     public void expand() {
         WebElement sidebar = root();
         double widthBefore = sidebar.getRect().getWidth();
@@ -73,6 +98,10 @@ public class SidebarComponent {
         toggleWait.until(webDriver -> sidebar.getRect().getWidth() > widthBefore);
     }
 
+    /**
+     * Kiểm tra điều kiện is dashboard active.
+     * @return kết quả is dashboard active sau khi xử lý
+     */
     public boolean isDashboardActive() {
         WebElement menu = dashboardMenu();
         WebElement current = menu;
@@ -91,6 +120,10 @@ public class SidebarComponent {
                 && !background.equals("transparent");
     }
 
+    /**
+     * Thực hiện xử lý root trong luồng kiểm thử.
+     * @return kết quả root sau khi xử lý
+     */
     private WebElement root() {
         if (cachedRoot != null) {
             try {
@@ -127,14 +160,26 @@ public class SidebarComponent {
         return cachedRoot;
     }
 
+    /**
+     * Thực hiện xử lý dashboard menu trong luồng kiểm thử.
+     * @return kết quả dashboard menu sau khi xử lý
+     */
     private WebElement dashboardMenu() {
         return wait.until(webDriver -> visibleDashboardMenu());
     }
 
+    /**
+     * Thực hiện xử lý dashboard menu is visible trong luồng kiểm thử.
+     * @return kết quả dashboard menu is visible sau khi xử lý
+     */
     private boolean dashboardMenuIsVisible() {
         return visibleDashboardMenu() != null;
     }
 
+    /**
+     * Trả về visible dashboard menu từ trạng thái hiện tại.
+     * @return kết quả visible dashboard menu sau khi xử lý
+     */
     private WebElement visibleDashboardMenu() {
         WebElement byHref = driver.findElements(DASHBOARD_MENU).stream()
                 .filter(WebElement::isDisplayed)
@@ -151,12 +196,19 @@ public class SidebarComponent {
                 .orElse(null);
     }
 
+    /**
+     * Kích hoạt toggle button trong luồng kiểm thử.
+     */
     private void clickToggleButton() {
         WebElement button = toggleButton();
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center'}); arguments[0].click();", button);
     }
 
+    /**
+     * Thực hiện xử lý toggle button trong luồng kiểm thử.
+     * @return kết quả toggle button sau khi xử lý
+     */
     private WebElement toggleButton() {
         WebElement styledToggle = driver.findElements(SIDEBAR_TOGGLE).stream()
                 .filter(WebElement::isDisplayed)

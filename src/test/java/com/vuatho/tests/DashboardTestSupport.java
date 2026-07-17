@@ -11,14 +11,25 @@ import org.testng.annotations.BeforeMethod;
 
 import java.lang.reflect.Method;
 
+/**
+ * Cung cấp thiết lập, dữ liệu và thao tác dùng chung cho các test Dashboard.
+ */
 abstract class DashboardTestSupport extends BaseTest {
     protected DashboardPage dashboard;
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Mở dashboard trong luồng kiểm thử.
+     * @param method giá trị method được truyền vào
+     */
     @BeforeMethod
     public void openDashboard(Method method) {
         dashboard = new DashboardPage(driver);
@@ -46,6 +57,9 @@ abstract class DashboardTestSupport extends BaseTest {
         }
     }
 
+    /**
+     * Thực hiện xử lý skip unless logout tests are enabled trong luồng kiểm thử.
+     */
     protected void skipUnlessLogoutTestsAreEnabled() {
         if (!TestConfig.runLogoutTests()) {
             throw new SkipException("Mac dinh tat test logout de giu session dang nhap.");

@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Cung cấp dữ liệu hợp lệ, dữ liệu xóa và kỳ vọng cho các test chỉnh sửa eKYC.
+ */
 public final class EkycInformationTestData {
     private static final List<EkycInformationCase> CASES = List.of(
             informationCase(
@@ -66,35 +69,64 @@ public final class EkycInformationTestData {
                     true,
                     true));
 
+    /**
+     * Khởi tạo EkycInformationTestData với các phụ thuộc cần thiết.
+     */
     private EkycInformationTestData() {
     }
 
+    /**
+     * Thực hiện xử lý cases trong luồng kiểm thử.
+     * @return kết quả cases sau khi xử lý
+     */
     public static List<EkycInformationCase> cases() {
         return CASES;
     }
 
+    /**
+     * Cập nhật cases trong luồng kiểm thử.
+     * @return kết quả edit cases sau khi xử lý
+     */
     public static List<EkycInformationCase> editCases() {
         return CASES.stream()
                 .filter(testCase -> testCase.action() == EkycInformationAction.EDIT)
                 .toList();
     }
 
+    /**
+     * Xóa hoặc đặt lại cases trong luồng kiểm thử.
+     * @return kết quả clear cases sau khi xử lý
+     */
     public static List<EkycInformationCase> clearCases() {
         return CASES.stream()
                 .filter(testCase -> testCase.action() == EkycInformationAction.CLEAR)
                 .toList();
     }
 
+    /**
+     * Tìm by id trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @return kết quả find by id sau khi xử lý
+     */
     public static Optional<EkycInformationCase> findById(String id) {
         return CASES.stream()
                 .filter(testCase -> testCase.id().equalsIgnoreCase(id))
                 .findFirst();
     }
 
+    /**
+     * Thực hiện xử lý contains id trong luồng kiểm thử.
+     * @param id giá trị id được truyền vào
+     * @return kết quả contains id sau khi xử lý
+     */
     public static boolean containsId(String id) {
         return findById(id).isPresent();
     }
 
+    /**
+     * Thực hiện xử lý all fields trong luồng kiểm thử.
+     * @return kết quả all fields sau khi xử lý
+     */
     private static List<EkycInformationField> allFields() {
         Set<EkycInformationField> fields = EnumSet.allOf(EkycInformationField.class);
         return List.copyOf(fields);

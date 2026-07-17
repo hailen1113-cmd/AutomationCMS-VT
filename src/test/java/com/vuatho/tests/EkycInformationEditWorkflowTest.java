@@ -10,6 +10,9 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+/**
+ * Kiểm tra chỉnh sửa dữ liệu từng trường eKYC và xác nhận giá trị được lưu.
+ */
 public class EkycInformationEditWorkflowTest extends EkycWorkflowTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(EkycInformationEditWorkflowTest.class,
@@ -17,6 +20,10 @@ public class EkycInformationEditWorkflowTest extends EkycWorkflowTestSupport {
                 "Kiem tra edit thong tin eKYC");
     }
 
+    /**
+     * Thực hiện xử lý ekyc edit information cases trong luồng kiểm thử.
+     * @return kết quả ekyc edit information cases sau khi xử lý
+     */
     @DataProvider(name = "ekycEditInformationCases", parallel = false)
     public Object[][] ekycEditInformationCases() {
         List<EkycInformationCase> cases = EkycInformationTestData.cases().stream()
@@ -30,6 +37,10 @@ public class EkycInformationEditWorkflowTest extends EkycWorkflowTestSupport {
         return rows;
     }
 
+    /**
+     * Thực thi test “EKYC-INFORMATION-EDIT: Sua thong tin eKYC” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param testCase test case đang thực thi
+     */
     @Test(dataProvider = "ekycEditInformationCases",
             groups = {"ekyc", "information", "edit"},
             description = "EKYC-INFORMATION-EDIT: Sua thong tin eKYC")
@@ -40,6 +51,11 @@ public class EkycInformationEditWorkflowTest extends EkycWorkflowTestSupport {
         runEditInformationCase(testCase);
     }
 
+    /**
+     * Thực hiện xử lý matches configured information case trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @return kết quả matches configured information case sau khi xử lý
+     */
     private boolean matchesConfiguredInformationCase(EkycInformationCase testCase) {
         String configuredCaseId = configured("ekyc.case.id", "EKYC_CASE_ID");
         if (!configuredCaseId.isBlank() && !testCase.id().equalsIgnoreCase(configuredCaseId)) {

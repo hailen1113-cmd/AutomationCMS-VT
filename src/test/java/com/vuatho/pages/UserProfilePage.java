@@ -48,18 +48,30 @@ public class UserProfilePage {
     private final WebDriver driver;
     private final WebDriverWait wait;
 
+    /**
+     * Khởi tạo UserProfilePage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public UserProfilePage(WebDriver driver) {
         this.driver = driver;
         this.wait = Waits.standard(driver);
         this.wait.ignoring(StaleElementReferenceException.class);
     }
 
+    /**
+     * Mở from menu trong luồng kiểm thử.
+     * @return kết quả open from menu sau khi xử lý
+     */
     public UserProfilePage openFromMenu() {
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(
                 USER_MANAGEMENT_MENU_TARGET, false);
         return waitUntilLoaded();
     }
 
+    /**
+     * Chờ until loaded trong luồng kiểm thử.
+     * @return kết quả wait until loaded sau khi xử lý
+     */
     public UserProfilePage waitUntilLoaded() {
         wait.until(webDriver -> documentIsReady());
         wait.until(webDriver -> currentRouteContains(USER_MANAGEMENT_ROUTE));
@@ -69,16 +81,28 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý restore default list if needed trong luồng kiểm thử.
+     * @return kết quả restore default list if needed sau khi xử lý
+     */
     public UserProfilePage restoreDefaultListIfNeeded() {
         waitUntilLoaded();
         clearSearch();
         return waitUntilLoaded();
     }
 
+    /**
+     * Kiểm tra điều kiện has user rows.
+     * @return kết quả has user rows sau khi xử lý
+     */
     public boolean hasUserRows() {
         return !visibleUserRows().isEmpty();
     }
 
+    /**
+     * Chờ until at least user rows visible trong luồng kiểm thử.
+     * @param minimumRows giá trị minimum rows được truyền vào
+     */
     public void waitUntilAtLeastUserRowsVisible(int minimumRows) {
         wait.until(webDriver -> noLoadingIndicatorIsVisible());
         wait.until(webDriver -> visibleUserRows().size() >= minimumRows);
@@ -86,14 +110,26 @@ public class UserProfilePage {
         wait.until(webDriver -> visibleUserRows().size() >= minimumRows);
     }
 
+    /**
+     * Trả về first user row text từ trạng thái hiện tại.
+     * @return kết quả first user row text sau khi xử lý
+     */
     public String firstUserRowText() {
         return firstUserRow().getText();
     }
 
+    /**
+     * Kiểm tra điều kiện has search input.
+     * @return kết quả has search input sau khi xử lý
+     */
     public boolean hasSearchInput() {
         return searchInput().isDisplayed();
     }
 
+    /**
+     * Kiểm tra điều kiện has search mode options.
+     * @return kết quả has search mode options sau khi xử lý
+     */
     public boolean hasSearchModeOptions() {
         List<String> options = new Select(visibleSearchModeSelect()).getOptions().stream()
                 .map(WebElement::getText)
@@ -103,6 +139,10 @@ public class UserProfilePage {
                 && options.stream().anyMatch(option -> option.contains("sdt"));
     }
 
+    /**
+     * Kích hoạt search mode trong luồng kiểm thử.
+     * @param modeLabel giá trị mode label được truyền vào
+     */
     public void selectSearchMode(String modeLabel) {
         WebElement selectElement = visibleSearchModeSelect();
         Select select = new Select(selectElement);
@@ -121,20 +161,37 @@ public class UserProfilePage {
         wait.until(webDriver -> TextNormalizer.normalize(selectedSearchMode()).contains(expected));
     }
 
+    /**
+     * Kích hoạt search mode trong luồng kiểm thử.
+     * @return kết quả selected search mode sau khi xử lý
+     */
     public String selectedSearchMode() {
         return new Select(visibleSearchModeSelect()).getFirstSelectedOption().getText().trim();
     }
 
+    /**
+     * Thực hiện xử lý search and reset trong luồng kiểm thử.
+     * @param query giá trị query được truyền vào
+     */
     public void searchAndReset(String query) {
         searchFor(query);
         clearSearch();
     }
 
+    /**
+     * Thực hiện xử lý search by mode trong luồng kiểm thử.
+     * @param modeLabel giá trị mode label được truyền vào
+     * @param query giá trị query được truyền vào
+     */
     public void searchByMode(String modeLabel, String query) {
         selectSearchMode(modeLabel);
         searchFor(query);
     }
 
+    /**
+     * Thực hiện xử lý search for trong luồng kiểm thử.
+     * @param query giá trị query được truyền vào
+     */
     public void searchFor(String query) {
         WebElement input = searchInput();
         input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
@@ -148,6 +205,9 @@ public class UserProfilePage {
         wait.until(webDriver -> hasUserRows() || bodyHasNoDataMessage());
     }
 
+    /**
+     * Xóa hoặc đặt lại search trong luồng kiểm thử.
+     */
     public void clearSearch() {
         WebElement input = searchInput();
         String currentValue = input.getAttribute("value");
@@ -163,10 +223,18 @@ public class UserProfilePage {
         waitUntilLoaded();
     }
 
+    /**
+     * Thực hiện xử lý search input is empty trong luồng kiểm thử.
+     * @return kết quả search input is empty sau khi xử lý
+     */
     public boolean searchInputIsEmpty() {
         return searchInput().getAttribute("value").isBlank();
     }
 
+    /**
+     * Trả về first user search term từ trạng thái hiện tại.
+     * @return kết quả first user search term sau khi xử lý
+     */
     public String firstUserSearchTerm() {
         return List.of(firstUserRowText().split("\\R")).stream()
                 .map(String::trim)
@@ -178,6 +246,10 @@ public class UserProfilePage {
                 .orElseThrow(() -> new IllegalStateException("Khong doc duoc gia tri tim kiem o dong nguoi dung dau tien."));
     }
 
+    /**
+     * Trả về first visible user name từ trạng thái hiện tại.
+     * @return kết quả first visible user name sau khi xử lý
+     */
     public String firstVisibleUserName() {
         return firstUserInfoCellLines().stream()
                 .filter(line -> !line.matches(".*\\d{6,}.*"))
@@ -186,6 +258,10 @@ public class UserProfilePage {
                 .orElseThrow(() -> new IllegalStateException("Khong doc duoc ten nguoi dung dau tien dang hien thi."));
     }
 
+    /**
+     * Trả về first visible user phone search term từ trạng thái hiện tại.
+     * @return kết quả first visible user phone search term sau khi xử lý
+     */
     public String firstVisibleUserPhoneSearchTerm() {
         return firstUserInfoCellLines().stream()
                 .filter(line -> line.matches(".*\\d{6,}.*"))
@@ -194,6 +270,11 @@ public class UserProfilePage {
                 .orElseThrow(() -> new IllegalStateException("Khong doc duoc SDT nguoi dung dau tien dang hien thi."));
     }
 
+    /**
+     * Trả về first visible user names từ trạng thái hiện tại.
+     * @param maxCount giá trị max count được truyền vào
+     * @return kết quả first visible user names sau khi xử lý
+     */
     public List<String> firstVisibleUserNames(int maxCount) {
         waitUntilAtLeastUserRowsVisible(maxCount);
         return visibleUserRows().stream()
@@ -206,6 +287,11 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Trả về first visible user phone search terms từ trạng thái hiện tại.
+     * @param maxCount giá trị max count được truyền vào
+     * @return kết quả first visible user phone search terms sau khi xử lý
+     */
     public List<String> firstVisibleUserPhoneSearchTerms(int maxCount) {
         waitUntilAtLeastUserRowsVisible(maxCount);
         return visibleUserRows().stream()
@@ -217,6 +303,11 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Trả về visible rows contain search term từ trạng thái hiện tại.
+     * @param query giá trị query được truyền vào
+     * @return kết quả visible rows contain search term sau khi xử lý
+     */
     public boolean visibleRowsContainSearchTerm(String query) {
         String expected = normalizeSearchTerm(query);
         return visibleUserRows().stream()
@@ -225,6 +316,11 @@ public class UserProfilePage {
                 .anyMatch(row -> row.contains(expected));
     }
 
+    /**
+     * Trả về visible rows all contain search term từ trạng thái hiện tại.
+     * @param query giá trị query được truyền vào
+     * @return kết quả visible rows all contain search term sau khi xử lý
+     */
     public boolean visibleRowsAllContainSearchTerm(String query) {
         String expected = normalizeSearchTerm(query);
         List<String> rows = visibleUserRows().stream()
@@ -234,10 +330,19 @@ public class UserProfilePage {
         return !rows.isEmpty() && rows.stream().allMatch(row -> row.contains(expected));
     }
 
+    /**
+     * Mở first user detail trong luồng kiểm thử.
+     * @return kết quả open first user detail sau khi xử lý
+     */
     public UserProfilePage openFirstUserDetail() {
         return openUserDetailAtIndex(0);
     }
 
+    /**
+     * Mở user detail tab trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @return kết quả open user detail tab sau khi xử lý
+     */
     public UserProfilePage openUserDetailTab(String tabLabel) {
         WebElement tab = userDetailTab(tabLabel);
         String previousState = detailSurfaceState();
@@ -249,11 +354,21 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Cuộn current user detail tab to bottom then top trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @return kết quả scroll current user detail tab to bottom then top sau khi xử lý
+     */
     public UserProfilePage scrollCurrentUserDetailTabToBottomThenTop(String tabLabel) {
         scrollUserDetailToBottomThenTop(tabLabel);
         return this;
     }
 
+    /**
+     * Thực hiện xử lý user detail tab is selected trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @return kết quả user detail tab is selected sau khi xử lý
+     */
     public boolean userDetailTabIsSelected(String tabLabel) {
         WebElement tab = userDetailTab(tabLabel);
         String normalizedClass = TextNormalizer.normalize(String.valueOf(tab.getAttribute("class")));
@@ -267,6 +382,10 @@ public class UserProfilePage {
                 || normalizedClass.contains("primary");
     }
 
+    /**
+     * Mở user with pending name update request trong luồng kiểm thử.
+     * @return kết quả open user with pending name update request sau khi xử lý
+     */
     public UserProfilePage openUserWithPendingNameUpdateRequest() {
         int inspectedUsers = 0;
         int inspectedPages = 0;
@@ -292,6 +411,10 @@ public class UserProfilePage {
                 + inspectedUsers + " user.");
     }
 
+    /**
+     * Mở user with pending avatar update request trong luồng kiểm thử.
+     * @return kết quả open user with pending avatar update request sau khi xử lý
+     */
     public UserProfilePage openUserWithPendingAvatarUpdateRequest() {
         int inspectedUsers = 0;
         int inspectedPages = 0;
@@ -317,6 +440,11 @@ public class UserProfilePage {
                 + inspectedUsers + " user.");
     }
 
+    /**
+     * Mở user detail at index trong luồng kiểm thử.
+     * @param rowIndex giá trị row index được truyền vào
+     * @return kết quả open user detail at index sau khi xử lý
+     */
     private UserProfilePage openUserDetailAtIndex(int rowIndex) {
         String previousState = pageState();
         String previousUrl = driver.getCurrentUrl();
@@ -331,10 +459,18 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý user detail is open trong luồng kiểm thử.
+     * @return kết quả user detail is open sau khi xử lý
+     */
     public boolean userDetailIsOpen() {
         return detailIsOpen("", "");
     }
 
+    /**
+     * Thực hiện xử lý detail text trong luồng kiểm thử.
+     * @return kết quả detail text sau khi xử lý
+     */
     public String detailText() {
         return visibleDetailSurfaces().stream()
                 .map(WebElement::getText)
@@ -343,22 +479,38 @@ public class UserProfilePage {
                 .orElseGet(this::bodyText);
     }
 
+    /**
+     * Thực hiện xử lý user detail has visible content trong luồng kiểm thử.
+     * @return kết quả user detail has visible content sau khi xử lý
+     */
     public boolean userDetailHasVisibleContent() {
         String normalized = TextNormalizer.normalize(requireVisibleDetailSurface().getText());
         return normalized.length() > 40
                 && !normalized.contains("dang tai");
     }
 
+    /**
+     * Kiểm tra điều kiện has pending name update request.
+     * @return kết quả has pending name update request sau khi xử lý
+     */
     public boolean hasPendingNameUpdateRequest() {
         WebElement card = nameUpdateCard();
         return card != null && TextNormalizer.normalize(card.getText()).contains("cho duyet");
     }
 
+    /**
+     * Kiểm tra điều kiện has pending avatar update request.
+     * @return kết quả has pending avatar update request sau khi xử lý
+     */
     public boolean hasPendingAvatarUpdateRequest() {
         WebElement card = avatarUpdateCard();
         return card != null && TextNormalizer.normalize(card.getText()).contains("cho duyet");
     }
 
+    /**
+     * Thực hiện xử lý approve name update request trong luồng kiểm thử.
+     * @return kết quả approve name update request sau khi xử lý
+     */
     public UserProfilePage approveNameUpdateRequest() {
         WebElement card = requireNameUpdateCard();
         clickButtonInsideByText(card, "Chấp nhận");
@@ -367,6 +519,10 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý reject name update request with default reason trong luồng kiểm thử.
+     * @return kết quả reject name update request with default reason sau khi xử lý
+     */
     public UserProfilePage rejectNameUpdateRequestWithDefaultReason() {
         openRejectNameUpdateDialog();
         selectFirstRejectReason();
@@ -374,6 +530,11 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý reject name update request with other reason trong luồng kiểm thử.
+     * @param reason giá trị reason được truyền vào
+     * @return kết quả reject name update request with other reason sau khi xử lý
+     */
     public UserProfilePage rejectNameUpdateRequestWithOtherReason(String reason) {
         openRejectNameUpdateDialog();
         selectOtherRejectReason();
@@ -382,6 +543,10 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý approve avatar update request trong luồng kiểm thử.
+     * @return kết quả approve avatar update request sau khi xử lý
+     */
     public UserProfilePage approveAvatarUpdateRequest() {
         WebElement card = requireAvatarUpdateCard();
         clickButtonInsideByText(card, "Chấp nhận");
@@ -390,6 +555,10 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý reject avatar update request with default reason trong luồng kiểm thử.
+     * @return kết quả reject avatar update request with default reason sau khi xử lý
+     */
     public UserProfilePage rejectAvatarUpdateRequestWithDefaultReason() {
         openRejectAvatarUpdateDialog();
         selectFirstRejectReason();
@@ -397,6 +566,11 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Thực hiện xử lý reject avatar update request with other reason trong luồng kiểm thử.
+     * @param reason giá trị reason được truyền vào
+     * @return kết quả reject avatar update request with other reason sau khi xử lý
+     */
     public UserProfilePage rejectAvatarUpdateRequestWithOtherReason(String reason) {
         openRejectAvatarUpdateDialog();
         selectOtherRejectReason();
@@ -405,10 +579,19 @@ public class UserProfilePage {
         return this;
     }
 
+    /**
+     * Trả về first user row từ trạng thái hiện tại.
+     * @return kết quả first user row sau khi xử lý
+     */
     private WebElement firstUserRow() {
         return userRowAt(0);
     }
 
+    /**
+     * Thực hiện xử lý user row at trong luồng kiểm thử.
+     * @param index giá trị index được truyền vào
+     * @return kết quả user row at sau khi xử lý
+     */
     private WebElement userRowAt(int index) {
         wait.until(webDriver -> !visibleUserRows().isEmpty());
         List<WebElement> rows = visibleUserRows();
@@ -418,11 +601,18 @@ public class UserProfilePage {
         return rows.get(index);
     }
 
+    /**
+     * Thực hiện xử lý back to user list trong luồng kiểm thử.
+     */
     private void backToUserList() {
         driver.navigate().back();
         waitUntilLoaded();
     }
 
+    /**
+     * Mở next user list page if available trong luồng kiểm thử.
+     * @return kết quả open next user list page if available sau khi xử lý
+     */
     private boolean openNextUserListPageIfAvailable() {
         WebElement nextButton = driver.findElements(NEXT_PAGE_BUTTON).stream()
                 .filter(WebElement::isDisplayed)
@@ -442,6 +632,10 @@ public class UserProfilePage {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý require name update card trong luồng kiểm thử.
+     * @return kết quả require name update card sau khi xử lý
+     */
     private WebElement requireNameUpdateCard() {
         WebElement card = nameUpdateCard();
         if (card == null) {
@@ -450,6 +644,10 @@ public class UserProfilePage {
         return card;
     }
 
+    /**
+     * Thực hiện xử lý require avatar update card trong luồng kiểm thử.
+     * @return kết quả require avatar update card sau khi xử lý
+     */
     private WebElement requireAvatarUpdateCard() {
         WebElement card = avatarUpdateCard();
         if (card == null) {
@@ -458,6 +656,10 @@ public class UserProfilePage {
         return card;
     }
 
+    /**
+     * Thực hiện xử lý name update card trong luồng kiểm thử.
+     * @return kết quả name update card sau khi xử lý
+     */
     private WebElement nameUpdateCard() {
         return visibleMainElements(By.xpath(
                         "//*[self::div or self::section or self::article]"
@@ -469,6 +671,10 @@ public class UserProfilePage {
                 .orElse(null);
     }
 
+    /**
+     * Thực hiện xử lý avatar update card trong luồng kiểm thử.
+     * @return kết quả avatar update card sau khi xử lý
+     */
     private WebElement avatarUpdateCard() {
         return visibleMainElements(By.xpath(
                         "//*[self::div or self::section or self::article]"
@@ -480,18 +686,27 @@ public class UserProfilePage {
                 .orElse(null);
     }
 
+    /**
+     * Mở reject name update dialog trong luồng kiểm thử.
+     */
     private void openRejectNameUpdateDialog() {
         WebElement card = requireNameUpdateCard();
         clickButtonInsideByText(card, "Từ chối");
         wait.until(webDriver -> rejectDialog() != null);
     }
 
+    /**
+     * Mở reject avatar update dialog trong luồng kiểm thử.
+     */
     private void openRejectAvatarUpdateDialog() {
         WebElement card = requireAvatarUpdateCard();
         clickButtonInsideByText(card, "Từ chối");
         wait.until(webDriver -> rejectDialog() != null);
     }
 
+    /**
+     * Kích hoạt first reject reason trong luồng kiểm thử.
+     */
     private void selectFirstRejectReason() {
         WebElement dialog = requireRejectDialog();
         WebElement option = visibleChildren(dialog, By.cssSelector("label, [role='radio']")).stream()
@@ -501,6 +716,9 @@ public class UserProfilePage {
         click(option);
     }
 
+    /**
+     * Kích hoạt other reject reason trong luồng kiểm thử.
+     */
     private void selectOtherRejectReason() {
         WebElement dialog = requireRejectDialog();
         WebElement option = visibleChildren(dialog, By.cssSelector("label, [role='radio']")).stream()
@@ -511,6 +729,10 @@ public class UserProfilePage {
         wait.until(webDriver -> otherReasonInput() != null);
     }
 
+    /**
+     * Cập nhật other reject reason trong luồng kiểm thử.
+     * @param reason giá trị reason được truyền vào
+     */
     private void enterOtherRejectReason(String reason) {
         WebElement input = otherReasonInput();
         if (input == null) {
@@ -521,6 +743,9 @@ public class UserProfilePage {
         wait.until(webDriver -> reason.equals(otherReasonInput().getAttribute("value")));
     }
 
+    /**
+     * Thực hiện xử lý confirm reject dialog trong luồng kiểm thử.
+     */
     private void confirmRejectDialog() {
         WebElement dialog = requireRejectDialog();
         clickButtonInsideByText(dialog, "Xác nhận");
@@ -528,6 +753,10 @@ public class UserProfilePage {
         wait.until(webDriver -> rejectDialog() == null || confirmationOrToastIsVisible());
     }
 
+    /**
+     * Thực hiện xử lý reject dialog trong luồng kiểm thử.
+     * @return kết quả reject dialog sau khi xử lý
+     */
     private WebElement rejectDialog() {
         return driver.findElements(DIALOGS).stream()
                 .filter(WebElement::isDisplayed)
@@ -536,6 +765,10 @@ public class UserProfilePage {
                 .orElse(null);
     }
 
+    /**
+     * Thực hiện xử lý require reject dialog trong luồng kiểm thử.
+     * @return kết quả require reject dialog sau khi xử lý
+     */
     private WebElement requireRejectDialog() {
         WebElement dialog = rejectDialog();
         if (dialog == null) {
@@ -544,6 +777,10 @@ public class UserProfilePage {
         return dialog;
     }
 
+    /**
+     * Thực hiện xử lý other reason input trong luồng kiểm thử.
+     * @return kết quả other reason input sau khi xử lý
+     */
     private WebElement otherReasonInput() {
         WebElement dialog = rejectDialog();
         if (dialog == null) {
@@ -555,6 +792,11 @@ public class UserProfilePage {
                 .orElse(null);
     }
 
+    /**
+     * Thực hiện xử lý user detail tab trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @return kết quả user detail tab sau khi xử lý
+     */
     private WebElement userDetailTab(String tabLabel) {
         String expectedLabel = TextNormalizer.normalize(tabLabel);
         WebElement detailSurface = requireVisibleDetailSurface();
@@ -592,6 +834,12 @@ public class UserProfilePage {
         return jsCandidate;
     }
 
+    /**
+     * Thực hiện xử lý user detail tab text matches trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     * @param expectedLabel giá trị expected label được truyền vào
+     * @return kết quả user detail tab text matches sau khi xử lý
+     */
     private boolean userDetailTabTextMatches(WebElement element, String expectedLabel) {
         String actualLabel = TextNormalizer.normalize(String.join(" ",
                 element.getText(),
@@ -605,6 +853,11 @@ public class UserProfilePage {
                 || actualLabel.contains(expectedLabel);
     }
 
+    /**
+     * Chờ for user detail tab to load trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     * @param previousState giá trị previous state được truyền vào
+     */
     private void waitForUserDetailTabToLoad(String tabLabel, String previousState) {
         PageLoadSynchronizer.waitForDataToSettle(driver);
         wait.until(webDriver -> userDetailHasVisibleContent());
@@ -612,6 +865,9 @@ public class UserProfilePage {
         waitUntilDetailSurfaceStable();
     }
 
+    /**
+     * Chờ until detail surface stable trong luồng kiểm thử.
+     */
     private void waitUntilDetailSurfaceStable() {
         wait.until(webDriver -> {
             String firstState = detailSurfaceState();
@@ -625,6 +881,10 @@ public class UserProfilePage {
         });
     }
 
+    /**
+     * Cuộn user detail to bottom then top trong luồng kiểm thử.
+     * @param tabLabel giá trị tab label được truyền vào
+     */
     private void scrollUserDetailToBottomThenTop(String tabLabel) {
         WebElement scrollContainer = userDetailScrollContainer();
         System.out.println("[UserProfile] Scroll xuong cuoi tab: " + tabLabel);
@@ -638,6 +898,10 @@ public class UserProfilePage {
         waitUntilDetailSurfaceStable();
     }
 
+    /**
+     * Thực hiện xử lý user detail scroll container trong luồng kiểm thử.
+     * @return kết quả user detail scroll container sau khi xử lý
+     */
     private WebElement userDetailScrollContainer() {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const surface=arguments[0];"
@@ -654,6 +918,11 @@ public class UserProfilePage {
                 requireVisibleDetailSurface());
     }
 
+    /**
+     * Cuộn detail container trong luồng kiểm thử.
+     * @param scrollContainer giá trị scroll container được truyền vào
+     * @param position giá trị position được truyền vào
+     */
     private void scrollDetailContainer(WebElement scrollContainer, String position) {
         ((JavascriptExecutor) driver).executeScript(
                 "const container=arguments[0], position=arguments[1], surface=arguments[2];"
@@ -672,6 +941,9 @@ public class UserProfilePage {
                 scrollContainer, position, requireVisibleDetailSurface());
     }
 
+    /**
+     * Thực hiện xử lý pause for scroll trong luồng kiểm thử.
+     */
     private void pauseForScroll() {
         try {
             Thread.sleep(600);
@@ -681,10 +953,19 @@ public class UserProfilePage {
         }
     }
 
+    /**
+     * Thực hiện xử lý detail surface state trong luồng kiểm thử.
+     * @return kết quả detail surface state sau khi xử lý
+     */
     private String detailSurfaceState() {
         return requireVisibleDetailSurface().getText().replaceAll("\\s+", " ").trim();
     }
 
+    /**
+     * Kích hoạt button inside trong luồng kiểm thử.
+     * @param container giá trị container được truyền vào
+     * @param label giá trị label được truyền vào
+     */
     private void clickButtonInside(WebElement container, String label) {
         WebElement button = visibleChildren(container, By.xpath(
                         ".//button[normalize-space()='" + label + "' or .//*[normalize-space()='" + label + "']]"))
@@ -695,6 +976,11 @@ public class UserProfilePage {
         click(button);
     }
 
+    /**
+     * Kích hoạt button inside by text trong luồng kiểm thử.
+     * @param container giá trị container được truyền vào
+     * @param label giá trị label được truyền vào
+     */
     private void clickButtonInsideByText(WebElement container, String label) {
         String expectedLabel = TextNormalizer.normalize(label);
         WebElement button = visibleChildren(container, By.cssSelector("button"))
@@ -707,6 +993,12 @@ public class UserProfilePage {
         click(button);
     }
 
+    /**
+     * Thực hiện xử lý button text matches trong luồng kiểm thử.
+     * @param button giá trị button được truyền vào
+     * @param expectedLabel giá trị expected label được truyền vào
+     * @return kết quả button text matches sau khi xử lý
+     */
     private boolean buttonTextMatches(WebElement button, String expectedLabel) {
         String actualLabel = TextNormalizer.normalize(String.join(" ",
                 button.getText(),
@@ -719,12 +1011,22 @@ public class UserProfilePage {
                 || actualLabel.contains(expectedLabel);
     }
 
+    /**
+     * Kiểm tra điều kiện is enabled button.
+     * @param button giá trị button được truyền vào
+     * @return kết quả is enabled button sau khi xử lý
+     */
     private boolean isEnabledButton(WebElement button) {
         return button.isEnabled()
                 && !"true".equalsIgnoreCase(button.getAttribute("disabled"))
                 && !"true".equalsIgnoreCase(button.getAttribute("aria-disabled"));
     }
 
+    /**
+     * Trả về visible main elements từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả visible main elements sau khi xử lý
+     */
     private List<WebElement> visibleMainElements(By locator) {
         return driver.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -732,12 +1034,20 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý search input trong luồng kiểm thử.
+     * @return kết quả search input sau khi xử lý
+     */
     private WebElement searchInput() {
         return wait.until(webDriver -> visibleMainElements(SEARCH_INPUT).stream()
                 .findFirst()
                 .orElse(null));
     }
 
+    /**
+     * Trả về visible search mode select từ trạng thái hiện tại.
+     * @return kết quả visible search mode select sau khi xử lý
+     */
     private WebElement visibleSearchModeSelect() {
         WebElement nearestSelect = visibleSearchModeSelectNearSearchInput();
         if (nearestSelect != null) {
@@ -758,6 +1068,10 @@ public class UserProfilePage {
         return select;
     }
 
+    /**
+     * Trả về visible search mode select near search input từ trạng thái hiện tại.
+     * @return kết quả visible search mode select near search input sau khi xử lý
+     */
     private WebElement visibleSearchModeSelectNearSearchInput() {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "const visible=e=>{"
@@ -779,10 +1093,19 @@ public class UserProfilePage {
                         + "})[0];");
     }
 
+    /**
+     * Trả về first user info cell lines từ trạng thái hiện tại.
+     * @return kết quả first user info cell lines sau khi xử lý
+     */
     private List<String> firstUserInfoCellLines() {
         return userInfoCellLines(firstUserRow());
     }
 
+    /**
+     * Thực hiện xử lý user info cell lines trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @return kết quả user info cell lines sau khi xử lý
+     */
     private List<String> userInfoCellLines(WebElement row) {
         WebElement infoCell = userInformationTextCell(row);
         if (infoCell == null) {
@@ -794,6 +1117,11 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý user information text cell trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @return kết quả user information text cell sau khi xử lý
+     */
     private WebElement userInformationTextCell(WebElement row) {
         WebElement byDataKey = row.findElements(By.cssSelector(
                         "td[data-key$='user_info'], td[data-key*='user_info'], "
@@ -814,10 +1142,21 @@ public class UserProfilePage {
         return cells.size() >= 2 ? cells.get(1) : null;
     }
 
+    /**
+     * Thực hiện xử lý normalize search term trong luồng kiểm thử.
+     * @param value giá trị đầu vào
+     * @return kết quả normalize search term sau khi xử lý
+     */
     private String normalizeSearchTerm(String value) {
         return TextNormalizer.normalize(value).replaceAll("[^a-z0-9]", "");
     }
 
+    /**
+     * Trả về visible children từ trạng thái hiện tại.
+     * @param container giá trị container được truyền vào
+     * @param locator locator xác định phần tử
+     * @return kết quả visible children sau khi xử lý
+     */
     private List<WebElement> visibleChildren(WebElement container, By locator) {
         return container.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -825,6 +1164,10 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý confirmation or toast is visible trong luồng kiểm thử.
+     * @return kết quả confirmation or toast is visible sau khi xử lý
+     */
     private boolean confirmationOrToastIsVisible() {
         String normalized = TextNormalizer.normalize(bodyText());
         return normalized.contains("thanh cong")
@@ -833,12 +1176,20 @@ public class UserProfilePage {
                 || normalized.contains("cap nhat");
     }
 
+    /**
+     * Trả về visible user rows từ trạng thái hiện tại.
+     * @return kết quả visible user rows sau khi xử lý
+     */
     private List<WebElement> visibleUserRows() {
         return rawUserRows().stream()
                 .filter(this::isUsableUserRow)
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý raw user rows trong luồng kiểm thử.
+     * @return kết quả raw user rows sau khi xử lý
+     */
     @SuppressWarnings("unchecked")
     private List<WebElement> rawUserRows() {
         Set<WebElement> rows = new LinkedHashSet<>(driver.findElements(ROWS));
@@ -856,6 +1207,11 @@ public class UserProfilePage {
         return new ArrayList<>(rows);
     }
 
+    /**
+     * Kiểm tra điều kiện is usable user row.
+     * @param row giá trị row được truyền vào
+     * @return kết quả is usable user row sau khi xử lý
+     */
     private boolean isUsableUserRow(WebElement row) {
         try {
             String text = row.getText();
@@ -869,6 +1225,11 @@ public class UserProfilePage {
         }
     }
 
+    /**
+     * Thực hiện xử lý looks like header row trong luồng kiểm thử.
+     * @param text nội dung cần xử lý
+     * @return kết quả looks like header row sau khi xử lý
+     */
     private boolean looksLikeHeaderRow(String text) {
         String normalized = TextNormalizer.normalize(text);
         return normalized.contains("thong tin nguoi dung")
@@ -876,6 +1237,11 @@ public class UserProfilePage {
                 && normalized.contains("thoi gian tao");
     }
 
+    /**
+     * Thực hiện xử lý information action trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @return kết quả information action sau khi xử lý
+     */
     private WebElement informationAction(WebElement row) {
         WebElement userInfoCell = userInformationCell(row);
         if (userInfoCell != null) {
@@ -906,6 +1272,11 @@ public class UserProfilePage {
         return row;
     }
 
+    /**
+     * Thực hiện xử lý user information cell trong luồng kiểm thử.
+     * @param row giá trị row được truyền vào
+     * @return kết quả user information cell sau khi xử lý
+     */
     private WebElement userInformationCell(WebElement row) {
         WebElement byDataKey = row.findElements(By.cssSelector(
                         "td[data-key$='user_info'], td[data-key*='user_info'], "
@@ -929,6 +1300,11 @@ public class UserProfilePage {
         return null;
     }
 
+    /**
+     * Thực hiện xử lý deepest clickable content trong luồng kiểm thử.
+     * @param cell giá trị cell được truyền vào
+     * @return kết quả deepest clickable content sau khi xử lý
+     */
     private WebElement deepestClickableContent(WebElement cell) {
         return cell.findElements(By.cssSelector("a, button, [role='button'], span, p, div")).stream()
                 .filter(WebElement::isDisplayed)
@@ -939,6 +1315,11 @@ public class UserProfilePage {
                 .orElse(cell);
     }
 
+    /**
+     * Thực hiện xử lý looks like information action trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     * @return kết quả looks like information action sau khi xử lý
+     */
     private boolean looksLikeInformationAction(WebElement element) {
         String text = TextNormalizer.normalize(String.join(" ",
                 element.getText(),
@@ -952,6 +1333,12 @@ public class UserProfilePage {
                 || text.contains("detail");
     }
 
+    /**
+     * Thực hiện xử lý detail is open trong luồng kiểm thử.
+     * @param previousState giá trị previous state được truyền vào
+     * @param previousUrl giá trị previous url được truyền vào
+     * @return kết quả detail is open sau khi xử lý
+     */
     private boolean detailIsOpen(String previousState, String previousUrl) {
         if (!previousState.isBlank() && !pageState().equals(previousState)
                 && hasDetailText(bodyText())) {
@@ -967,6 +1354,10 @@ public class UserProfilePage {
                 .anyMatch(this::hasDetailText);
     }
 
+    /**
+     * Trả về visible detail surfaces từ trạng thái hiện tại.
+     * @return kết quả visible detail surfaces sau khi xử lý
+     */
     private List<WebElement> visibleDetailSurfaces() {
         return driver.findElements(DETAIL_SURFACES).stream()
                 .filter(WebElement::isDisplayed)
@@ -974,17 +1365,30 @@ public class UserProfilePage {
                 .toList();
     }
 
+    /**
+     * Thực hiện xử lý require visible detail surface trong luồng kiểm thử.
+     * @return kết quả require visible detail surface sau khi xử lý
+     */
     private WebElement requireVisibleDetailSurface() {
         return visibleDetailSurfaces().stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Khong tim thay man chi tiet nguoi dung dang hien thi."));
     }
 
+    /**
+     * Kiểm tra điều kiện has detail text.
+     * @param text nội dung cần xử lý
+     * @return kết quả has detail text sau khi xử lý
+     */
     private boolean hasDetailText(String text) {
         String normalized = TextNormalizer.normalize(text);
         return DETAIL_TEXT_MARKERS.stream().anyMatch(normalized::contains);
     }
 
+    /**
+     * Kích hoạt  trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     */
     private void click(WebElement element) {
         try {
             element.click();
@@ -993,29 +1397,55 @@ public class UserProfilePage {
         }
     }
 
+    /**
+     * Cuộn into view trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     */
     private void scrollIntoView(WebElement element) {
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block:'center', inline:'center'});", element);
     }
 
+    /**
+     * Kiểm tra điều kiện is displayed.
+     * @param locator locator xác định phần tử
+     * @return kết quả is displayed sau khi xử lý
+     */
     private boolean isDisplayed(By locator) {
         return driver.findElements(locator).stream().anyMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Thực hiện xử lý document is ready trong luồng kiểm thử.
+     * @return kết quả document is ready sau khi xử lý
+     */
     private boolean documentIsReady() {
         Object state = ((JavascriptExecutor) driver).executeScript("return document.readyState");
         return "complete".equals(state);
     }
 
+    /**
+     * Trả về current route contains từ trạng thái hiện tại.
+     * @param route giá trị route được truyền vào
+     * @return kết quả current route contains sau khi xử lý
+     */
     private boolean currentRouteContains(String route) {
         return driver.getCurrentUrl().contains(route);
     }
 
+    /**
+     * Thực hiện xử lý no loading indicator is visible trong luồng kiểm thử.
+     * @return kết quả no loading indicator is visible sau khi xử lý
+     */
     private boolean noLoadingIndicatorIsVisible() {
         return driver.findElements(LOADING_INDICATORS).stream()
                 .noneMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Thực hiện xử lý body has no data message trong luồng kiểm thử.
+     * @return kết quả body has no data message sau khi xử lý
+     */
     private boolean bodyHasNoDataMessage() {
         String normalized = TextNormalizer.normalize(bodyText());
         return normalized.contains("khong co du lieu")
@@ -1023,14 +1453,27 @@ public class UserProfilePage {
                 || normalized.contains("khong tim thay");
     }
 
+    /**
+     * Thực hiện xử lý page state trong luồng kiểm thử.
+     * @return kết quả page state sau khi xử lý
+     */
     private String pageState() {
         return driver.getCurrentUrl() + "|" + bodyText().hashCode();
     }
 
+    /**
+     * Thực hiện xử lý body text trong luồng kiểm thử.
+     * @return kết quả body text sau khi xử lý
+     */
     private String bodyText() {
         return driver.findElement(By.tagName("body")).getText();
     }
 
+    /**
+     * Thực hiện xử lý short text trong luồng kiểm thử.
+     * @param element phần tử cần thao tác
+     * @return kết quả short text sau khi xử lý
+     */
     private String shortText(WebElement element) {
         String text = element.getText();
         if (text == null || text.isBlank()) {

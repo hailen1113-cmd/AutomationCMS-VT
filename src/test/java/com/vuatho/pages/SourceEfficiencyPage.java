@@ -13,6 +13,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
+/**
+ * Page Object thao tác và xác nhận trạng thái tải của trang Hiệu quả và chi phí nguồn.
+ */
 public class SourceEfficiencyPage {
     private static final By MENU = By.cssSelector("a[href='/vuatho/supply-performance']");
     private static final By OVERVIEW_SECTION = By.id("sec-overview");
@@ -27,6 +30,10 @@ public class SourceEfficiencyPage {
     private final SidebarComponent sidebar;
     private boolean loaded;
 
+    /**
+     * Khởi tạo SourceEfficiencyPage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public SourceEfficiencyPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(45));
@@ -35,6 +42,10 @@ public class SourceEfficiencyPage {
         this.sidebar = new SidebarComponent(driver);
     }
 
+    /**
+     * Mở and wait until loaded trong luồng kiểm thử.
+     * @return kết quả open and wait until loaded sau khi xử lý
+     */
     public SourceEfficiencyPage openAndWaitUntilLoaded() {
         OverlayCleaner.dismissBlockingOverlays(driver);
         sidebar.ensureExpanded();
@@ -54,6 +65,10 @@ public class SourceEfficiencyPage {
         return this;
     }
 
+    /**
+     * Kiểm tra điều kiện is loaded.
+     * @return kết quả is loaded sau khi xử lý
+     */
     public boolean isLoaded() {
         try {
             return loaded && documentIsReady() && isVisible(OVERVIEW_SECTION) && isVisible(USERS_SECTION);
@@ -62,15 +77,28 @@ public class SourceEfficiencyPage {
         }
     }
 
+    /**
+     * Thực hiện xử lý document is ready trong luồng kiểm thử.
+     * @return kết quả document is ready sau khi xử lý
+     */
     private boolean documentIsReady() {
         return "complete".equals(((JavascriptExecutor) driver)
                 .executeScript("return document.readyState"));
     }
 
+    /**
+     * Kiểm tra điều kiện is visible.
+     * @param locator locator xác định phần tử
+     * @return kết quả is visible sau khi xử lý
+     */
     private boolean isVisible(By locator) {
         return driver.findElements(locator).stream().anyMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Thực hiện xử lý menu trong luồng kiểm thử.
+     * @return kết quả menu sau khi xử lý
+     */
     private WebElement menu() {
         return driver.findElements(MENU).stream()
                 .filter(WebElement::isDisplayed)

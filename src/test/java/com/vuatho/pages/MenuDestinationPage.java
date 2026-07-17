@@ -83,6 +83,10 @@ public class MenuDestinationPage {
     private Duration loadDuration = Duration.ZERO;
     private String expectedDestinationUrl = "";
 
+    /**
+     * Khởi tạo MenuDestinationPage với các phụ thuộc cần thiết.
+     * @param driver WebDriver đang điều khiển trình duyệt
+     */
     public MenuDestinationPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(45));
@@ -91,10 +95,21 @@ public class MenuDestinationPage {
         this.sidebar = new SidebarComponent(driver);
     }
 
+    /**
+     * Mở and wait until loaded trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     * @return kết quả open and wait until loaded sau khi xử lý
+     */
     public MenuDestinationPage openAndWaitUntilLoaded(MenuTarget target) {
         return openAndWaitUntilLoaded(target, true);
     }
 
+    /**
+     * Mở and wait until loaded trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     * @param scrollToBottom giá trị scroll to bottom được truyền vào
+     * @return kết quả open and wait until loaded sau khi xử lý
+     */
     public MenuDestinationPage openAndWaitUntilLoaded(MenuTarget target, boolean scrollToBottom) {
         long startedAt = System.nanoTime();
         OverlayCleaner.dismissBlockingOverlays(driver);
@@ -116,22 +131,42 @@ public class MenuDestinationPage {
         return this;
     }
 
+    /**
+     * Kiểm tra điều kiện is loaded.
+     * @return kết quả is loaded sau khi xử lý
+     */
     public boolean isLoaded() {
         return loaded && documentIsReady();
     }
 
+    /**
+     * Đọc duration trong luồng kiểm thử.
+     * @return kết quả load duration sau khi xử lý
+     */
     public Duration loadDuration() {
         return loadDuration;
     }
 
+    /**
+     * Thực hiện xử lý expected destination url trong luồng kiểm thử.
+     * @return kết quả expected destination url sau khi xử lý
+     */
     public String expectedDestinationUrl() {
         return expectedDestinationUrl;
     }
 
+    /**
+     * Trả về current url từ trạng thái hiện tại.
+     * @return kết quả current url sau khi xử lý
+     */
     public String currentUrl() {
         return driver.getCurrentUrl();
     }
 
+    /**
+     * Thực hiện xử lý url matches expected destination trong luồng kiểm thử.
+     * @return kết quả url matches expected destination sau khi xử lý
+     */
     public boolean urlMatchesExpectedDestination() {
         if (expectedDestinationUrl == null || expectedDestinationUrl.isBlank()) {
             return true;
@@ -139,6 +174,10 @@ public class MenuDestinationPage {
         return samePath(driver.getCurrentUrl(), expectedDestinationUrl);
     }
 
+    /**
+     * Thực hiện xử lý expand parent menu if needed trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     */
     private void expandParentMenuIfNeeded(MenuTarget target) {
         if (!target.hasParent() || visibleSidebarItem(menuLabel(target.name())) != null) {
             return;
@@ -157,16 +196,31 @@ public class MenuDestinationPage {
         wait.until(webDriver -> noLoadingIndicatorIsVisible());
     }
 
+    /**
+     * Kiểm tra điều kiện has navigated away from.
+     * @param previousUrl giá trị previous url được truyền vào
+     * @param previousContent giá trị previous content được truyền vào
+     * @return kết quả has navigated away from sau khi xử lý
+     */
     private boolean hasNavigatedAwayFrom(String previousUrl, String previousContent) {
         return !driver.getCurrentUrl().equals(previousUrl)
                 || !mainContentText().equals(previousContent);
     }
 
+    /**
+     * Thực hiện xử lý no loading indicator is visible trong luồng kiểm thử.
+     * @return kết quả no loading indicator is visible sau khi xử lý
+     */
     private boolean noLoadingIndicatorIsVisible() {
         return driver.findElements(LOADING_INDICATORS).stream()
                 .noneMatch(WebElement::isDisplayed);
     }
 
+    /**
+     * Thực hiện xử lý expected page marker is visible trong luồng kiểm thử.
+     * @param targetLabel giá trị target label được truyền vào
+     * @return kết quả expected page marker is visible sau khi xử lý
+     */
     private boolean expectedPageMarkerIsVisible(String targetLabel) {
         if ("Tài chính".equals(targetLabel)) {
             return driver.findElements(FINANCE_PAGE_MARKER).stream()
@@ -182,6 +236,11 @@ public class MenuDestinationPage {
         return false;
     }
 
+    /**
+     * Trả về current route is từ trạng thái hiện tại.
+     * @param path đường dẫn cần xử lý
+     * @return kết quả current route is sau khi xử lý
+     */
     private boolean currentRouteIs(String path) {
         if (driver.getCurrentUrl().contains(path)) {
             return true;
@@ -193,6 +252,11 @@ public class MenuDestinationPage {
         return Boolean.TRUE.equals(nextPage);
     }
 
+    /**
+     * Kích hoạt sidebar item trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả click sidebar item sau khi xử lý
+     */
     private String clickSidebarItem(String label) {
         OverlayCleaner.dismissBlockingOverlays(driver);
         WebElement item = wait.until(webDriver -> visibleSidebarItem(label));
@@ -203,6 +267,11 @@ public class MenuDestinationPage {
         return destination == null ? "" : destination;
     }
 
+    /**
+     * Trả về visible sidebar item từ trạng thái hiện tại.
+     * @param label giá trị label được truyền vào
+     * @return kết quả visible sidebar item sau khi xử lý
+     */
     private WebElement visibleSidebarItem(String label) {
         WebElement byKnownHref = visibleSidebarItemByKnownHref(label);
         if (byKnownHref != null) {
@@ -215,6 +284,11 @@ public class MenuDestinationPage {
                 .orElse(null);
     }
 
+    /**
+     * Trả về visible sidebar item by known href từ trạng thái hiện tại.
+     * @param label giá trị label được truyền vào
+     * @return kết quả visible sidebar item by known href sau khi xử lý
+     */
     private WebElement visibleSidebarItemByKnownHref(String label) {
         if ("Dashboard".equals(label)) {
             return driver.findElements(DASHBOARD_MENU).stream()
@@ -528,6 +602,11 @@ public class MenuDestinationPage {
         return null;
     }
 
+    /**
+     * Trả về visible element từ trạng thái hiện tại.
+     * @param locator locator xác định phần tử
+     * @return kết quả visible element sau khi xử lý
+     */
     private WebElement visibleElement(By locator) {
         return driver.findElements(locator).stream()
                 .filter(WebElement::isDisplayed)
@@ -536,6 +615,11 @@ public class MenuDestinationPage {
                 .orElse(null);
     }
 
+    /**
+     * Trả về visible parent menu button từ trạng thái hiện tại.
+     * @param index giá trị index được truyền vào
+     * @return kết quả visible parent menu button sau khi xử lý
+     */
     private WebElement visibleParentMenuButton(int index) {
         List<WebElement> parentMenus = driver.findElements(COLLAPSIBLE_PARENT_MENUS).stream()
                 .filter(WebElement::isDisplayed)
@@ -544,11 +628,21 @@ public class MenuDestinationPage {
         return parentMenus.size() > index ? parentMenus.get(index) : null;
     }
 
+    /**
+     * Thực hiện xử lý exact text trong luồng kiểm thử.
+     * @param label giá trị label được truyền vào
+     * @return kết quả exact text sau khi xử lý
+     */
     private By exactText(String label) {
         return By.xpath("//*[normalize-space()='" + label + "'"
                 + " or normalize-space(text())='" + label + "']");
     }
 
+    /**
+     * Thực hiện xử lý menu label trong luồng kiểm thử.
+     * @param catalogLabel giá trị catalog label được truyền vào
+     * @return kết quả menu label sau khi xử lý
+     */
     private String menuLabel(String catalogLabel) {
         if (catalogLabel.contains("Thá»‘ng KÃª Thá»£ - KhÃ¡ch")
                 || catalogLabel.contains("Thống Kê Thợ - Khách")) {
@@ -557,6 +651,10 @@ public class MenuDestinationPage {
         return catalogLabel;
     }
 
+    /**
+     * Thực hiện xử lý main content text trong luồng kiểm thử.
+     * @return kết quả main content text sau khi xử lý
+     */
     private String mainContentText() {
         return driver.findElements(By.cssSelector("main, [role='main']")).stream()
                 .filter(WebElement::isDisplayed)
@@ -566,16 +664,31 @@ public class MenuDestinationPage {
                 .trim();
     }
 
+    /**
+     * Thực hiện xử lý document is ready trong luồng kiểm thử.
+     * @return kết quả document is ready sau khi xử lý
+     */
     private boolean documentIsReady() {
         return "complete".equals(((JavascriptExecutor) driver)
                 .executeScript("return document.readyState"));
     }
 
+    /**
+     * Kiểm tra điều kiện has reached expected url.
+     * @param expectedUrl giá trị expected url được truyền vào
+     * @return kết quả has reached expected url sau khi xử lý
+     */
     private boolean hasReachedExpectedUrl(String expectedUrl) {
         return expectedUrl == null || expectedUrl.isBlank()
                 || samePath(driver.getCurrentUrl(), expectedUrl);
     }
 
+    /**
+     * Thực hiện xử lý same path trong luồng kiểm thử.
+     * @param actualUrl giá trị actual url được truyền vào
+     * @param expectedUrl giá trị expected url được truyền vào
+     * @return kết quả same path sau khi xử lý
+     */
     private boolean samePath(String actualUrl, String expectedUrl) {
         try {
             URI actual = URI.create(actualUrl);

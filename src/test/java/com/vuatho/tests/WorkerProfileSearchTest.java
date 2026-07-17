@@ -14,22 +14,36 @@ import org.testng.annotations.Test;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Kiểm tra tìm kiếm hồ sơ thợ với từ khóa hợp lệ, rỗng và không có kết quả.
+ */
 public class WorkerProfileSearchTest extends BaseTest {
     private static final int SEARCH_SAMPLE_SIZE = 5;
 
     private WorkerProfilePage workerProfilePage;
 
+    /**
+     * Cho phép chạy trực tiếp lớp này từ IDE mà không cần cấu hình TestNG XML.
+     * @param args các tham số dòng lệnh
+     */
     public static void main(String[] args) {
         TestNgRunner.run(WorkerProfileSearchTest.class,
                 "Bo test tim kiem ho so tho ERP",
                 "Kiem tra tim kiem ho so tho");
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý prepare worker profile page trong luồng kiểm thử.
+     */
     @BeforeMethod(alwaysRun = true)
     public void prepareWorkerProfilePage() {
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
@@ -38,6 +52,9 @@ public class WorkerProfileSearchTest extends BaseTest {
         workerProfilePage = new WorkerProfilePage(driver).openFromMenu();
     }
 
+    /**
+     * Thực hiện xử lý clean worker profile state trong luồng kiểm thử.
+     */
     @AfterMethod(alwaysRun = true)
     public void cleanWorkerProfileState() {
         try {
@@ -50,6 +67,9 @@ public class WorkerProfileSearchTest extends BaseTest {
         }
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-SEARCH-001: O tim kiem tho co the reset” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(priority = 6, groups = { "partner-worker", "worker-profile", "worker-search" },
             description = "WORKER-PROFILE-SEARCH-001: O tim kiem tho co the reset")
     public void workerSearchCanBeReset() {
@@ -59,6 +79,9 @@ public class WorkerProfileSearchTest extends BaseTest {
                 "Reset tim kiem tho khong xoa noi dung o nhap.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-SEARCH-MODE-001: Tim kiem tho co tuy chon ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(priority = 2, groups = { "partner-worker", "worker-profile", "worker-search" },
             description = "WORKER-PROFILE-SEARCH-MODE-001: Tim kiem tho co tuy chon ten va SDT")
     public void workerSearchModeOptionsAreAvailable() {
@@ -66,6 +89,9 @@ public class WorkerProfileSearchTest extends BaseTest {
                 "Dropdown kieu tim kiem tho thieu tuy chon ten hoac SDT.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-SEARCH-MODE-002: Kieu tim kiem tho doi duoc giua ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(priority = 3, groups = { "partner-worker", "worker-profile", "worker-search" },
             description = "WORKER-PROFILE-SEARCH-MODE-002: Kieu tim kiem tho doi duoc giua ten va SDT")
     public void workerSearchModeCanSwitchBetweenNameAndPhone() {
@@ -79,6 +105,9 @@ public class WorkerProfileSearchTest extends BaseTest {
                 "Kieu tim kiem tho khong chuyen sang SDT.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten tho dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(priority = 4, groups = { "partner-worker", "worker-profile", "worker-search" },
             description = "WORKER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten tho dau tien")
     public void workerCanSearchFirstFiveNames() {
@@ -99,6 +128,9 @@ public class WorkerProfileSearchTest extends BaseTest {
                 "O tim kiem tho khong duoc xoa sau khi tim theo ten.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT tho dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(priority = 5, groups = { "partner-worker", "worker-profile", "worker-search" },
             description = "WORKER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT tho dau tien")
     public void workerCanSearchFirstFivePhoneNumbers() {

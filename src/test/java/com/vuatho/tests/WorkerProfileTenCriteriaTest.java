@@ -11,20 +11,34 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
+/**
+ * Kiểm tra tuần tự mười tiêu chí lọc nghiệp vụ của danh sách hồ sơ thợ.
+ */
 public class WorkerProfileTenCriteriaTest extends BaseTest {
         private WorkerProfilePage workerProfilePage;
 
+    /**
+     * Cho phép chạy trực tiếp lớp này từ IDE mà không cần cấu hình TestNG XML.
+     * @param args các tham số dòng lệnh
+     */
         public static void main(String[] args) {
                 TestNgRunner.run(WorkerProfileTenCriteriaTest.class,
                                 "ERP Worker Profile Ten Criteria Suite",
                                 "Bộ testcase tab 10 Tiêu chí Hồ Sơ Thợ");
         }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
         @Override
         protected boolean reuseDriverBetweenTestMethods() {
                 return true;
         }
 
+    /**
+     * Thực hiện xử lý prepare worker criteria tab trong luồng kiểm thử.
+     */
         @BeforeMethod(alwaysRun = true)
         public void prepareWorkerCriteriaTab() {
                 LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
@@ -35,6 +49,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                 workerProfilePage.openTenCriteriaTab();
         }
 
+    /**
+     * Thực hiện xử lý clean worker criteria state trong luồng kiểm thử.
+     */
         @AfterMethod(alwaysRun = true)
         public void cleanWorkerCriteriaState() {
                 try {
@@ -48,6 +65,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                 }
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-001: Tab 10 Tiêu chí hiển thị đủ bảng, tổng hợp và có nút Cập nhật” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-001: Tab 10 Tiêu chí hiển thị đủ bảng, tổng hợp và có nút Cập nhật")
         public void workerTenCriteriaTabShowsSummaryRowsAndEditableRules() {
@@ -63,12 +83,18 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                                 "Không tìm thấy nút Cập nhật nào trong tab 10 Tiêu chí.");
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-002: Thấy nút Cập nhật thì bấm và mở popup trạng thái” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-002: Thấy nút Cập nhật thì bấm và mở popup trạng thái")
         public void visibleCriteriaUpdateButtonCanBeClicked() {
                 clickVisibleCriteriaUpdateButtonAndAssertDialog();
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-DEMO-001: Bấm Cập nhật và giữ popup trạng thái để quan sát” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-DEMO-001: Bấm Cập nhật và giữ popup trạng thái để quan sát")
         public void workerCriteriaUpdateButtonShowsPopupForVisualCheck() {
@@ -80,6 +106,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                 workerProfilePage.closeCriteriaStatusUpdate();
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-005: Hủy cập nhật trạng thái không làm đổi tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-005: Hủy cập nhật trạng thái không làm đổi tiêu chí")
         public void workerCriteriaStatusCancelDoesNotChangeCurrentStatus() {
@@ -94,6 +123,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                                 "Bấm Hủy nhưng trạng thái tiêu chí có nút Cập nhật vẫn bị thay đổi.");
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-006: Đóng popup cập nhật trạng thái không làm đổi tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-006: Đóng popup cập nhật trạng thái không làm đổi tiêu chí")
         public void workerCriteriaStatusCloseDoesNotChangeCurrentStatus() {
@@ -108,6 +140,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                                 "Đóng popup nhưng trạng thái tiêu chí có nút Cập nhật vẫn bị thay đổi.");
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-007: Xác nhận cập nhật trạng thái làm reload và đổi trạng thái tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-007: Xác nhận cập nhật trạng thái làm reload và đổi trạng thái tiêu chí")
         public void workerCriteriaStatusCanBeUpdatedAndRestored() {
@@ -126,6 +161,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                 }
         }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-CRITERIA-008: Cập nhật nhiều tiêu chí có nút Cập nhật và khôi phục trạng thái ban đầu” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
         @Test(groups = { "partner-worker",
                         "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-008: Cập nhật nhiều tiêu chí có nút Cập nhật và khôi phục trạng thái ban đầu")
         public void multipleVisibleCriteriaStatusesCanBeUpdatedAndRestored() {
@@ -157,6 +195,9 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                                 "Chưa cập nhật được nhiều hơn 1 tiêu chí có thể restore trạng thái.");
         }
 
+    /**
+     * Kích hoạt visible criteria update button and assert dialog trong luồng kiểm thử.
+     */
         private void clickVisibleCriteriaUpdateButtonAndAssertDialog() {
                 workerProfilePage.clickFirstVisibleCriteriaUpdateButton();
 
@@ -165,10 +206,20 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
                 workerProfilePage.closeCriteriaStatusUpdate();
         }
 
+    /**
+     * Thực hiện xử lý opposite criteria status trong luồng kiểm thử.
+     * @param currentStatus giá trị current status được truyền vào
+     * @return kết quả opposite criteria status sau khi xử lý
+     */
         private String oppositeCriteriaStatus(String currentStatus) {
                 return "Đạt".equals(currentStatus) ? "Chưa đạt" : "Đạt";
         }
 
+    /**
+     * Kiểm tra điều kiện can restore criteria status.
+     * @param status giá trị status được truyền vào
+     * @return kết quả can restore criteria status sau khi xử lý
+     */
         private boolean canRestoreCriteriaStatus(String status) {
                 return "Đạt".equals(status) || "Chưa đạt".equals(status);
         }

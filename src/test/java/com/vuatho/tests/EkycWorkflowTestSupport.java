@@ -15,6 +15,9 @@ import org.testng.annotations.BeforeMethod;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Cung cấp thiết lập và thao tác giao diện dùng chung cho các workflow eKYC.
+ */
 abstract class EkycWorkflowTestSupport extends BaseTest {
     protected static final List<String> FOCUSED_FAMILIES = List.of("REVIEW");
     protected static final List<String> EXCLUDED_CASE_KEYWORDS = List.of(
@@ -55,11 +58,18 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
 
     protected EkycPage ekycPage;
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực hiện xử lý prepare authenticated session trong luồng kiểm thử.
+     */
     @BeforeMethod(alwaysRun = true)
     public void prepareAuthenticatedSession() {
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
@@ -69,6 +79,10 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         System.out.println("[eKYC] Dang nhap xong, san sang mo menu eKYC.");
     }
 
+    /**
+     * Thực thi review case trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     */
     protected void runReviewCase(EkycWorkbookCase testCase) {
         openFirstKycDrawer(testCase, "review");
 
@@ -90,6 +104,10 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         ekycPage.submitDrawerDecision();
     }
 
+    /**
+     * Thực thi edit information case trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     */
     protected void runEditInformationCase(EkycInformationCase testCase) {
         openFirstKycDrawer(testCase, "edit thong tin KYC");
 
@@ -111,6 +129,10 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         }
     }
 
+    /**
+     * Thực thi clear information case trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     */
     protected void runClearInformationCase(EkycInformationCase testCase) {
         openFirstKycDrawer(testCase, "clear/delete thong tin KYC");
 
@@ -144,6 +166,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         }
     }
 
+    /**
+     * Mở first kyc drawer trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @param action giá trị action được truyền vào
+     */
     protected void openFirstKycDrawer(EkycInformationCase testCase, String action) {
         System.out.printf("[eKYC] Chay %s cho %s%n", action, testCase.id());
         ekycPage.openFromMenu();
@@ -155,6 +182,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
                 testCase.id() + ": Thieu title Chi tiet eKYC trong drawer.");
     }
 
+    /**
+     * Mở first kyc drawer trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @param action giá trị action được truyền vào
+     */
     protected void openFirstKycDrawer(EkycWorkbookCase testCase, String action) {
         System.out.printf("[eKYC] Chay %s cho %s%n", action, testCase.id());
         ekycPage.openFromMenu();
@@ -166,6 +198,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
                 testCase.id() + ": Thieu title Chi tiet eKYC trong drawer.");
     }
 
+    /**
+     * Kiểm tra điều kiện is focused simple data case.
+     * @param testCase test case đang thực thi
+     * @return kết quả is focused simple data case sau khi xử lý
+     */
     protected boolean isFocusedSimpleDataCase(EkycWorkbookCase testCase) {
         String text = normalizedCaseTitle(testCase);
         if ("REVIEW".equals(testCase.family())) {
@@ -185,6 +222,12 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         return EXCLUDED_CASE_KEYWORDS.stream().noneMatch(text::contains);
     }
 
+    /**
+     * Thực hiện xử lý configured trong luồng kiểm thử.
+     * @param property giá trị property được truyền vào
+     * @param environment giá trị environment được truyền vào
+     * @return kết quả configured sau khi xử lý
+     */
     protected String configured(String property, String environment) {
         String configured = System.getProperty(property);
         if (configured == null || configured.isBlank() || configured.startsWith("${")) {
@@ -193,6 +236,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         return configured == null ? "" : configured.trim();
     }
 
+    /**
+     * Kiểm tra điều kiện is reject review case.
+     * @param testCase test case đang thực thi
+     * @return kết quả is reject review case sau khi xử lý
+     */
     private boolean isRejectReviewCase(EkycWorkbookCase testCase) {
         String text = normalizedCaseText(testCase);
         return text.contains("reject")
@@ -202,6 +250,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
                 || text.contains("ly do");
     }
 
+    /**
+     * Thực hiện xử lý review side trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @return kết quả review side sau khi xử lý
+     */
     private KycSide reviewSide(EkycWorkbookCase testCase) {
         String text = normalizedCaseText(testCase);
         if (text.contains("selfie") || text.contains("chan dung")) {
@@ -213,6 +266,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
         return KycSide.FRONT;
     }
 
+    /**
+     * Thực hiện xử lý normalized case text trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @return kết quả normalized case text sau khi xử lý
+     */
     private String normalizedCaseText(EkycWorkbookCase testCase) {
         return TextNormalizer.normalize(String.join(" ",
                 testCase.id(),
@@ -222,6 +280,11 @@ abstract class EkycWorkflowTestSupport extends BaseTest {
                 testCase.rule()));
     }
 
+    /**
+     * Thực hiện xử lý normalized case title trong luồng kiểm thử.
+     * @param testCase test case đang thực thi
+     * @return kết quả normalized case title sau khi xử lý
+     */
     private String normalizedCaseTitle(EkycWorkbookCase testCase) {
         return TextNormalizer.normalize(String.join(" ",
                 testCase.id(),

@@ -5,6 +5,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+/**
+ * Kiểm tra áp dụng và reset các tiêu chí lọc trên danh sách hồ sơ thợ.
+ */
 public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(WorkerProfileFilterTest.class,
@@ -12,6 +15,10 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Kiem tra bo loc ho so tho");
     }
 
+    /**
+     * Thực hiện xử lý kyc status filters trong luồng kiểm thử.
+     * @return kết quả kyc status filters sau khi xử lý
+     */
     @DataProvider(name = "kycStatusFilters", parallel = false)
     public Object[][] kycStatusFilters() {
         return new Object[][] {
@@ -22,6 +29,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
         };
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-001: Bo loc hien thi trang thai KYC va chon ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-001: Bo loc hien thi trang thai KYC va chon ngay")
     public void workerFilterShowsKycStatusAndDateControls() {
@@ -33,6 +43,10 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Thieu lich loc theo ngay.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-002: Chon duoc bo loc trang thai KYC cua tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param statusLabel giá trị status label được truyền vào
+     */
     @Test(dataProvider = "kycStatusFilters",
             groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-002: Chon duoc bo loc trang thai KYC cua tho")
@@ -48,6 +62,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Dong tho khong khop bo loc trang thai KYC: " + statusLabel);
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-003: Reset duoc bo loc trang thai KYC cua tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-003: Reset duoc bo loc trang thai KYC cua tho")
     public void workerKycStatusFilterCanBeResetSafely() {
@@ -63,6 +80,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Thieu dong tho sau khi reset.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-004: Lich loc theo ngay co the chuyen thang” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-004: Lich loc theo ngay co the chuyen thang")
     public void workerDateFilterCanNavigateMonth() {
@@ -72,6 +92,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Lich loc theo ngay khong chuyen thang duoc.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-005: Bo loc ngay khong chon ngay tuong lai” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-005: Bo loc ngay khong chon ngay tuong lai")
     public void workerDateFilterDoesNotUseFutureDate() {
@@ -81,6 +104,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Khong co ngay qua khu hop le de loc.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-006: Ho so tho loc duoc theo mot ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-006: Ho so tho loc duoc theo mot ngay")
     public void workerDateFilterCanApplySingleDay() {
@@ -93,6 +119,9 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
                 "Ket qua loc mot ngay chua tai xong.");
     }
 
+    /**
+     * Thực thi test “WORKER-PROFILE-FILTER-007: Ho so tho loc duoc theo nhieu ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
             description = "WORKER-PROFILE-FILTER-007: Ho so tho loc duoc theo nhieu ngay")
     public void workerDateFilterCanApplyMultipleDays() {

@@ -7,10 +7,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Mở trình duyệt để tạo trước phiên Google và lưu profile phục vụ các test đăng nhập.
+ */
 public final class GoogleSessionSetup {
     private GoogleSessionSetup() {
     }
 
+    /**
+     * Cho phép chạy trực tiếp lớp này từ IDE mà không cần cấu hình TestNG XML.
+     * @param args các tham số dòng lệnh
+     */
     public static void main(String[] args) throws IOException {
         Path chrome = findChrome();
         Path profile = Path.of(TestConfig.persistentSeleniumProfileDirectory())
@@ -33,6 +40,10 @@ public final class GoogleSessionSetup {
         System.out.println("3. Run Java lai LoginDashboardSourceAccessTest.main().");
     }
 
+    /**
+     * Tìm chrome trong luồng kiểm thử.
+     * @return kết quả find chrome sau khi xử lý
+     */
     private static Path findChrome() {
         List<Path> candidates = List.of(
                 pathFromEnvironment("ProgramFiles", "Google", "Chrome", "Application", "chrome.exe"),
@@ -45,6 +56,12 @@ public final class GoogleSessionSetup {
                 .orElseThrow(() -> new IllegalStateException("Khong tim thay Google Chrome tren may."));
     }
 
+    /**
+     * Thực hiện xử lý path from environment trong luồng kiểm thử.
+     * @param variable giá trị variable được truyền vào
+     * @param children giá trị children được truyền vào
+     * @return kết quả path from environment sau khi xử lý
+     */
     private static Path pathFromEnvironment(String variable, String... children) {
         String root = System.getenv(variable);
         if (root == null || root.isBlank()) {

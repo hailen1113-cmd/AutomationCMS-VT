@@ -12,8 +12,14 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Kiểm tra tính đầy đủ và nhất quán của catalog dữ liệu chỉnh sửa thông tin eKYC.
+ */
 public class EkycInformationTestDataTest {
 
+    /**
+     * Thực hiện xử lý information test data has unique ids and required coverage trong luồng kiểm thử.
+     */
     @Test
     public void informationTestDataHasUniqueIdsAndRequiredCoverage() {
         var cases = EkycInformationTestData.cases();

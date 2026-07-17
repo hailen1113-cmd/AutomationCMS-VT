@@ -5,6 +5,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+/**
+ * Thực thi các test case giao diện Dashboard được nạp động từ workbook.
+ */
 public class DashboardWorkbookUiTest extends DashboardTestSupport {
     public static void main(String[] args) {
         TestNgRunner.run(DashboardWorkbookUiTest.class,
@@ -12,6 +15,10 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
                 "Kiem tra cac case workbook tren Dashboard");
     }
 
+    /**
+     * Thực hiện xử lý overview cards trong luồng kiểm thử.
+     * @return kết quả overview cards sau khi xử lý
+     */
     @DataProvider(name = "overviewCards", parallel = false)
     public Object[][] overviewCards() {
         return new Object[][]{
@@ -24,6 +31,11 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
         };
     }
 
+    /**
+     * Thực thi test “Workbook OVD-001..006: Card tong quan hien thi va co gia tri so” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param caseId giá trị case id được truyền vào
+     * @param label giá trị label được truyền vào
+     */
     @Test(dataProvider = "overviewCards",
             description = "Workbook OVD-001..006: Card tong quan hien thi va co gia tri so")
     public void overviewCardHasNumericValue(String caseId, String label) {
@@ -31,6 +43,10 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
                 caseId + " thieu hoac khong co gia tri so: " + label);
     }
 
+    /**
+     * Thực hiện xử lý dashboard sections trong luồng kiểm thử.
+     * @return kết quả dashboard sections sau khi xử lý
+     */
     @DataProvider(name = "dashboardSections", parallel = false)
     public Object[][] dashboardSections() {
         return new Object[][]{
@@ -40,6 +56,11 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
         };
     }
 
+    /**
+     * Thực thi test “Workbook dashboard section hien thi” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param caseId giá trị case id được truyền vào
+     * @param title giá trị title được truyền vào
+     */
     @Test(dataProvider = "dashboardSections",
             description = "Workbook dashboard section hien thi")
     public void dashboardSectionIsDisplayed(String caseId, String title) {
@@ -47,6 +68,10 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
                 caseId + " section khong hien thi: " + title);
     }
 
+    /**
+     * Thực hiện xử lý period selections trong luồng kiểm thử.
+     * @return kết quả period selections sau khi xử lý
+     */
     @DataProvider(name = "periodSelections", parallel = false)
     public Object[][] periodSelections() {
         return new Object[][]{
@@ -58,6 +83,12 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
         };
     }
 
+    /**
+     * Thực thi test “Workbook period selector doi duoc active state” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param caseId giá trị case id được truyền vào
+     * @param groupIndex giá trị group index được truyền vào
+     * @param label giá trị label được truyền vào
+     */
     @Test(dataProvider = "periodSelections",
             description = "Workbook period selector doi duoc active state")
     public void dashboardPeriodCanBeSelected(String caseId, int groupIndex, String label) {

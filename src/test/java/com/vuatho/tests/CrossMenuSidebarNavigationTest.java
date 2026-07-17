@@ -17,21 +17,36 @@ import org.testng.asserts.SoftAssert;
 
 import java.time.Duration;
 
+/**
+ * Xác nhận mỗi mục sidebar điều hướng đến đúng route và trang đích tải thành công.
+ */
 public class CrossMenuSidebarNavigationTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(CrossMenuSidebarNavigationTest.class, "ERP Cross-menu Suite", "ERP Cross-menu Navigation Tests");
     }
 
+    /**
+     * Thực hiện xử lý menu pages trong luồng kiểm thử.
+     * @return kết quả menu pages sau khi xử lý
+     */
     @DataProvider(name = "menuPages")
     public Object[][] menuPages() {
         return MenuCatalog.dataProviderRows();
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực thi test “CMS-MENU: Menu destination loads and scrolls to the bottom” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param target giá trị target được truyền vào
+     */
     @Test(dataProvider = "menuPages",
             groups = {"smoke", "navigation", "loadpage"},
             description = "CMS-MENU: Menu destination loads and scrolls to the bottom")

@@ -7,6 +7,9 @@ import org.testng.annotations.ITestAnnotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+/**
+ * Chỉ cho phép chạy test đăng xuất khi cờ cấu hình tương ứng được bật.
+ */
 public class LogoutTestsEnabled implements IAnnotationTransformer {
     @Override
     @SuppressWarnings("rawtypes")

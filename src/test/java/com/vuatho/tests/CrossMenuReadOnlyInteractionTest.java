@@ -11,6 +11,9 @@ import org.testng.annotations.Test;
 
 import static com.vuatho.navigation.MenuTarget.childOf;
 
+/**
+ * Kiểm tra các control chỉ đọc và thao tác không làm thay đổi dữ liệu trên nhiều menu.
+ */
 public class CrossMenuReadOnlyInteractionTest extends BaseTest {
     public static void main(String[] args) {
         TestNgRunner.run(CrossMenuReadOnlyInteractionTest.class,
@@ -18,11 +21,18 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
                 "Safe cross-menu functional tests");
     }
 
+    /**
+     * Cho biết có tái sử dụng cùng một WebDriver giữa các phương thức test hay không.
+     * @return kết quả reuse driver between test methods sau khi xử lý
+     */
     @Override
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
     }
 
+    /**
+     * Thực thi test “CMS-ORDER-VIEW: Order list can switch between table and card views” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-ORDER-VIEW: Order list can switch between table and card views")
     public void orderViewCanBeSwitched() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
@@ -32,6 +42,9 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
         features.switchView("Bảng");
     }
 
+    /**
+     * Thực thi test “CMS-TRANSACTION-TABS: Transaction tabs and pagination work” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-TRANSACTION-TABS: Transaction tabs and pagination work")
     public void transactionTabsAndPaginationWork() {
         open(childOf("Giao Dịch", "Lịch Sử Giao Dịch"));
@@ -41,6 +54,9 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
         features.goToPaginationPage("2");
     }
 
+    /**
+     * Thực thi test “CMS-MARKETING-TABS: Client/worker and period tabs work” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
     @Test(description = "CMS-MARKETING-TABS: Client/worker and period tabs work")
     public void marketingAudienceAndPeriodTabsWork() {
         open(childOf("Marketing", "Thống Kê Thợ - Khách"));
@@ -55,6 +71,10 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
         features.switchView("Tháng");
     }
 
+    /**
+     * Mở  trong luồng kiểm thử.
+     * @param target giá trị target được truyền vào
+     */
     private void open(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
