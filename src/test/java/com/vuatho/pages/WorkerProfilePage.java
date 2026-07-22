@@ -6,8 +6,10 @@ import com.vuatho.utils.PageLoadSynchronizer;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -57,6 +59,14 @@ public class WorkerProfilePage {
             "li[aria-label='next page button']");
     private static final By PAGE_ITEMS = By.cssSelector(
             "li[data-slot='item'][aria-label^='pagination item']");
+    private static final By CONNECTION_PENALTY_PERCENTAGE_INPUT = By.cssSelector(
+            "input[data-slot='input'][aria-label='Nhập phần trăm (tối thiểu 16%)']");
+    private static final By CONNECTION_PENALTY_DURATION_INPUT = By.cssSelector(
+            "input[data-slot='input'][aria-label='VD: 7']");
+    private static final By CONNECTION_PENALTY_CANCEL_BUTTON = By.xpath(
+            ".//button[@type='button' and normalize-space()='Bỏ qua']");
+    private static final By CONNECTION_PENALTY_APPLY_BUTTON = By.xpath(
+            ".//button[@type='button' and normalize-space()='Áp dụng']");
     private static final By TRANSACTION_HISTORY_HEADING = By.xpath(
             "//*[normalize-space()='Lịch sử giao dịch']");
     private static final List<String> KPI_LABELS = List.of(
@@ -79,6 +89,7 @@ public class WorkerProfilePage {
     private final WebDriver driver;
     private final WebDriverWait wait;
     private boolean workerDetailOpened;
+    private List<WebElement> visibleWorkerRowsSnapshot = List.of();
 
     /**
      * Kết quả đọc được sau khi mở một giao dịch trong tab trình duyệt mới.
@@ -148,12 +159,26 @@ public class WorkerProfilePage {
             boolean requiredFieldsPresent,
             boolean initialStateValid,
             boolean emptySubmissionBlocked,
+            boolean eachRequiredFieldBlocked,
+            boolean nonNumericValuesBlocked,
             boolean testDataEntered,
             boolean permanentDisablesBlockingDays,
             boolean permanentOffEnablesBlockingDays,
             boolean restrictionOptionsMutuallyExclusive,
             boolean cancelledWithoutCreatingViolation,
+            boolean cancelledFormReset,
             boolean topCloseButtonWorks) {
+    }
+
+    /** Kết quả validation các dữ liệu sai nhưng vẫn có hình thức hợp lệ để submit. */
+    public record WorkerPenaltyInvalidInputResult(
+            boolean invalidOrderBlocked,
+            boolean negativeAmountBlocked,
+            boolean negativeDaysBlocked,
+            boolean whitespaceTitleBlocked,
+            boolean whitespaceReasonBlocked,
+            boolean fixtureRemainsUsable,
+            boolean dialogCancelled) {
     }
 
     /** Kết quả sau khi áp dụng xử phạt thật trên sandbox. */
@@ -164,7 +189,73 @@ public class WorkerProfilePage {
             boolean blockedByExistingPenalty,
             boolean dialogClosed,
             boolean violationHistoryChanged,
-            boolean newViolationDisplayed) {
+            boolean newViolationDisplayed,
+            boolean singleHistoryRecordDisplayed,
+            boolean activePenaltyDisplayed,
+            boolean savedDetailsDisplayed) {
+    }
+
+    /** Kết quả kiểm tra các control và validation của popup Phí phạt kết nối. */
+    public record WorkerConnectionPenaltyDialogResult(
+            boolean dialogDisplayed,
+            boolean explanationDisplayed,
+            boolean requiredFieldsDisplayed,
+            boolean presetOptionsDisplayed,
+            boolean initialStateValid,
+            boolean emptySubmissionBlocked,
+            boolean presetOptionsSelectable,
+            boolean belowMinimumBlocked,
+            boolean nonNumericPercentageBlocked,
+            boolean invalidDurationBlocked,
+            boolean cancelledValuesNotPersisted,
+            boolean cancelledWithoutChangingPenalty) {
+    }
+
+    /** Kết quả áp dụng thật một mức phí phạt kết nối cho thợ đang bị phạt. */
+    public record WorkerConnectionPenaltyApplyResult(
+            boolean dialogDisplayed,
+            boolean requestedValuesEntered,
+            boolean submissionPerformed,
+            boolean dialogClosed,
+            boolean configuredValuesPersisted) {
+    }
+
+    /** Kết quả sau khi giảm số ngày còn lại của một lệnh phạt. */
+    public record WorkerPenaltyReductionResult(
+            boolean statusDialogDisplayed,
+            boolean reductionDialogDisplayed,
+            boolean reductionDataEntered,
+            boolean submissionPerformed,
+            boolean dialogClosed,
+            boolean remainingDaysUpdated) {
+    }
+
+    /** Kết quả sau khi gỡ lệnh phạt đang hoạt động. */
+    public record WorkerPenaltyRemovalResult(
+            boolean statusDialogDisplayed,
+            boolean removalOptionDisplayed,
+            boolean removalDialogDisplayed,
+            boolean paymentOptionsDisplayed,
+            boolean balanceSourcesDisplayed,
+            boolean requestedPaymentOptionSelected,
+            boolean requestedBalanceSourceSelected,
+            boolean confirmationPerformed,
+            boolean removalPerformed,
+            boolean statusDialogClosed,
+            boolean activePenaltyRemoved,
+            boolean removalShownInHistory) {
+    }
+
+    /** Kết quả kiểm tra popup gỡ phạt mà không thay đổi dữ liệu. */
+    public record WorkerPenaltyRemovalDialogResult(
+            boolean statusDialogDisplayed,
+            boolean removalDialogDisplayed,
+            boolean penaltySummaryDisplayed,
+            boolean paymentOptionsDisplayed,
+            boolean confirmationInitiallyAvailable,
+            boolean cancelButtonWorks,
+            boolean escapeKeyWorks,
+            boolean activePenaltyPreserved) {
     }
 
     /**
@@ -236,7 +327,7 @@ public class WorkerProfilePage {
         wait.until(webDriver -> driver.getCurrentUrl().contains(WORKER_PROFILE_ROUTE));
         wait.until(webDriver -> searchInput().isDisplayed());
         wait.until(webDriver -> noLoadingIndicatorIsVisible());
-        PageLoadSynchronizer.waitForDataToSettle(driver);
+        keepWorkerDetailVisible(Duration.ofMillis(500));
         wait.until(webDriver -> hasExpectedTableHeaders());
         return this;
     }
@@ -247,6 +338,19 @@ public class WorkerProfilePage {
     private void navigateToWorkerRoute() {
         js().executeScript("window.location.href = window.location.origin + arguments[0];", WORKER_PROFILE_ROUTE);
         wait.until(webDriver -> documentIsReady());
+    }
+
+    /** Tải lại route danh sách thợ để loại bỏ toàn bộ drawer/modal còn sót giữa các testcase. */
+    public WorkerProfilePage reloadWorkerList() {
+        navigateToWorkerRoute();
+        workerDetailOpened = false;
+        try {
+            waitUntilPageShellLoaded();
+            return restoreDefaultListIfNeeded();
+        } catch (RuntimeException exception) {
+            System.out.println("[WORKER PROFILE] Da dieu huong ve danh sach; UI se tiep tuc on dinh o testcase sau.");
+            return this;
+        }
     }
 
     /**
@@ -836,6 +940,48 @@ public class WorkerProfilePage {
     }
 
     /**
+     * Doc so luong vi pham hien thi tren dong tho; tra ve -1 neu khong doc duoc.
+     */
+    public int workerRowViolationCountAt(int rowIndex) {
+        String[] lines = workerRowTextAt(rowIndex).split("\\R");
+        for (int index = 1; index < lines.length; index++) {
+            if (lines[index].trim().matches("\\d{2}-\\d{2}-\\d{4}.*")
+                    && lines[index - 1].trim().matches("\\d+")) {
+                return Integer.parseInt(lines[index - 1].trim());
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Dem so dong tho dang hien thi tren trang danh sach hien tai.
+     * @return so dong tho dang hien thi
+     */
+    public int visibleWorkerCount() {
+        return visibleRows().size();
+    }
+
+    /**
+     * Chụp nội dung tất cả dòng thợ đang hiển thị bằng một lần truy vấn DOM.
+     * Dùng khi cần duyệt tìm fixture để tránh gọi lại visibleRows cho từng dòng.
+     */
+    public List<String> visibleWorkerRowTexts() {
+        visibleWorkerRowsSnapshot = visibleRows();
+        return visibleWorkerRowsSnapshot.stream()
+                .map(row -> row.getText().trim())
+                .toList();
+    }
+
+    /** Mở row từ snapshot vừa tạo bởi visibleWorkerRowTexts, không query lại toàn bảng. */
+    public void openWorkerInformationFromSnapshotAt(int rowIndex) {
+        if (rowIndex < 0 || rowIndex >= visibleWorkerRowsSnapshot.size()) {
+            throw new IllegalArgumentException("Worker snapshot row index is out of range: " + rowIndex);
+        }
+        dismissTransientOverlays();
+        openWorkerInformation(visibleWorkerRowsSnapshot.get(rowIndex));
+    }
+
+    /**
      * Tìm đúng dòng chứa tên thợ chỉ định và mở drawer Thông tin thợ của dòng đó.
      * @param workerName tên thợ cần mở
      */
@@ -1334,21 +1480,262 @@ public class WorkerProfilePage {
                 || normalizedHistory.contains("chua co hanh vi vi pham")) {
             return false;
         }
+        return true;
+    }
 
-        WebElement heading = visibleElement(By.xpath("//*[normalize-space()='Lịch sử vi phạm']"));
-        if (heading == null) {
+    /** Kiểm tra một mã đơn hoặc nội dung đã xuất hiện trong lịch sử vi phạm của thợ hiện tại. */
+    public boolean workerViolationHistoryContains(String value) {
+        return !value.isBlank() && workerViolationHistoryText().contains(value);
+    }
+
+    /**
+     * Kiểm tra nhanh backend có cho mở form tạo phạt trên thợ hiện tại hay không.
+     * Nếu mở được thì đóng ngay, không tạo dữ liệu.
+     */
+    public boolean workerPenaltyCreationIsAvailable() {
+        WebElement punishButton = visibleElement(By.xpath("//button[normalize-space()='Xử phạt']"));
+        if (punishButton == null || !punishButton.isEnabled()
+                || "true".equalsIgnoreCase(punishButton.getAttribute("aria-disabled"))) {
             return false;
         }
-        WebElement section = heading.findElements(
-                        By.xpath("ancestor::div[.//button[normalize-space()='Xử phạt']][1]"))
-                .stream()
-                .findFirst()
-                .orElse(heading);
-        return section.findElements(By.cssSelector("tbody tr")).stream()
-                .filter(WebElement::isDisplayed)
-                .map(row -> row.getText().trim())
-                .anyMatch(text -> !text.isBlank()
-                        && !TextNormalizer.normalize(text).contains("chua co hanh vi vi pham"));
+
+        clickCandidate(punishButton);
+        WebElement dialog;
+        try {
+            dialog = new WebDriverWait(driver, Duration.ofSeconds(3))
+                    .until(webDriver -> workerPenaltyDialog());
+        } catch (TimeoutException exception) {
+            dismissTransientOverlays();
+            return false;
+        }
+
+        List<WebElement> cancelButtons = dialog.findElements(
+                By.xpath(".//button[normalize-space()='Hủy bỏ']"));
+        if (!cancelButtons.isEmpty()) {
+            clickCandidate(cancelButtons.get(0));
+        } else {
+            driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        }
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerPenaltyDialog() == null);
+        return true;
+    }
+
+    /** Trả về số ngày xử phạt còn lại; -1 nếu không có lệnh phạt đang hoạt động. */
+    public int activeWorkerPenaltyRemainingDays() {
+        WebElement activePenaltyCard = activeWorkerPenaltyCard();
+        if (activePenaltyCard == null) {
+            return -1;
+        }
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("thoi han con lai:\\s*(\\d+)\\s*ngay")
+                .matcher(TextNormalizer.normalize(activePenaltyCard.getText()));
+        return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
+    }
+
+    /** Đối chiếu các dữ liệu quan trọng trên thẻ lệnh phạt đang hoạt động. */
+    public boolean activeWorkerPenaltyContains(String... expectedValues) {
+        WebElement activePenaltyCard = activeWorkerPenaltyCard();
+        return activePenaltyCard != null
+                && containsAllLoose(normalizedElementText(activePenaltyCard), expectedValues);
+    }
+
+    /** Đối chiếu một bản ghi xử phạt trong phần lịch sử theo các giá trị đã lưu. */
+    public boolean workerViolationHistoryContainsAll(String... expectedValues) {
+        return containsAllLoose(TextNormalizer.normalize(workerViolationHistoryText()), expectedValues);
+    }
+
+    /** Snapshot text của đúng vùng lịch sử, dùng cho log chẩn đoán khi backend/UI chưa đồng bộ. */
+    public String workerViolationHistorySnapshot() {
+        return workerViolationHistoryText();
+    }
+
+    /**
+     * Kiểm tra popup Phí phạt kết nối, gồm preset, validation bắt buộc/tối thiểu và nút Bỏ qua.
+     * Không lưu thay đổi xuống hệ thống.
+     */
+    public WorkerConnectionPenaltyDialogResult inspectWorkerConnectionPenaltyDialogAndCancel(
+            Duration observationDuration) {
+        int remainingDaysBefore = activeWorkerPenaltyRemainingDays();
+        WebElement dialog = openWorkerConnectionPenaltyDialog();
+        String dialogText = normalizedElementText(dialog);
+
+        WebElement percentageInput = connectionPenaltyPercentageField(dialog);
+        WebElement durationInput = connectionPenaltyDurationField(dialog);
+        WebElement applyButton = dialog.findElement(CONNECTION_PENALTY_APPLY_BUTTON);
+        boolean explanationDisplayed = dialogText.contains("mac dinh la 15%")
+                && dialogText.contains("toi thieu 16%");
+        boolean requiredFieldsDisplayed = percentageInput.isDisplayed()
+                && durationInput.isDisplayed()
+                && applyButton.isDisplayed()
+                && !dialog.findElements(CONNECTION_PENALTY_CANCEL_BUTTON).isEmpty();
+        List<String> presets = List.of("18%", "20%", "23%", "25%");
+        boolean presetOptionsDisplayed = true;
+        for (String preset : presets) {
+            presetOptionsDisplayed &= connectionPenaltyPreset(dialog, preset) != null;
+        }
+        String initialPercentage = percentageInput.getAttribute("value");
+        String initialDuration = durationInput.getAttribute("value");
+        boolean initialPercentageValid = initialPercentage.matches("\\d+")
+                && Integer.parseInt(initialPercentage) >= 16;
+        boolean initialDurationValid = initialDuration.isBlank()
+                || (initialDuration.matches("\\d+") && Integer.parseInt(initialDuration) > 0);
+        boolean initialStateValid = (initialPercentage.isBlank() && initialDuration.isBlank())
+                || (initialPercentageValid && initialDurationValid);
+
+        // Popup có thể giữ cấu hình từ lần chạy trước; luôn đưa form về rỗng trước khi test required.
+        enterPenaltyValue(percentageInput, "");
+        enterPenaltyValue(durationInput, "");
+
+        if (applyButton.isEnabled()) {
+            clickCandidate(applyButton);
+        }
+        boolean emptySubmissionBlocked = workerConnectionPenaltyDialog() != null;
+
+        boolean presetOptionsSelectable = presetOptionsDisplayed;
+        for (String preset : presets) {
+            dialog = wait.until(webDriver -> workerConnectionPenaltyDialog());
+            WebElement presetButton = connectionPenaltyPreset(dialog, preset);
+            if (presetButton == null) {
+                presetOptionsSelectable = false;
+                continue;
+            }
+            clickCandidate(presetButton);
+            String expectedValue = preset.replace("%", "");
+            WebElement currentPercentageInput = connectionPenaltyPercentageField(dialog);
+            boolean selected = expectedValue.equals(currentPercentageInput.getAttribute("value"))
+                    || "true".equalsIgnoreCase(presetButton.getAttribute("aria-pressed"))
+                    || "true".equalsIgnoreCase(presetButton.getAttribute("data-selected"));
+            presetOptionsSelectable &= selected;
+        }
+
+        dialog = wait.until(webDriver -> workerConnectionPenaltyDialog());
+        percentageInput = connectionPenaltyPercentageField(dialog);
+        durationInput = connectionPenaltyDurationField(dialog);
+        enterPenaltyValue(percentageInput, "15");
+        enterPenaltyValue(durationInput, "1");
+        applyButton = dialog.findElement(CONNECTION_PENALTY_APPLY_BUTTON);
+        if (applyButton.isEnabled()) {
+            clickCandidate(applyButton);
+        }
+        boolean belowMinimumBlocked = workerConnectionPenaltyDialog() != null;
+
+        dialog = currentWorkerConnectionPenaltyDialogOrOpen();
+        boolean nonNumericPercentageBlocked = connectionPenaltySubmissionBlocked(dialog, "abc", "1");
+
+        dialog = currentWorkerConnectionPenaltyDialogOrOpen();
+        boolean zeroDurationBlocked = connectionPenaltySubmissionBlocked(dialog, "18", "0");
+        dialog = currentWorkerConnectionPenaltyDialogOrOpen();
+        boolean nonNumericDurationBlocked = connectionPenaltySubmissionBlocked(dialog, "18", "abc");
+        boolean invalidDurationBlocked = zeroDurationBlocked && nonNumericDurationBlocked;
+        keepWorkerDetailVisible(observationDuration);
+
+        dialog = currentWorkerConnectionPenaltyDialogOrOpen();
+        clickCandidate(dialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerConnectionPenaltyDialog() == null);
+        closeWorkerPenaltyLevelDialog();
+
+        WebElement reopenedDialog = openWorkerConnectionPenaltyDialog();
+        boolean cancelledValuesNotPersisted = initialPercentage.equals(
+                        connectionPenaltyPercentageField(reopenedDialog).getAttribute("value"))
+                && initialDuration.equals(
+                        connectionPenaltyDurationField(reopenedDialog).getAttribute("value"));
+        clickCandidate(reopenedDialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerConnectionPenaltyDialog() == null);
+        closeWorkerPenaltyLevelDialog();
+        boolean penaltyUnchanged = remainingDaysBefore == activeWorkerPenaltyRemainingDays();
+
+        return new WorkerConnectionPenaltyDialogResult(
+                true,
+                explanationDisplayed,
+                requiredFieldsDisplayed,
+                presetOptionsDisplayed,
+                initialStateValid,
+                emptySubmissionBlocked,
+                presetOptionsSelectable,
+                belowMinimumBlocked,
+                nonNumericPercentageBlocked,
+                invalidDurationBlocked,
+                cancelledValuesNotPersisted,
+                penaltyUnchanged);
+    }
+
+    /** Chọn mức phí preset, nhập thời hạn và bấm Áp dụng thật trên sandbox. */
+    public WorkerConnectionPenaltyApplyResult applyWorkerConnectionPenalty(
+            String percentage,
+            String durationDays,
+            Duration observationDuration) {
+        WebElement dialog = openWorkerConnectionPenaltyDialog();
+        WebElement percentageInput = connectionPenaltyPercentageField(dialog);
+        WebElement durationInput = connectionPenaltyDurationField(dialog);
+
+        WebElement presetButton = connectionPenaltyPreset(dialog, percentage + "%");
+        if (presetButton != null) {
+            clickCandidate(presetButton);
+        }
+        if (!percentage.equals(percentageInput.getAttribute("value"))) {
+            enterPenaltyValue(percentageInput, percentage);
+        }
+        enterPenaltyValue(durationInput, durationDays);
+        boolean requestedValuesEntered = percentage.equals(percentageInput.getAttribute("value"))
+                && durationDays.equals(durationInput.getAttribute("value"));
+        keepWorkerDetailVisible(observationDuration);
+
+        clickCandidate(dialog.findElement(CONNECTION_PENALTY_APPLY_BUTTON));
+        boolean dialogClosed;
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(20))
+                    .until(webDriver -> workerConnectionPenaltyDialog() == null);
+            dialogClosed = true;
+        } catch (TimeoutException exception) {
+            dialogClosed = false;
+        }
+        if (!dialogClosed) {
+            return new WorkerConnectionPenaltyApplyResult(
+                    true, requestedValuesEntered, true, false, false);
+        }
+
+        // Popup đóng là đủ để tiếp tục. Không quét loading indicator toàn trang ở đây vì
+        // trang chi tiết giữ nhiều node ẩn và có thể làm ChromeDriver treo ở isDisplayed().
+        WebElement reopenedDialog = openWorkerConnectionPenaltyDialog();
+        boolean configuredValuesPersisted = percentage.equals(
+                        connectionPenaltyPercentageField(reopenedDialog).getAttribute("value"))
+                && durationDays.equals(
+                        connectionPenaltyDurationField(reopenedDialog).getAttribute("value"));
+        clickCandidate(reopenedDialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerConnectionPenaltyDialog() == null);
+
+        return new WorkerConnectionPenaltyApplyResult(
+                true, requestedValuesEntered, true, true, configuredValuesPersisted);
+    }
+
+    /**
+     * Mo popup Giam phat de doc so ngay con lai truc tiep tu form.
+     * Tra ve -1 neu tho hien tai khong co lenh phat co the giam.
+     */
+    public int activeWorkerPenaltyReductionRemainingDays() {
+        WebElement statusButton = visibleWorkerPenaltyStatusButton();
+        if (statusButton == null) {
+            return -1;
+        }
+
+        clickCandidate(statusButton);
+        WebElement statusDialog = wait.until(webDriver -> workerViolationDialog("trang thai"));
+        List<WebElement> reduceButtons = statusDialog.findElements(By.xpath(
+                ".//button[.//*[normalize-space()='Giảm phạt']]"));
+        if (reduceButtons.isEmpty()) {
+            closeWorkerPenaltyStatusDialogs();
+            return -1;
+        }
+        clickCandidate(reduceButtons.get(0));
+
+        WebElement reductionDialog = wait.until(webDriver -> workerPenaltyReductionDialog());
+        int remainingDays = remainingDaysInPenaltyReductionDialog(reductionDialog);
+        closeWorkerPenaltyReductionDialog();
+        return remainingDays;
     }
 
     /**
@@ -1407,10 +1794,77 @@ public class WorkerProfilePage {
         boolean emptySubmissionBlocked = workerPenaltyDialog() != null
                 && workerViolationHistoryText().equals(historyBefore);
 
-        enterPenaltyValue(orderInput, orderId);
-        enterPenaltyValue(titleInput, penaltyTitle);
-        enterPenaltyValue(reasonInput, reason);
-        enterPenaltyValue(amountInput, amount);
+        if (!emptySubmissionBlocked) {
+            throw new IllegalStateException("Form rỗng đã đóng popup hoặc tạo dữ liệu xử phạt.");
+        }
+
+        // Kiểm tra từng field bắt buộc trong cùng một popup để tăng coverage mà không tạo thêm user/data.
+        List<String> fieldPlaceholders = List.of(
+                "Nhập mã đơn",
+                "VD: Vi phạm quy định ứng xử",
+                "Nhập chi tiết hành vi vi phạm",
+                "Nhập số tiền",
+                "Số ngày");
+        List<String> requiredPlaceholders = fieldPlaceholders.stream()
+                .filter(placeholder -> penaltyFieldIsMarkedRequired(
+                        wait.until(webDriver -> workerPenaltyDialog()), placeholder))
+                .toList();
+        if (requiredPlaceholders.isEmpty()) {
+            throw new IllegalStateException(
+                    "Không đọc được field bắt buộc từ dấu * hoặc thuộc tính required của popup.");
+        }
+        System.out.println("[WORKER VIOLATION VALIDATION] Field bat buoc: "
+                + String.join(", ", requiredPlaceholders));
+        boolean eachRequiredFieldBlocked = true;
+        for (String missingPlaceholder : requiredPlaceholders) {
+            System.out.println("[WORKER VIOLATION VALIDATION] Bo trong: " + missingPlaceholder);
+            dialog = wait.until(webDriver -> workerPenaltyDialog());
+            boolean blocked = penaltySubmissionBlocked(
+                    dialog,
+                    "Nhập mã đơn".equals(missingPlaceholder) ? "" : orderId,
+                    "VD: Vi phạm quy định ứng xử".equals(missingPlaceholder) ? "" : penaltyTitle,
+                    "Nhập chi tiết hành vi vi phạm".equals(missingPlaceholder) ? "" : reason,
+                    "Nhập số tiền".equals(missingPlaceholder) ? "" : amount,
+                    "Số ngày".equals(missingPlaceholder) ? "" : blockingDays,
+                    historyBefore);
+            eachRequiredFieldBlocked &= blocked;
+            if (!blocked) {
+                throw new IllegalStateException(
+                        "Form đã chấp nhận khi thiếu field bắt buộc: " + missingPlaceholder);
+            }
+        }
+
+        boolean amountIsRequired = requiredPlaceholders.contains("Nhập số tiền");
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean invalidAmountBlocked = amountIsRequired
+                ? penaltySubmissionBlocked(
+                        dialog, orderId, penaltyTitle, reason, "abc", blockingDays, historyBefore)
+                : penaltyFieldRejectsNonNumericValue("Nhập số tiền");
+        if (!invalidAmountBlocked) {
+            throw new IllegalStateException("Form đã chấp nhận Số tiền không phải số.");
+        }
+        boolean daysAreRequired = requiredPlaceholders.contains("Số ngày");
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean invalidDaysBlocked = daysAreRequired
+                ? penaltySubmissionBlocked(
+                        dialog, orderId, penaltyTitle, reason, amount, "abc", historyBefore)
+                : penaltyFieldRejectsNonNumericValue("Số ngày");
+        if (!invalidDaysBlocked) {
+            throw new IllegalStateException("Form đã chấp nhận Thời hạn chặn không phải số.");
+        }
+        boolean nonNumericValuesBlocked = invalidAmountBlocked && invalidDaysBlocked;
+
+        enterPenaltyDialogValue("Nhập mã đơn", orderId);
+        enterPenaltyDialogValue("VD: Vi phạm quy định ứng xử", penaltyTitle);
+        enterPenaltyDialogValue("Nhập chi tiết hành vi vi phạm", reason);
+        enterPenaltyDialogValue("Nhập số tiền", amount);
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        orderInput = penaltyField(dialog, "Nhập mã đơn");
+        titleInput = penaltyField(dialog, "VD: Vi phạm quy định ứng xử");
+        reasonInput = penaltyField(dialog, "Nhập chi tiết hành vi vi phạm");
+        amountInput = penaltyField(dialog, "Nhập số tiền");
+        WebElement currentBlockingDaysInput = penaltyField(dialog, "Số ngày");
 
         WebElement permanentCheckbox = dialog.findElements(By.cssSelector("input[type='checkbox']"))
                 .stream()
@@ -1418,14 +1872,14 @@ public class WorkerProfilePage {
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy checkbox Vĩnh viễn."));
         clickFormControl(permanentCheckbox);
         wait.until(webDriver -> permanentCheckbox.isSelected());
-        wait.until(webDriver -> !blockingDaysInput.isEnabled());
-        boolean permanentDisablesBlockingDays = !blockingDaysInput.isEnabled();
+        wait.until(webDriver -> !currentBlockingDaysInput.isEnabled());
+        boolean permanentDisablesBlockingDays = !currentBlockingDaysInput.isEnabled();
         clickFormControl(permanentCheckbox);
         wait.until(webDriver -> !permanentCheckbox.isSelected());
-        wait.until(webDriver -> blockingDaysInput.isEnabled());
-        boolean permanentOffEnablesBlockingDays = blockingDaysInput.isEnabled();
+        wait.until(webDriver -> currentBlockingDaysInput.isEnabled());
+        boolean permanentOffEnablesBlockingDays = currentBlockingDaysInput.isEnabled();
 
-        enterPenaltyValue(blockingDaysInput, blockingDays);
+        enterPenaltyValue(currentBlockingDaysInput, blockingDays);
 
         List<WebElement> restrictionRadios = dialog.findElements(By.cssSelector("input[type='radio']"));
         if (restrictionRadios.size() < 2) {
@@ -1443,7 +1897,7 @@ public class WorkerProfilePage {
                 && penaltyTitle.equals(titleInput.getAttribute("value"))
                 && reason.equals(reasonInput.getAttribute("value"))
                 && !amountInput.getAttribute("value").isBlank()
-                && blockingDays.equals(blockingDaysInput.getAttribute("value"));
+                && blockingDays.equals(currentBlockingDaysInput.getAttribute("value"));
 
         keepWorkerDetailVisible(observationDuration);
         WebElement cancelButton = dialog.findElement(By.xpath(".//button[normalize-space()='Hủy bỏ']"));
@@ -1453,21 +1907,109 @@ public class WorkerProfilePage {
         boolean cancelledWithoutCreatingViolation = hasWorkerViolationHistorySection()
                 && workerViolationHistoryText().equals(historyBefore);
 
+        boolean cancelledFormReset = true;
         boolean topCloseButtonWorks = true;
         if (verifyAlternativeCloseMethods) {
-            topCloseButtonWorks = openAndClosePenaltyDialogWithTopButton();
+            clickCandidate(wait.until(webDriver -> visibleElement(
+                    By.xpath("//button[normalize-space()='Xử phạt']"))));
+            WebElement reopenedDialog = wait.until(webDriver -> workerPenaltyDialog());
+            cancelledFormReset = penaltyDialogFieldsAreBlank(reopenedDialog);
+            WebElement closeButton = reopenedDialog.findElement(By.xpath(
+                    ".//h5[normalize-space()='Thiết lập xử phạt']/parent::div/parent::div/button"));
+            clickCandidate(closeButton);
+            new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .until(webDriver -> workerPenaltyDialog() == null);
+            topCloseButtonWorks = hasWorkerViolationHistorySection();
         }
 
         return new WorkerPenaltyDialogResult(
                 requiredFieldsPresent,
                 initialStateValid,
                 emptySubmissionBlocked,
+                eachRequiredFieldBlocked,
+                nonNumericValuesBlocked,
                 testDataEntered,
                 permanentDisablesBlockingDays,
                 permanentOffEnablesBlockingDays,
                 restrictionOptionsMutuallyExclusive,
                 cancelledWithoutCreatingViolation,
+                cancelledFormReset,
                 topCloseButtonWorks);
+    }
+
+    /**
+     * Submit lần lượt các biến thể dữ liệu sai trên cùng một form. Nếu hệ thống nhận sai
+     * và tạo lệnh active, tự gỡ đúng lệnh vừa phát sinh để không làm bẩn fixture.
+     */
+    public WorkerPenaltyInvalidInputResult validateWorkerPenaltyInvalidInputs(
+            String validOrderId,
+            String invalidOrderId,
+            String validTitle,
+            String validReason,
+            String validAmount,
+            String validBlockingDays) {
+        String historyBefore = workerViolationHistoryText();
+        clickCandidate(wait.until(webDriver -> visibleElement(
+                By.xpath("//button[normalize-space()='Xử phạt']"))));
+        WebElement dialog = wait.until(webDriver -> workerPenaltyDialog());
+
+        boolean invalidOrderBlocked = penaltySubmissionBlocked(
+                dialog, invalidOrderId, validTitle, validReason,
+                validAmount, validBlockingDays, historyBefore);
+        if (!invalidOrderBlocked) {
+            boolean cleaned = cleanupUnexpectedActivePenalty();
+            return new WorkerPenaltyInvalidInputResult(
+                    false, false, false, false, false, cleaned, workerPenaltyDialog() == null);
+        }
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean negativeAmountBlocked = penaltySubmissionBlocked(
+                dialog, validOrderId, validTitle, validReason,
+                "-1", validBlockingDays, historyBefore);
+        if (!negativeAmountBlocked) {
+            boolean cleaned = cleanupUnexpectedActivePenalty();
+            return new WorkerPenaltyInvalidInputResult(
+                    true, false, false, false, false, cleaned, workerPenaltyDialog() == null);
+        }
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean negativeDaysBlocked = penaltySubmissionBlocked(
+                dialog, validOrderId, validTitle, validReason,
+                validAmount, "-1", historyBefore);
+        if (!negativeDaysBlocked) {
+            boolean cleaned = cleanupUnexpectedActivePenalty();
+            return new WorkerPenaltyInvalidInputResult(
+                    true, true, false, false, false, cleaned, workerPenaltyDialog() == null);
+        }
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean whitespaceTitleBlocked = penaltySubmissionBlocked(
+                dialog, validOrderId, "   ", validReason,
+                validAmount, validBlockingDays, historyBefore);
+        if (!whitespaceTitleBlocked) {
+            boolean cleaned = cleanupUnexpectedActivePenalty();
+            return new WorkerPenaltyInvalidInputResult(
+                    true, true, true, false, false, cleaned, workerPenaltyDialog() == null);
+        }
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        boolean whitespaceReasonBlocked = penaltySubmissionBlocked(
+                dialog, validOrderId, validTitle, "   ",
+                validAmount, validBlockingDays, historyBefore);
+        if (!whitespaceReasonBlocked) {
+            boolean cleaned = cleanupUnexpectedActivePenalty();
+            return new WorkerPenaltyInvalidInputResult(
+                    true, true, true, true, false, cleaned, workerPenaltyDialog() == null);
+        }
+
+        dialog = wait.until(webDriver -> workerPenaltyDialog());
+        clickCandidate(dialog.findElement(By.xpath(".//button[normalize-space()='Hủy bỏ']")));
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerPenaltyDialog() == null);
+        boolean fixtureRemainsUsable = workerViolationHistoryText().equals(historyBefore)
+                && activeWorkerPenaltyRemainingDays() < 0;
+        return new WorkerPenaltyInvalidInputResult(
+                true, true, true, true, true, fixtureRemainsUsable, true);
     }
 
     /**
@@ -1498,7 +2040,10 @@ public class WorkerProfilePage {
                     false,
                     true,
                     true,
-                    true);
+                    true,
+                    countTextOccurrences(workerViolationHistoryText(), penaltyTitle) == 1,
+                    activeWorkerPenaltyRemainingDays() >= 0,
+                    activeWorkerPenaltyContains(orderId, penaltyTitle));
         }
         WebElement punishButton = wait.until(webDriver -> visibleElement(
                 By.xpath("//button[normalize-space()='Xử phạt']")));
@@ -1509,7 +2054,8 @@ public class WorkerProfilePage {
                     .until(webDriver -> workerPenaltyDialog());
         } catch (TimeoutException exception) {
             System.out.println("[WORKER VIOLATION APPLY] He thong dang chan tao xu phat trung cho user nay.");
-            return new WorkerPenaltyApplyResult(orderId, penaltyTitle, false, true, false, false, false);
+            return new WorkerPenaltyApplyResult(
+                    orderId, penaltyTitle, false, true, false, false, false, false, false, false);
         }
 
         enterPenaltyValue(penaltyField(dialog, "Nhập mã đơn"), orderId);
@@ -1533,9 +2079,22 @@ public class WorkerProfilePage {
         // Bảng lịch sử không tự fetch lại sau khi popup đóng; đổi tab để tải dữ liệu mới từ backend.
         openWorkerDetailTab("Tổng quan");
         openWorkerDetailTab("Xử lý vi phạm");
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(10)).until(webDriver ->
+                    workerViolationHistoryContains(orderId)
+                            || workerViolationHistoryContains(penaltyTitle));
+        } catch (TimeoutException ignored) {
+            // Các boolean bên dưới sẽ tạo assertion rõ ràng nếu backend chưa trả bản ghi.
+        }
         String historyAfter = workerViolationHistoryText();
         boolean historyChanged = !historyAfter.equals(historyBefore);
         boolean recordDisplayed = historyAfter.contains(orderId) || historyAfter.contains(penaltyTitle);
+        boolean singleHistoryRecordDisplayed = countTextOccurrences(historyAfter, penaltyTitle) == 1;
+        boolean activePenaltyDisplayed = activeWorkerPenaltyRemainingDays() >= 0;
+        boolean savedDetailsDisplayed = activeWorkerPenaltyContains(
+                        orderId, penaltyTitle, reason, amount, "Chặn tìm việc")
+                && workerViolationHistoryContainsAll(
+                        orderId, penaltyTitle, reason, amount, "Chặn tìm việc");
         if (!historyChanged) {
             System.out.println("[WORKER VIOLATION APPLY] Popup da dong; bang lich su chua refresh kip du lieu moi.");
         }
@@ -1546,7 +2105,311 @@ public class WorkerProfilePage {
                 false,
                 workerPenaltyDialog() == null,
                 historyChanged,
-                recordDisplayed);
+                recordDisplayed,
+                singleHistoryRecordDisplayed,
+                activePenaltyDisplayed,
+                savedDetailsDisplayed);
+    }
+
+    /** Mở Trạng thái, chọn Giảm phạt, nhập số ngày giảm và áp dụng. */
+    public WorkerPenaltyReductionResult reduceActiveWorkerPenalty(
+            String reductionDays,
+            int expectedRemainingDays,
+            Duration observationDuration) {
+        WebElement statusButton = wait.until(webDriver -> visibleWorkerPenaltyStatusButton());
+        clickCandidate(statusButton);
+
+        WebElement statusDialog = wait.until(webDriver -> workerViolationDialog("trang thai"));
+        boolean statusDialogDisplayed = TextNormalizer.normalize(statusDialog.getText()).contains("giam phat");
+        clickCandidate(statusDialog.findElement(By.xpath(".//*[normalize-space()='Giảm phạt']")));
+
+        WebElement reductionDialog = wait.until(webDriver -> workerPenaltyReductionDialog());
+        int remainingDaysInDialog = remainingDaysInPenaltyReductionDialog(reductionDialog);
+        if (remainingDaysInDialog <= Integer.parseInt(reductionDays)) {
+            closeWorkerPenaltyReductionDialog();
+            return new WorkerPenaltyReductionResult(
+                    statusDialogDisplayed,
+                    true,
+                    false,
+                    false,
+                    workerPenaltyReductionDialog() == null,
+                    false);
+        }
+        WebElement reductionInput = penaltyField(reductionDialog, "Số ngày muốn giảm");
+        boolean reductionDialogDisplayed = reductionDialog
+                .findElements(By.xpath(".//button[normalize-space()='Áp dụng']")).size() == 1;
+        enterPenaltyValue(reductionInput, reductionDays);
+        boolean reductionDataEntered = reductionDays.equals(reductionInput.getAttribute("value"));
+        keepWorkerDetailVisible(observationDuration);
+
+        clickCandidate(reductionDialog.findElement(By.xpath(".//button[normalize-space()='Áp dụng']")));
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(20)).until(webDriver ->
+                    workerPenaltyReductionDialog() == null
+                            || activeWorkerPenaltyRemainingDays() == expectedRemainingDays);
+        } catch (TimeoutException exception) {
+            WebElement stillOpen = workerPenaltyReductionDialog();
+            System.out.println("[WORKER PENALTY REDUCE] Popup sau Ap dung: "
+                    + (stillOpen == null ? "da dong" : stillOpen.getText().replaceAll("\\R", " | ")));
+            System.out.println("[WORKER PENALTY REDUCE] So ngay hien tai: "
+                    + activeWorkerPenaltyRemainingDays());
+            throw exception;
+        }
+        WebElement stillOpen = workerPenaltyReductionDialog();
+        if (stillOpen != null && activeWorkerPenaltyRemainingDays() == expectedRemainingDays) {
+            closeWorkerPenaltyReductionDialog();
+        }
+        PageLoadSynchronizer.waitForDataToSettle(driver);
+        openWorkerDetailTab("Tổng quan");
+        openWorkerDetailTab("Xử lý vi phạm");
+
+        String normalizedPage = TextNormalizer.normalize(driver.findElement(By.tagName("body")).getText());
+        boolean remainingDaysUpdated = normalizedPage.contains(
+                "thoi han con lai: " + expectedRemainingDays + " ngay");
+        return new WorkerPenaltyReductionResult(
+                statusDialogDisplayed,
+                reductionDialogDisplayed,
+                reductionDataEntered,
+                true,
+                workerPenaltyReductionDialog() == null,
+                remainingDaysUpdated);
+    }
+
+    /** Mở Trạng thái và chọn Gỡ phạt cho lệnh phạt đang hoạt động. */
+    public WorkerPenaltyRemovalResult removeActiveWorkerPenalty() {
+        return removeActiveWorkerPenalty("ghi nhan da thu", "chi phi", Duration.ZERO);
+    }
+
+    /** Mở Trạng thái, chọn cách xử lý tiền rồi xác nhận gỡ phạt. */
+    public WorkerPenaltyRemovalResult removeActiveWorkerPenalty(String normalizedPaymentOption) {
+        return removeActiveWorkerPenalty(normalizedPaymentOption, "chi phi", Duration.ZERO);
+    }
+
+    /** Mở Trạng thái, chọn cách xử lý tiền và nguồn số dư rồi xác nhận gỡ phạt. */
+    public WorkerPenaltyRemovalResult removeActiveWorkerPenalty(
+            String normalizedPaymentOption,
+            String normalizedBalanceSource) {
+        return removeActiveWorkerPenalty(normalizedPaymentOption, normalizedBalanceSource, Duration.ZERO);
+    }
+
+    /** Mở popup, chọn đúng cách xử lý/nguồn tiền, giữ màn hình để quan sát rồi xác nhận gỡ phạt. */
+    public WorkerPenaltyRemovalResult removeActiveWorkerPenalty(
+            String normalizedPaymentOption,
+            String normalizedBalanceSource,
+            Duration observationDuration) {
+        clickCandidate(wait.until(webDriver -> visibleWorkerPenaltyStatusButton()));
+
+        WebElement statusDialog = wait.until(webDriver -> workerViolationDialog("trang thai"));
+        boolean statusDialogDisplayed = statusDialog != null;
+        System.out.println("[WORKER PENALTY REMOVE] Da mo popup Trang thai.");
+        keepWorkerDetailVisible(observationDuration);
+        WebElement removalButton = statusDialog.findElement(By.xpath(
+                ".//button[.//*[normalize-space()='Gỡ phạt']]"));
+        boolean removalOptionDisplayed = removalButton.isDisplayed();
+        clickCandidate(removalButton);
+
+        WebElement removalDialog = new WebDriverWait(driver, Duration.ofSeconds(20))
+                .until(webDriver -> workerPenaltyRemovalDialog());
+        boolean removalDialogDisplayed = removalDialog != null;
+        System.out.println("[WORKER PENALTY REMOVE] Da mo popup Go phat.");
+        keepWorkerDetailVisible(observationDuration);
+        List<WebElement> paidButtons = removalDialog.findElements(By.tagName("button")).stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> normalizedElementText(button).startsWith("ghi nhan da thu"))
+                .toList();
+        List<WebElement> refundButtons = removalDialog.findElements(By.tagName("button")).stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> normalizedElementText(button).startsWith("tru so du tho"))
+                .toList();
+        boolean paymentOptionsDisplayed = !paidButtons.isEmpty() && !refundButtons.isEmpty();
+
+        List<WebElement> selectedPaymentButtons = "tru so du tho".equals(normalizedPaymentOption)
+                ? refundButtons
+                : paidButtons;
+        if (selectedPaymentButtons.isEmpty()) {
+            throw new NoSuchElementException("Khong tim thay cach xu ly tien phat: " + normalizedPaymentOption);
+        }
+        System.out.println("[WORKER PENALTY REMOVE] Chon cach xu ly: " + normalizedPaymentOption + ".");
+        clickCandidate(selectedPaymentButtons.get(0));
+        PageLoadSynchronizer.waitForDataToSettle(driver);
+        WebElement dialogAfterPaymentSelection = workerPenaltyRemovalDialog();
+        keepWorkerDetailVisible(observationDuration);
+        boolean balanceSourcesDisplayed = !"tru so du tho".equals(normalizedPaymentOption)
+                || (dialogAfterPaymentSelection != null
+                        && normalizedElementText(dialogAfterPaymentSelection).contains("chi phi")
+                        && normalizedElementText(dialogAfterPaymentSelection).contains("ky quy"));
+        if ("tru so du tho".equals(normalizedPaymentOption) && dialogAfterPaymentSelection != null) {
+            WebElement balanceSourceButton = dialogAfterPaymentSelection.findElements(By.tagName("button")).stream()
+                    .filter(this::isElementDisplayed)
+                    .filter(button -> normalizedElementText(button).startsWith(normalizedBalanceSource))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Khong tim thay nguon so du: " + normalizedBalanceSource));
+            System.out.println("[WORKER PENALTY REMOVE] Chon nguon so du: " + normalizedBalanceSource + ".");
+            clickCandidate(balanceSourceButton);
+            PageLoadSynchronizer.waitForDataToSettle(driver);
+            dialogAfterPaymentSelection = workerPenaltyRemovalDialog();
+            keepWorkerDetailVisible(observationDuration);
+        }
+        boolean confirmationPerformed;
+        boolean requestedPaymentOptionSelected;
+        boolean requestedBalanceSourceSelected;
+        if (dialogAfterPaymentSelection == null) {
+            throw new NoSuchElementException("Popup Go phat bien mat truoc khi xac nhan.");
+        } else {
+            WebElement confirmButton;
+            try {
+                confirmButton = new WebDriverWait(driver, Duration.ofSeconds(10)).until(webDriver -> {
+                    WebElement currentDialog = workerPenaltyRemovalDialog();
+                    if (currentDialog == null) {
+                        return null;
+                    }
+                    return currentDialog.findElements(By.tagName("button")).stream()
+                            .filter(this::isElementDisplayed)
+                            .filter(button -> {
+                                String text = normalizedElementText(button);
+                                return button.isEnabled()
+                                        && ("tru so du tho".equals(normalizedPaymentOption)
+                                                ? text.startsWith("go & tru")
+                                                : text.startsWith("go phat"));
+                            })
+                            .findFirst()
+                            .orElse(null);
+                });
+            } catch (TimeoutException exception) {
+                WebElement currentDialog = workerPenaltyRemovalDialog();
+                if (currentDialog != null) {
+                    currentDialog.findElements(By.tagName("button")).stream()
+                            .filter(this::isElementDisplayed)
+                            .forEach(button -> System.out.println(
+                                    "[WORKER PENALTY REMOVE] Nut sau chon " + normalizedPaymentOption
+                                            + ": " + normalizedElementText(button)
+                                            + ", enabled=" + button.isEnabled()
+                                            + ", aria-disabled=" + button.getAttribute("aria-disabled")));
+                }
+                throw exception;
+            }
+            String normalizedConfirmText = normalizedElementText(confirmButton);
+            requestedPaymentOptionSelected = "tru so du tho".equals(normalizedPaymentOption)
+                    ? normalizedConfirmText.startsWith("go & tru")
+                    : normalizedConfirmText.startsWith("go phat");
+            requestedBalanceSourceSelected = !"tru so du tho".equals(normalizedPaymentOption)
+                    || normalizedConfirmText.contains(normalizedBalanceSource);
+            System.out.println("[WORKER PENALTY REMOVE] Nut xac nhan: " + normalizedConfirmText + ".");
+            if (!requestedPaymentOptionSelected || !requestedBalanceSourceSelected) {
+                throw new IllegalStateException("Popup chua chon dung cach xu ly hoac nguon so du.");
+            }
+            System.out.println("[WORKER PENALTY REMOVE] Sap bam nut xac nhan sau khi quan sat popup.");
+            clickCandidate(confirmButton);
+            confirmationPerformed = true;
+        }
+
+        if (workerPenaltyRemovalDialog() != null) {
+            new WebDriverWait(driver, Duration.ofSeconds(20))
+                    .until(webDriver -> workerPenaltyRemovalDialog() == null);
+        }
+        closeWorkerPenaltyStatusDialogs();
+        boolean statusDialogClosed = workerViolationDialog("trang thai") == null;
+        PageLoadSynchronizer.waitForDataToSettle(driver);
+        openWorkerDetailTab("Tổng quan");
+        openWorkerDetailTab("Xử lý vi phạm");
+
+        boolean activePenaltyRemoved;
+        try {
+            activePenaltyRemoved = new WebDriverWait(driver, Duration.ofSeconds(20))
+                    .until(webDriver -> activeWorkerPenaltyRemainingDays() < 0);
+        } catch (TimeoutException exception) {
+            activePenaltyRemoved = false;
+            System.out.println("[WORKER PENALTY REMOVE] Lenh phat van dang hoat dong, so ngay con lai: "
+                    + activeWorkerPenaltyRemainingDays());
+        }
+        String normalizedPage = TextNormalizer.normalize(driver.findElement(By.tagName("body")).getText());
+        boolean removalShownInHistory = normalizedPage.contains("go phat")
+                || normalizedPage.contains("da go phat");
+        return new WorkerPenaltyRemovalResult(
+                statusDialogDisplayed,
+                removalOptionDisplayed,
+                removalDialogDisplayed,
+                paymentOptionsDisplayed,
+                balanceSourcesDisplayed,
+                requestedPaymentOptionSelected,
+                requestedBalanceSourceSelected,
+                confirmationPerformed,
+                true,
+                statusDialogClosed,
+                activePenaltyRemoved,
+                removalShownInHistory);
+    }
+
+    /** Kiểm tra nội dung, validation và các cách đóng popup gỡ phạt mà không submit. */
+    public WorkerPenaltyRemovalDialogResult inspectActiveWorkerPenaltyRemovalDialogAndCancel() {
+        return inspectActiveWorkerPenaltyRemovalDialogAndCancel(Duration.ZERO);
+    }
+
+    /** Kiểm tra popup gỡ phạt, giữ từng trạng thái để có thể quan sát khi chạy có giao diện. */
+    public WorkerPenaltyRemovalDialogResult inspectActiveWorkerPenaltyRemovalDialogAndCancel(
+            Duration observationDuration) {
+        clickCandidate(wait.until(webDriver -> visibleWorkerPenaltyStatusButton()));
+        WebElement statusDialog = wait.until(webDriver -> workerViolationDialog("trang thai"));
+        boolean statusDialogDisplayed = statusDialog != null;
+        keepWorkerDetailVisible(observationDuration);
+        clickCandidate(statusDialog.findElement(By.xpath(
+                ".//button[.//*[normalize-space()='Gỡ phạt']]")));
+
+        WebElement removalDialog = wait.until(webDriver -> workerPenaltyRemovalDialog());
+        keepWorkerDetailVisible(observationDuration);
+        String removalText = normalizedElementText(removalDialog);
+        boolean removalDialogDisplayed = removalDialog != null;
+        boolean penaltySummaryDisplayed = removalText.contains("ma don:")
+                && removalText.contains("so tien:");
+        boolean paymentOptionsDisplayed = removalText.contains("ghi nhan da thu")
+                && removalText.contains("tru so du tho");
+        WebElement initialConfirmButton = removalDialog.findElements(By.tagName("button")).stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> normalizedElementText(button).contains("xac nhan go phat"))
+                .findFirst()
+                .orElse(null);
+        boolean confirmationInitiallyAvailable = initialConfirmButton != null
+                && initialConfirmButton.isDisplayed();
+
+        WebElement cancelButton = removalDialog.findElements(By.tagName("button")).stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> normalizedElementText(button).equals("huy bo"))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Khong tim thay nut Huy bo popup Go phat."));
+        clickCandidate(cancelButton);
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(webDriver -> workerPenaltyRemovalDialog() == null);
+        closeWorkerPenaltyStatusDialogs();
+        boolean cancelButtonWorks = hasActiveWorkerPenaltyStatusAction();
+
+        clickCandidate(wait.until(webDriver -> visibleWorkerPenaltyStatusButton()));
+        statusDialog = wait.until(webDriver -> workerViolationDialog("trang thai"));
+        clickCandidate(statusDialog.findElement(By.xpath(
+                ".//button[.//*[normalize-space()='Gỡ phạt']]")));
+        wait.until(webDriver -> workerPenaltyRemovalDialog());
+        keepWorkerDetailVisible(observationDuration);
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(webDriver -> workerPenaltyRemovalDialog() == null);
+        closeWorkerPenaltyStatusDialogs();
+        boolean escapeKeyWorks = workerPenaltyRemovalDialog() == null;
+        boolean activePenaltyPreserved = cancelButtonWorks;
+
+        return new WorkerPenaltyRemovalDialogResult(
+                statusDialogDisplayed,
+                removalDialogDisplayed,
+                penaltySummaryDisplayed,
+                paymentOptionsDisplayed,
+                confirmationInitiallyAvailable,
+                cancelButtonWorks,
+                escapeKeyWorks,
+                activePenaltyPreserved);
+    }
+
+    /** Cho biết hồ sơ đang mở có nút thao tác trạng thái của lệnh phạt hoạt động hay không. */
+    public boolean hasActiveWorkerPenaltyStatusAction() {
+        return visibleWorkerPenaltyStatusButton() != null;
     }
 
     /**
@@ -2102,22 +2965,12 @@ public class WorkerProfilePage {
      * @return kết quả worker information actions sau khi xử lý
      */
     private List<WebElement> workerInformationActions(WebElement row) {
-        List<WebElement> cells = row.findElements(By.cssSelector("td, [role='gridcell']")).stream()
-                .filter(WebElement::isDisplayed)
-                .filter(cell -> cell.getRect().getWidth() > 0 && cell.getRect().getHeight() > 0)
-                .toList();
+        List<WebElement> cells = row.findElements(By.cssSelector("td, [role='gridcell']"));
         if (cells.size() >= 2) {
             WebElement infoCell = cells.get(1);
-            List<WebElement> children = infoCell.findElements(By.cssSelector("a, button, [role='button'], span, p, div"))
-                    .stream()
-                    .filter(WebElement::isDisplayed)
-                    .filter(element -> element.getRect().getWidth() > 0 && element.getRect().getHeight() > 0)
-                    .filter(element -> !element.getText().isBlank())
-                    .toList();
-            return java.util.stream.Stream.concat(
-                            java.util.stream.Stream.concat(children.stream(), java.util.stream.Stream.of(infoCell)),
-                            java.util.stream.Stream.of(row))
-                    .toList();
+            // Click ô thông tin trước, sau đó fallback sang row. Không quét toàn bộ
+            // span/p/div con hoặc gọi getRect vì mỗi call là một HTTP command WebDriver.
+            return List.of(infoCell, row);
         }
         return List.of(row);
     }
@@ -2446,10 +3299,181 @@ public class WorkerProfilePage {
     private WebElement workerPenaltyDialog() {
         return driver.findElements(By.cssSelector("[role='dialog'], section[aria-modal='true']"))
                 .stream()
-                .filter(WebElement::isDisplayed)
-                .filter(dialog -> TextNormalizer.normalize(dialog.getText()).contains("thiet lap xu phat"))
+                .filter(this::isElementDisplayed)
+                .filter(dialog -> normalizedElementText(dialog).contains("thiet lap xu phat"))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /** Tìm popup chọn loại mức phạt mở ra ngay sau khi bấm nút Mức phạt. */
+    private WebElement workerPenaltyLevelDialog() {
+        return driver.findElements(By.xpath(
+                        "//section[@role='dialog' and @data-open='true'"
+                                + " and .//*[self::h4 or self::h5][normalize-space()='Mức phạt']]"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Tìm popup form Phí phạt kết nối, không nhầm với lựa chọn trong popup Mức phạt. */
+    private WebElement workerConnectionPenaltyDialog() {
+        return driver.findElements(By.xpath(
+                        "//section[@role='dialog' and @data-open='true'"
+                                + " and .//*[self::h4 or self::h5][normalize-space()='Phí phạt kết nối']]"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Đi đủ hai bước Mức phạt -> Phí phạt kết nối và trả về form cấu hình. */
+    private WebElement openWorkerConnectionPenaltyDialog() {
+        clickCandidate(wait.until(webDriver -> visibleWorkerConnectionPenaltyButton()));
+        WebElement levelDialog = wait.until(webDriver -> workerPenaltyLevelDialog());
+        WebElement connectionPenaltyOption = levelDialog.findElements(By.xpath(
+                        ".//button[contains(normalize-space(.), 'Phí phạt kết nối')]"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Popup Mức phạt không có lựa chọn Phí phạt kết nối."));
+        clickCandidate(connectionPenaltyOption);
+        return wait.until(webDriver -> workerConnectionPenaltyDialog());
+    }
+
+    /** Đóng popup chọn Mức phạt nếu form Bỏ qua quay lại popup trung gian. */
+    private void closeWorkerPenaltyLevelDialog() {
+        if (workerPenaltyLevelDialog() == null) {
+            return;
+        }
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerPenaltyLevelDialog() == null);
+    }
+
+    /** Tìm popup thao tác trạng thái vi phạm theo nội dung tiêu đề. */
+    private WebElement workerViolationDialog(String normalizedTitle) {
+        if ("trang thai".equals(normalizedTitle)) {
+            return driver.findElements(By.xpath(
+                            "//section[@role='dialog' and @data-open='true'"
+                                    + " and .//h4[normalize-space()='Trạng thái']]"))
+                    .stream()
+                    .filter(this::isElementDisplayed)
+                    .findFirst()
+                    .orElse(null);
+        }
+        return driver.findElements(By.cssSelector("[role='dialog'], section[aria-modal='true']"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .filter(dialog -> normalizedElementText(dialog).contains(normalizedTitle))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Tìm đúng popup Giảm phạt, không nhầm với popup Trạng thái cũng chứa cùng nhãn. */
+    private WebElement workerPenaltyReductionDialog() {
+        return driver.findElements(By.cssSelector("[role='dialog'], section[aria-modal='true']"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .filter(this::hasPenaltyReductionInput)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Tìm popup xác nhận gỡ phạt, phân biệt với popup chọn trạng thái. */
+    private WebElement workerPenaltyRemovalDialog() {
+        return driver.findElements(By.cssSelector("[role='dialog'], section[aria-modal='true']"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .filter(dialog -> {
+                    String text = normalizedElementText(dialog);
+                    return text.contains("chon cach xu ly tien phat khi go lenh")
+                            && text.contains("cach xu ly tien phat");
+                })
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Kiem tra popup co field So ngay muon giam va bo qua dialog da stale. */
+    private boolean hasPenaltyReductionInput(WebElement dialog) {
+        try {
+            return dialog.findElements(By.cssSelector("input[placeholder]")).stream()
+                    .anyMatch(input -> TextNormalizer.normalize(input.getAttribute("placeholder"))
+                            .contains("so ngay muon giam"));
+        } catch (StaleElementReferenceException exception) {
+            return false;
+        }
+    }
+
+    /** Doc so ngay con lai trong popup Giam phat. */
+    private int remainingDaysInPenaltyReductionDialog(WebElement dialog) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("so ngay con lai:\\s*(\\d+)\\s*ngay")
+                .matcher(TextNormalizer.normalize(dialog.getText()));
+        return matcher.find() ? Integer.parseInt(matcher.group(1)) : -1;
+    }
+
+    /** Dong popup Giam phat neu dang mo. */
+    private void closeWorkerPenaltyReductionDialog() {
+        WebElement reductionDialog = workerPenaltyReductionDialog();
+        if (reductionDialog == null) {
+            closeWorkerPenaltyStatusDialogs();
+            return;
+        }
+        List<WebElement> cancelButtons = reductionDialog.findElements(By.xpath(".//button[normalize-space()='Hủy bỏ']"));
+        if (!cancelButtons.isEmpty()) {
+            clickCandidate(cancelButtons.get(0));
+        } else {
+            driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        }
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerPenaltyReductionDialog() == null);
+        closeWorkerPenaltyStatusDialogs();
+    }
+
+    /** Dong popup Trang thai neu dang mo. */
+    private void closeWorkerPenaltyStatusDialogs() {
+        WebElement statusDialog = workerViolationDialog("trang thai");
+        if (statusDialog == null) {
+            return;
+        }
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(webDriver -> workerViolationDialog("trang thai") == null);
+    }
+
+    /** Tìm nút Trạng thái của thẻ phạt, loại nút tiêu đề cột cùng tên trong bảng. */
+    private WebElement visibleWorkerPenaltyStatusButton() {
+        return driver.findElements(By.xpath("//button[normalize-space()='Trạng thái']"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> String.valueOf(button.getAttribute("class")).contains("inline-flex"))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Tìm nút Mức phạt trên thẻ lệnh phạt đang hoạt động. */
+    private WebElement visibleWorkerConnectionPenaltyButton() {
+        return driver.findElements(By.xpath("//button[normalize-space()='Mức phạt']"))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .filter(button -> String.valueOf(button.getAttribute("class")).contains("inline-flex"))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /** Tìm card chứa lệnh phạt đang hoạt động từ nút Trạng thái trên chính card đó. */
+    private WebElement activeWorkerPenaltyCard() {
+        WebElement statusButton = visibleWorkerPenaltyStatusButton();
+        if (statusButton == null) {
+            return null;
+        }
+        return statusButton.findElements(By.xpath(
+                        "ancestor::div[.//*[normalize-space()='Đang trong thời gian xử phạt']][1]"))
+                .stream()
+                .findFirst()
+                .orElse(statusButton);
     }
 
     /** Đọc nội dung phần Lịch sử vi phạm để phát hiện thay đổi ngoài ý muốn. */
@@ -2458,11 +3482,67 @@ public class WorkerProfilePage {
         if (heading == null) {
             return "";
         }
-        WebElement section = heading.findElements(By.xpath("ancestor::div[.//button[normalize-space()='Xử phạt']][1]"))
+        List<String> rowTexts = heading.findElements(By.xpath("following::tbody[1]/tr")).stream()
+                .filter(this::isElementDisplayed)
+                .map(row -> row.getText().trim())
+                .filter(text -> !text.isBlank())
+                .toList();
+        if (!rowTexts.isEmpty()) {
+            return String.join(System.lineSeparator(), rowTexts);
+        }
+        List<WebElement> historyCandidates = heading.findElements(By.xpath(
+                "following::*[self::table or self::tbody or @role='rowgroup' or @role='row']"));
+        System.out.println("[WORKER VIOLATION HISTORY] Khong thay tbody row; candidates="
+                + historyCandidates.size());
+        for (int index = 0; index < Math.min(5, historyCandidates.size()); index++) {
+            WebElement candidate = historyCandidates.get(index);
+            System.out.println("[WORKER VIOLATION HISTORY] tag=" + candidate.getTagName()
+                    + ", role=" + candidate.getAttribute("role")
+                    + ", text=" + candidate.getText().replaceAll("\\R", " | "));
+        }
+        WebElement historyContext = heading.findElement(By.xpath("parent::*/parent::*"));
+        String contextHtml = String.valueOf(historyContext.getAttribute("outerHTML"));
+        System.out.println("[WORKER VIOLATION HISTORY DOM] "
+                + contextHtml.substring(0, Math.min(12000, contextHtml.length())));
+        return heading.findElements(By.xpath(
+                        "following::*[contains(normalize-space(), 'Chưa có hành vi vi phạm')][1]"))
                 .stream()
+                .filter(this::isElementDisplayed)
+                .map(element -> element.getText().trim())
+                .filter(text -> !text.isBlank())
                 .findFirst()
-                .orElse(heading);
-        return section.getText().trim();
+                .orElse("");
+    }
+
+    /** So sánh lỏng để chấp nhận cách UI định dạng tiền như 1,000đ nhưng vẫn bắt sai dữ liệu. */
+    private boolean containsAllLoose(String actual, String... expectedValues) {
+        String compactActual = TextNormalizer.normalize(actual).replaceAll("[^a-z0-9]", "");
+        for (String expectedValue : expectedValues) {
+            if (expectedValue == null || expectedValue.isBlank()) {
+                continue;
+            }
+            String compactExpected = TextNormalizer.normalize(expectedValue).replaceAll("[^a-z0-9]", "");
+            if (!compactActual.contains(compactExpected)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Đếm số lần xuất hiện của tiêu đề duy nhất để phát hiện submit tạo bản ghi trùng. */
+    private static int countTextOccurrences(String actual, String expected) {
+        String normalizedActual = TextNormalizer.normalize(actual);
+        String normalizedExpected = TextNormalizer.normalize(expected);
+        if (normalizedExpected.isBlank()) {
+            return 0;
+        }
+        int count = 0;
+        int fromIndex = 0;
+        while ((fromIndex = normalizedActual.indexOf(normalizedExpected, fromIndex)) >= 0) {
+            count++;
+            fromIndex += normalizedExpected.length();
+        }
+        return count;
     }
 
     /** Mở lại popup và đóng bằng nút X trên header. */
@@ -2481,10 +3561,154 @@ public class WorkerProfilePage {
         String expected = TextNormalizer.normalize(placeholder);
         return dialog.findElements(By.cssSelector("input[placeholder], textarea[placeholder]"))
                 .stream()
+                .filter(this::isElementDisplayed)
                 .filter(field -> TextNormalizer.normalize(field.getAttribute("placeholder")).contains(expected))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
                         "Không tìm thấy field xử phạt có placeholder: " + placeholder));
+    }
+
+    /** Điền một biến thể form và xác nhận dữ liệu không hợp lệ không được lưu. */
+    private boolean penaltySubmissionBlocked(
+            WebElement dialog,
+            String orderId,
+            String penaltyTitle,
+            String reason,
+            String amount,
+            String blockingDays,
+            String historyBefore) {
+        enterPenaltyDialogValue("Nhập mã đơn", orderId);
+        enterPenaltyDialogValue("VD: Vi phạm quy định ứng xử", penaltyTitle);
+        enterPenaltyDialogValue("Nhập chi tiết hành vi vi phạm", reason);
+        enterPenaltyDialogValue("Nhập số tiền", amount);
+        enterPenaltyDialogValue("Số ngày", blockingDays);
+
+        WebElement currentDialog = wait.until(webDriver -> workerPenaltyDialog());
+        List<WebElement> restrictionRadios = currentDialog.findElements(By.cssSelector("input[type='radio']"));
+        if (restrictionRadios.isEmpty()) {
+            throw new IllegalStateException("Popup không có phạm vi hạn chế để kiểm tra validation.");
+        }
+        clickFormControl(restrictionRadios.get(0));
+        WebElement applyButton = currentDialog.findElement(By.xpath(".//button[normalize-space()='Áp dụng']"));
+        if (applyButton.isEnabled()
+                && !"true".equalsIgnoreCase(applyButton.getAttribute("aria-disabled"))) {
+            clickCandidate(applyButton);
+            try {
+                new WebDriverWait(driver, Duration.ofMillis(1200)).until(webDriver ->
+                        workerPenaltyDialog() == null
+                                || !workerViolationHistoryText().equals(historyBefore));
+            } catch (TimeoutException ignored) {
+                // Popup vẫn mở và lịch sử không đổi trong cửa sổ quan sát: validation đã chặn.
+            }
+        }
+        return workerPenaltyDialog() != null && workerViolationHistoryText().equals(historyBefore);
+    }
+
+    /** Gỡ lệnh active chỉ khi một submit invalid ngoài ý muốn vừa làm popup đóng. */
+    private boolean cleanupUnexpectedActivePenalty() {
+        if (workerPenaltyDialog() != null || activeWorkerPenaltyRemainingDays() < 0) {
+            return false;
+        }
+        System.out.println("[WORKER VIOLATION CLEANUP] Du lieu invalid da tao lenh active; dang tu dong go.");
+        try {
+            WorkerPenaltyRemovalResult cleanupResult = removeActiveWorkerPenalty(
+                    "ghi nhan da thu", "chi phi", Duration.ZERO);
+            return cleanupResult.activePenaltyRemoved();
+        } catch (RuntimeException exception) {
+            System.out.println("[WORKER VIOLATION CLEANUP] Khong go duoc lenh invalid: "
+                    + exception.getMessage());
+            return false;
+        }
+    }
+
+    /** Nhận diện required từ thuộc tính input hoặc dấu * trên label gần field. */
+    private boolean penaltyFieldIsMarkedRequired(WebElement dialog, String placeholder) {
+        WebElement field = penaltyField(dialog, placeholder);
+        if (field.getAttribute("required") != null
+                || "true".equalsIgnoreCase(field.getAttribute("aria-required"))) {
+            return true;
+        }
+        return field.findElements(By.xpath("ancestor::div[.//label][1]//label[1]"))
+                .stream()
+                .anyMatch(label -> label.getText().contains("*")
+                        || String.valueOf(label.getAttribute("outerHTML")).contains(">*<"));
+    }
+
+    /** Với field tùy chọn, chỉ kiểm tra UI từ chối ký tự chữ mà không submit để tránh tạo dữ liệu. */
+    private boolean penaltyFieldRejectsNonNumericValue(String placeholder) {
+        enterPenaltyDialogValue(placeholder, "abc");
+        WebElement currentDialog = wait.until(webDriver -> workerPenaltyDialog());
+        String actualValue = penaltyField(currentDialog, placeholder).getAttribute("value");
+        enterPenaltyDialogValue(placeholder, "");
+        return actualValue.isBlank() || !actualValue.matches(".*[A-Za-z].*");
+    }
+
+    /** Nhập field theo placeholder và tìm lại node khi React rerender popup validation. */
+    private void enterPenaltyDialogValue(String placeholder, String value) {
+        RuntimeException lastFailure = null;
+        for (int attempt = 0; attempt < 3; attempt++) {
+            try {
+                WebElement currentDialog = wait.until(webDriver -> workerPenaltyDialog());
+                enterPenaltyValue(penaltyField(currentDialog, placeholder), value);
+                return;
+            } catch (StaleElementReferenceException | ElementNotInteractableException exception) {
+                lastFailure = exception;
+            }
+        }
+        throw new IllegalStateException("Không nhập được field xử phạt: " + placeholder, lastFailure);
+    }
+
+    /** Popup phải trở lại rỗng sau khi người dùng nhập dữ liệu rồi bấm Hủy bỏ. */
+    private boolean penaltyDialogFieldsAreBlank(WebElement dialog) {
+        return penaltyField(dialog, "Nhập mã đơn").getAttribute("value").isBlank()
+                && penaltyField(dialog, "VD: Vi phạm quy định ứng xử").getAttribute("value").isBlank()
+                && penaltyField(dialog, "Nhập chi tiết hành vi vi phạm").getAttribute("value").isBlank()
+                && penaltyField(dialog, "Nhập số tiền").getAttribute("value").isBlank()
+                && penaltyField(dialog, "Số ngày").getAttribute("value").isBlank();
+    }
+
+    /** Input phần trăm theo aria-label thật của popup, không phụ thuộc ID React động. */
+    private WebElement connectionPenaltyPercentageField(WebElement dialog) {
+        return dialog.findElement(CONNECTION_PENALTY_PERCENTAGE_INPUT);
+    }
+
+    /** Input thời hạn theo aria-label thật của popup, không phụ thuộc thứ tự input. */
+    private WebElement connectionPenaltyDurationField(WebElement dialog) {
+        return dialog.findElement(CONNECTION_PENALTY_DURATION_INPUT);
+    }
+
+    /** Dùng dialog hiện tại; chỉ mở lại khi một validation bug đã làm form đóng ngoài ý muốn. */
+    private WebElement currentWorkerConnectionPenaltyDialogOrOpen() {
+        WebElement currentDialog = workerConnectionPenaltyDialog();
+        return currentDialog != null ? currentDialog : openWorkerConnectionPenaltyDialog();
+    }
+
+    /** Nhập một biến thể phí kết nối không hợp lệ và xác nhận form không được lưu. */
+    private boolean connectionPenaltySubmissionBlocked(
+            WebElement dialog,
+            String percentage,
+            String durationDays) {
+        enterPenaltyValue(connectionPenaltyPercentageField(dialog), percentage);
+        enterPenaltyValue(connectionPenaltyDurationField(dialog), durationDays);
+        WebElement applyButton = dialog.findElement(CONNECTION_PENALTY_APPLY_BUTTON);
+        if (applyButton.isEnabled()
+                && !"true".equalsIgnoreCase(applyButton.getAttribute("aria-disabled"))) {
+            clickCandidate(applyButton);
+            keepWorkerDetailVisible(Duration.ofMillis(350));
+        }
+        return workerConnectionPenaltyDialog() != null;
+    }
+
+    /** Tìm đúng div có thể click bao quanh span preset 18/20/23/25%. */
+    private WebElement connectionPenaltyPreset(WebElement dialog, String expectedPercentage) {
+        String xpath = ".//label[contains(normalize-space(.), 'Phí kết nối phạt')]"
+                + "/following-sibling::div[1]/div[span[normalize-space()='"
+                + expectedPercentage + "']]";
+        return dialog.findElements(By.xpath(xpath))
+                .stream()
+                .filter(this::isElementDisplayed)
+                .findFirst()
+                .orElse(null);
     }
 
     /** Xóa dữ liệu cũ và nhập giá trị mẫu vào field xử phạt. */
@@ -3043,9 +4267,27 @@ public class WorkerProfilePage {
      */
     private WebElement visibleElement(By locator) {
         return driver.findElements(locator).stream()
-                .filter(WebElement::isDisplayed)
+                .filter(this::isElementDisplayed)
                 .findFirst()
                 .orElse(null);
+    }
+
+    /** Kiem tra displayed nhung bo qua element da bi React unmount. */
+    private boolean isElementDisplayed(WebElement element) {
+        try {
+            return element.isDisplayed();
+        } catch (StaleElementReferenceException exception) {
+            return false;
+        }
+    }
+
+    /** Doc text da normalize va bo qua element da stale. */
+    private String normalizedElementText(WebElement element) {
+        try {
+            return TextNormalizer.normalize(element.getText());
+        } catch (StaleElementReferenceException exception) {
+            return "";
+        }
     }
 
     /**

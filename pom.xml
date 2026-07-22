@@ -10,8 +10,10 @@
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <selenium.version>4.45.0</selenium.version>
+        <selenium.version>4.46.0</selenium.version>
         <testng.version>7.9.0</testng.version>
         <poi.version>5.4.1</poi.version>
     </properties>

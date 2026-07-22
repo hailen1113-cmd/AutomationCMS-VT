@@ -24,6 +24,8 @@ public final class WorkerProfileListDetailFilterSuiteRunner {
                 WorkerProfileReferralListTest.class,
                 WorkerProfilePostListTest.class,
                 WorkerProfileViolationPenaltyTest.class,
+                WorkerProfileViolationPenaltyReductionTest.class,
+                WorkerProfileViolationPenaltyRemovalTest.class,
                 WorkerProfileFilterTest.class);
     }
 }

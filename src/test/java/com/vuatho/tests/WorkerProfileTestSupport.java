@@ -5,6 +5,7 @@ import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.WorkerProfilePage;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -30,10 +31,21 @@ abstract class WorkerProfileTestSupport extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareWorkerProfilePage() {
+        if (driver == null) {
+            throw new SkipException("WebDriver khong khoi tao duoc; bo qua setup trang ho so tho.");
+        }
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
         Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
                 "Khong dang nhap duoc truoc khi kiem tra ho so tho.");
-        workerProfilePage = new WorkerProfilePage(driver).openFromMenu();
+        if (preserveWorkerProfileStateBetweenMethods()
+                && workerProfilePage != null
+                && driver.getCurrentUrl().contains("/vuatho/worker")) {
+            return;
+        }
+        WorkerProfilePage page = new WorkerProfilePage(driver);
+        workerProfilePage = driver.getCurrentUrl().contains("/vuatho/worker")
+                ? page.reloadWorkerList()
+                : page.openFromMenu();
     }
 
     /**
@@ -41,6 +53,9 @@ abstract class WorkerProfileTestSupport extends BaseTest {
      */
     @AfterMethod(alwaysRun = true)
     public void cleanWorkerProfileState() {
+        if (preserveWorkerProfileStateBetweenMethods()) {
+            return;
+        }
         try {
             if (workerProfilePage != null) {
                 workerProfilePage.closeWorkerDetailIfOpen();
@@ -49,5 +64,10 @@ abstract class WorkerProfileTestSupport extends BaseTest {
         } catch (RuntimeException exception) {
             System.out.println("[WorkerProfile] Bo qua don dep; testcase tiep theo se mo lai trang ho so tho.");
         }
+    }
+
+    /** Cho phép workflow nhiều bước giữ cùng drawer/thợ giữa các test method. */
+    protected boolean preserveWorkerProfileStateBetweenMethods() {
+        return false;
     }
 }

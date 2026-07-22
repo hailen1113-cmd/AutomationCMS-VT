@@ -10,7 +10,6 @@ final class DriverSession {
     // Dùng chung một browser để giữ session ERP đã đăng nhập xuyên suốt các test method.
     // Không quit driver ở @AfterMethod, nếu không các test load page phía sau sẽ mất trạng thái login.
     private static WebDriver sharedDriver;
-    private static RuntimeException startupFailure;
     private static boolean shutdownHookRegistered;
 
     /**
@@ -20,10 +19,6 @@ final class DriverSession {
     }
 
     static WebDriver acquire() {
-        if (startupFailure != null) {
-            throw startupFailure;
-        }
-
         // Chỉ mở browser mới khi chưa có browser hoặc browser cũ đã bị đóng/crash.
         if (!isAlive(sharedDriver)) {
             System.out.println("Mo WebDriver moi cho bo test...");
@@ -32,7 +27,7 @@ final class DriverSession {
                 configureTimeouts(sharedDriver);
                 registerShutdownHook();
             } catch (RuntimeException exception) {
-                startupFailure = exception;
+                sharedDriver = null;
                 throw exception;
             }
         } else {
@@ -56,7 +51,6 @@ final class DriverSession {
             sharedDriver.quit();
         } finally {
             sharedDriver = null;
-            startupFailure = null;
         }
     }
 

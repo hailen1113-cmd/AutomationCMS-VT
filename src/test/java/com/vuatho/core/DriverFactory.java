@@ -3,11 +3,15 @@ package com.vuatho.core;
 import com.vuatho.config.TestConfig;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.http.ClientConfig;
 
 import java.nio.file.Path;
+import java.time.Duration;
+import java.util.Map;
 import java.util.logging.Level;
 
 public final class DriverFactory {
@@ -31,9 +35,14 @@ public final class DriverFactory {
         System.out.println("Su dung Chrome profile luu session: " + profileDirectory);
         options.addArguments("--user-data-dir=" + profileDirectory);
         options.addArguments("--profile-directory=Default");
-        // Khôi phục phiên trước, bao gồm các session-cookie mà Chrome chỉ giữ khi
-        // trình duyệt được cấu hình tiếp tục phiên làm việc cũ.
-        options.addArguments("--restore-last-session");
+        // Giữ cookie trong profile nhưng không khôi phục các tab của phiên Selenium bị crash.
+        // Restore tab cũ làm số process Chrome tăng dần và khiến WebDriver mất phản hồi.
+        options.setExperimentalOption("prefs", Map.of(
+                "session.restore_on_startup", 0,
+                "profile.exit_type", "Normal",
+                "profile.exited_cleanly", true));
+        options.addArguments("--disable-session-crashed-bubble");
+        options.addArguments("--homepage=about:blank");
         options.addArguments("--disable-notifications");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -55,7 +64,13 @@ public final class DriverFactory {
             options.addArguments("--start-maximized");
         }
 
-        WebDriver driver = new ChromeDriver(options);
+        // Giới hạn cả thời gian kết nối và đọc response của ChromeDriver. WebDriverWait
+        // không thể ngắt một HTTP command bị treo, nên thiếu timeout này có thể giữ suite vô hạn.
+        ClientConfig clientConfig = ClientConfig.defaultConfig()
+                .connectionTimeout(Duration.ofSeconds(15))
+                .readTimeout(Duration.ofSeconds(30));
+        ChromeDriverService service = new ChromeDriverService.Builder().build();
+        WebDriver driver = new ChromeDriver(service, options, clientConfig);
         if (!TestConfig.headless()) {
             // Maximize thêm lần nữa vì một số máy có thể bỏ qua --start-maximized lúc khởi động.
             driver.manage().window().maximize();
