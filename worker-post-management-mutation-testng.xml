@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Quan li bai dang tho ERP - Mutation" verbose="1" preserve-order="true" parallel="false">
+    <listeners>
+        <listener class-name="com.vuatho.core.DriverLifecycleListener"/>
+        <listener class-name="com.vuatho.reporting.ConsoleTestListener"/>
+    </listeners>
+    <test name="Duyet va tu choi bai test chuyen dung">
+        <classes>
+            <class name="com.vuatho.tests.WorkerPostManagementApprovalRejectionTest"/>
+        </classes>
+    </test>
+</suite>

@@ -26,7 +26,8 @@ public class MenuDestinationPage {
     private static final By WORKER_PROFILE_MENU = By.cssSelector("a[href='/vuatho/worker']");
     private static final By VIOLATION_WORKER_MENU = By.cssSelector("a[href='/vuatho/violation-worker']");
     private static final By TRAINING_MENU = By.cssSelector("a[href='/vuatho/training']");
-    private static final By PROFILE_POST_MENU = By.cssSelector("a[href='/vuatho/profile-post']");
+    private static final By WORKER_POST_MANAGEMENT_MENU = By.cssSelector(
+            "a[href='/vuatho/profile-post']");
     private static final By STOP_REQUEST_MENU = By.cssSelector("a[href='/vuatho/stop-request']");
     private static final By TESTED_MENU = By.cssSelector("a[href='/vuatho/tested']");
     private static final By SERVICE_MENU = By.cssSelector("a[href='/vuatho/service']");
@@ -340,7 +341,7 @@ public class MenuDestinationPage {
                     .orElse(null);
         }
         if ("Quản Lí Bài Đăng".equals(label)) {
-            return driver.findElements(PROFILE_POST_MENU).stream()
+            return driver.findElements(WORKER_POST_MANAGEMENT_MENU).stream()
                     .filter(WebElement::isDisplayed)
                     .filter(element -> element.getRect().getX() < 500)
                     .findFirst()

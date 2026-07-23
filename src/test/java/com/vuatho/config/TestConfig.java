@@ -232,6 +232,19 @@ public final class TestConfig {
         return Boolean.parseBoolean(value("run.mutating.api.tests", "RUN_MUTATING_API_TESTS", "false"));
     }
 
+    public static boolean runWorkerPostMutations() {
+        return Boolean.parseBoolean(value(
+                "run.worker.post.mutations", "RUN_WORKER_POST_MUTATIONS", "true"));
+    }
+
+    public static String workerPostApproveMarker() {
+        return value("worker.post.approve.marker", "WORKER_POST_APPROVE_MARKER", "");
+    }
+
+    public static String workerPostRejectMarker() {
+        return value("worker.post.reject.marker", "WORKER_POST_REJECT_MARKER", "");
+    }
+
     /**
      * Thực hiện xử lý value trong luồng kiểm thử.
      * @param property giá trị property được truyền vào

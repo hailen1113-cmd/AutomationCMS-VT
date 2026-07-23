@@ -2,8 +2,17 @@ package com.vuatho.tests;
 
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.WorkerViolationPage;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
+
+import java.time.Duration;
+import java.util.Comparator;
+import java.util.List;
 
 /** Test popup Tien phat theo ngay va cac khoang thong ke. */
 public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
@@ -85,6 +94,11 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
         workerViolationPage.openStatistics();
         Assert.assertTrue(workerViolationPage.statisticsChartIsRendered(),
                 "Popup co chu giai nhung khong render vung bieu do du kich thuoc.");
+
+        String tooltip = hoverLargestStatisticsColumn(true);
+
+        Assert.assertNotNull(tooltip,
+                "Hover vao cot du lieu nhung tooltip khong hien ngay, Da thu va Chua thu.");
     }
 
     @Test(groups = {"violation-worker", "statistics"},
@@ -172,5 +186,59 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     private WorkerViolationPage.CustomDateState requiredCustomDateState() {
         return workerViolationPage.statisticsCustomDateState()
                 .orElseThrow(() -> new AssertionError("Khong doc duoc hai input ngay tuy chinh va rang buoc min/max."));
+    }
+
+    /**
+     * Moi testcase de popup chart mo se hover vao cot du lieu truoc khi
+     * WorkerViolationTestSupport dong popup. Nho vay tooltip duoc hien thi
+     * trong tat ca case co du lieu, khong chi rieng testcase STAT-007.
+     */
+    @AfterMethod(alwaysRun = true)
+    public void hoverStatisticsColumnWhenPresent() {
+        if (workerViolationPage == null || !workerViolationPage.isStatisticsDialogOpen()) return;
+        try {
+            hoverLargestStatisticsColumn(false);
+        } catch (RuntimeException ignored) {
+            // Khong che mat ket qua testcase neu chart khong co cot du lieu.
+        }
+    }
+
+    private String hoverLargestStatisticsColumn(boolean required) {
+        WebElement dataColumn = visibleStatisticsColumns().stream()
+                .max(Comparator.comparingInt(column -> column.getRect().getHeight()))
+                .orElse(null);
+        if (dataColumn == null) {
+            if (required) {
+                throw new AssertionError("Bieu do khong co cot du lieu de thuc hien hover.");
+            }
+            return null;
+        }
+
+        new Actions(driver)
+                .moveToElement(dataColumn)
+                .pause(Duration.ofSeconds(2))
+                .perform();
+
+        if (!required) return null;
+        return new WebDriverWait(driver, Duration.ofSeconds(5)).until(d ->
+                d.findElements(By.cssSelector(".recharts-tooltip-wrapper")).stream()
+                        .filter(WebElement::isDisplayed)
+                        .map(WebElement::getText)
+                        .filter(text -> text != null
+                                && text.matches("(?s).*\\d{2}/\\d{2}/\\d{4}.*")
+                                && text.contains("\u0110\u00e3 thu")
+                                && text.contains("Ch\u01b0a thu"))
+                        .findFirst()
+                        .orElse(null));
+    }
+
+    private List<WebElement> visibleStatisticsColumns() {
+        return driver.findElements(By.cssSelector(
+                        ".recharts-bar-rectangle path, .recharts-bar-rectangle rect"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .filter(column -> column.getRect().getWidth() > 1
+                        && column.getRect().getHeight() > 1)
+                .toList();
     }
 }

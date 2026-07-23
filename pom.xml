@@ -63,6 +63,9 @@
                         <keep.browser.open>${keep.browser.open}</keep.browser.open>
                         <run.logout.tests>${run.logout.tests}</run.logout.tests>
                         <run.mutating.api.tests>${run.mutating.api.tests}</run.mutating.api.tests>
+                        <run.worker.post.mutations>${run.worker.post.mutations}</run.worker.post.mutations>
+                        <worker.post.approve.marker>${worker.post.approve.marker}</worker.post.approve.marker>
+                        <worker.post.reject.marker>${worker.post.reject.marker}</worker.post.reject.marker>
                         <ekyc.applicantId>${ekyc.applicantId}</ekyc.applicantId>
                         <ekyc.testcase.workbook>${ekyc.testcase.workbook}</ekyc.testcase.workbook>
                         <ekyc.case.id>${ekyc.case.id}</ekyc.case.id>
@@ -94,6 +97,36 @@
             <id>dashboard</id>
             <properties>
                 <suiteXmlFile>dashboard-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>worker-post-management</id>
+            <properties>
+                <suiteXmlFile>worker-post-management-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>worker-post-management-mutation</id>
+            <properties>
+                <suiteXmlFile>worker-post-management-mutation-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>worker-post-management-media</id>
+            <properties>
+                <suiteXmlFile>worker-post-management-media-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>worker-stop-request</id>
+            <properties>
+                <suiteXmlFile>worker-stop-request-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>worker-test-management</id>
+            <properties>
+                <suiteXmlFile>worker-test-management-testng.xml</suiteXmlFile>
             </properties>
         </profile>
     </profiles>

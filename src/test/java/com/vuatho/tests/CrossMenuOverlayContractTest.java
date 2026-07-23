@@ -122,18 +122,6 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     }
 
     /**
-     * Thực thi test “CMS-PROFILE-POST-FILTER: Profile post reset waits for data reload” và xác nhận kết quả theo yêu cầu nghiệp vụ.
-     */
-    @Test(description = "CMS-PROFILE-POST-FILTER: Profile post reset waits for data reload")
-    public void profilePostResetWaitsForReload() {
-        open(childOf("Đối Tác - Thợ", "Quản Lí Bài Đăng"));
-        ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
-
-        features.openControl("Reset");
-        PageLoadSynchronizer.waitForDataToSettle(driver);
-    }
-
-    /**
      * Thực thi test “CMS-PROMOTION-FILTER: Promotion filter control opens safely” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(description = "CMS-PROMOTION-FILTER: Promotion filter control opens safely")

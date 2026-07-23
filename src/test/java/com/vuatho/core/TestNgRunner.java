@@ -32,6 +32,25 @@ public final class TestNgRunner {
      * @param testClasses giá trị test classes được truyền vào
      */
     public static void run(String suiteName, String testName, Class<?>... testClasses) {
+        runInternal(suiteName, testName, null, testClasses);
+    }
+
+    /**
+     * Chạy các class nhưng chỉ lấy testcase thuộc một group cụ thể.
+     */
+    public static void runGroup(
+            String suiteName,
+            String testName,
+            String includedGroup,
+            Class<?>... testClasses) {
+        runInternal(suiteName, testName, includedGroup, testClasses);
+    }
+
+    private static void runInternal(
+            String suiteName,
+            String testName,
+            String includedGroup,
+            Class<?>... testClasses) {
         // Mặc định mở Chrome thật để dễ quan sát, nhưng vẫn quit sau test cuối cùng.
         // Có thể ghi đè từ Maven/IDE bằng -Dheadless, -Dinteractive hoặc -Dkeep.browser.open.
         ConsoleEncoding.useUtf8();
@@ -45,6 +64,9 @@ public final class TestNgRunner {
         testNG.setDefaultSuiteName(suiteName);
         testNG.setDefaultTestName(testName);
         testNG.setTestClasses(testClasses);
+        if (includedGroup != null && !includedGroup.isBlank()) {
+            testNG.setGroups(includedGroup);
+        }
         // Giữ đúng thứ tự class được truyền vào để login/setup chạy trước các flow load page.
         testNG.setPreserveOrder(true);
         // Nếu một @BeforeMethod/@AfterMethod lỗi ở một testcase, vẫn tiếp tục chạy các testcase còn lại.
