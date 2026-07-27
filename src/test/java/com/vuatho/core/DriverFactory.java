@@ -9,6 +9,8 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.http.ClientConfig;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
@@ -30,6 +32,16 @@ public final class DriverFactory {
         Path profileDirectory = Path.of(TestConfig.seleniumProfileDirectory())
                 .toAbsolutePath()
                 .normalize();
+        Path downloadDirectory = Path.of(TestConfig.downloadDirectory())
+                .toAbsolutePath()
+                .normalize();
+        try {
+            Files.createDirectories(downloadDirectory);
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Khong tao duoc thu muc download: " + downloadDirectory,
+                    exception);
+        }
 
         ChromeOptions options = new ChromeOptions();
         System.out.println("Su dung Chrome profile luu session: " + profileDirectory);
@@ -40,7 +52,12 @@ public final class DriverFactory {
         options.setExperimentalOption("prefs", Map.of(
                 "session.restore_on_startup", 0,
                 "profile.exit_type", "Normal",
-                "profile.exited_cleanly", true));
+                "profile.exited_cleanly", true,
+                "download.default_directory", downloadDirectory.toString(),
+                "download.prompt_for_download", false,
+                "download.directory_upgrade", true,
+                "profile.default_content_setting_values.automatic_downloads", 1,
+                "safebrowsing.enabled", true));
         options.addArguments("--disable-session-crashed-bubble");
         options.addArguments("--homepage=about:blank");
         options.addArguments("--disable-notifications");

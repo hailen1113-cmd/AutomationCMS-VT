@@ -14,9 +14,13 @@ public final class CustomerWorkerOrderSuiteRunner {
                 "data-interaction",
                 CustomerWorkerOrderOverviewTest.class,
                 CustomerWorkerOrderSearchFilterTest.class,
-                CustomerWorkerOrderViewStatisticsTest.class,
+                CustomerWorkerOrderViewModeTest.class,
+                CustomerWorkerOrderExportTest.class,
+                CustomerWorkerOrderStatusStatisticsTest.class,
+                CustomerWorkerOrderWarrantyStatisticsTest.class,
                 CustomerWorkerOrderPaginationTest.class,
                 CustomerWorkerOrderDetailTest.class,
+                CustomerWorkerOrderAdvancePopupTest.class,
                 CustomerWorkerOrderWorkflowTest.class);
     }
 }

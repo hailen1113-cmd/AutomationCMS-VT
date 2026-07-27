@@ -102,9 +102,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
                 {"Bảo hành đơn", "Có"},
                 {"Bảo hành đơn", "Không"},
                 {"Xuất hoá đơn", "Có yêu cầu"},
-                {"Xuất hoá đơn", "Không"},
-                {"Ghi nhận thông tin HĐ", "Đã ghi nhận"},
-                {"Ghi nhận thông tin HĐ", "Chưa ghi nhận"}
+                {"Xuất hoá đơn", "Không"}
         };
         String requested = System.getProperty(
                 "customer.order.filter.value", "").trim()
@@ -126,9 +124,6 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
         orderPage.selectDirectFilter(group, value);
         Assert.assertTrue(orderPage.totalDisplayed() <= defaultTotal,
                 "Filter " + group + " làm tổng dữ liệu tăng.");
-        if ("Ghi nhận thông tin HĐ".equals(group)) {
-            return;
-        }
         Assert.assertTrue(orderPage.rows().isEmpty()
                         ? orderPage.totalDisplayed() == 0
                         : orderPage.rows().stream().allMatch(row ->
@@ -152,16 +147,6 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
                 "Ghi nhận thông tin HĐ", "THỜI GIAN YÊU CẦU", "Đặt lại")) {
             Assert.assertTrue(text.contains(label), "Filter thiếu " + label);
         }
-    }
-
-    @Test(groups = {"customer-worker-order", "filter", "reset", "filter-reset", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-011: Đặt lại trong Filter phục hồi tổng dữ liệu")
-    public void resetInsideFilterRestoresDefaultOrders() {
-        int total = orderPage.totalDisplayed();
-        orderPage.selectDirectFilter("Bảo hành đơn", "Có");
-        Assert.assertTrue(orderPage.totalDisplayed() <= total);
-        orderPage.resetInsideFilter();
-        Assert.assertEquals(orderPage.totalDisplayed(), total);
     }
 
     @Test(groups = {"customer-worker-order", "filter", "service-filter", "data-interaction"},
@@ -237,17 +222,36 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
                 orderPage.rows().get(0), "Bảo hành đơn", "Có"));
     }
 
-    @Test(groups = {"customer-worker-order", "filter", "recorded-info-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-029: Hai trạng thái ghi nhận HĐ phân hoạch toàn bộ đơn")
-    public void recordedInvoiceInformationPartitionsAllOrders() {
-        int total = orderPage.totalDisplayed();
+    @DataProvider(name = "recordedInformationScopes")
+    public Object[][] recordedInformationScopes() {
+        return new Object[][]{
+                {"toàn bộ đơn", "", ""},
+                {"đơn đã yêu cầu xuất hóa đơn",
+                        "Xuất hoá đơn", "Có yêu cầu"}
+        };
+    }
+
+    @Test(dataProvider = "recordedInformationScopes",
+            groups = {"customer-worker-order", "filter",
+                    "recorded-info-filter", "combined-filter",
+                    "invoice-recorded-filter", "data-interaction"},
+            description = "CUSTOMER-WORKER-ORDER-029: Ghi nhận HĐ phân hoạch đúng từng phạm vi đơn")
+    public void recordedInvoiceInformationPartitionsSelectedScope(
+            String scopeName, String scopeGroup, String scopeValue) {
+        applyOptionalScope(scopeGroup, scopeValue);
+        int scopeTotal = orderPage.totalDisplayed();
+
         orderPage.selectDirectFilter("Ghi nhận thông tin HĐ", "Đã ghi nhận");
         int recorded = orderPage.totalDisplayed();
+
         orderPage.resetInsideFilter();
+        applyOptionalScope(scopeGroup, scopeValue);
         orderPage.selectDirectFilter("Ghi nhận thông tin HĐ", "Chưa ghi nhận");
         int unrecorded = orderPage.totalDisplayed();
-        Assert.assertEquals(recorded + unrecorded, total,
-                "Đã ghi nhận và Chưa ghi nhận không phân hoạch đúng tổng đơn.");
+
+        Assert.assertEquals(recorded + unrecorded, scopeTotal,
+                "Đã ghi nhận và Chưa ghi nhận không phân hoạch đúng "
+                        + scopeName + ".");
     }
 
     @DataProvider(name = "orderAgreementCombinations")
@@ -356,9 +360,9 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
-            "all-filter-types", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-034: Kết hợp Dịch vụ, trạng thái, thỏa thuận, bảo hành và ngày")
-    public void allMajorFilterTypesReturnOnlyMatchingRows() {
+            "visible-filter-combination", "data-interaction"},
+            description = "CUSTOMER-WORKER-ORDER-034: Kết hợp năm nhóm có dữ liệu đối chiếu trực tiếp trên bảng")
+    public void fiveVisibleFilterTypesReturnOnlyMatchingRows() {
         String service = "Sửa máy lạnh";
         orderPage.selectService(service);
         Assert.assertFalse(orderPage.rows().isEmpty());
@@ -370,10 +374,12 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
                 seed, "Bảo hành đơn");
         LocalDate date = requestedDate(seed);
 
-        orderPage.selectRequestDateRange(date, date);
         orderPage.selectOrderStatus(status);
         orderPage.selectAgreementStatus(agreement);
         orderPage.selectDirectFilter("Bảo hành đơn", warranty);
+        Assert.assertFalse(orderPage.rows().isEmpty(),
+                "Bốn điều kiện lấy từ cùng một đơn lại không trả dữ liệu.");
+        orderPage.selectRequestDateRange(date, date);
 
         Assert.assertFalse(orderPage.rows().isEmpty(),
                 "Năm điều kiện lấy từ cùng một đơn lại không trả dữ liệu.");
@@ -439,6 +445,101 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
         Assert.assertEquals(orderPage.totalDisplayed(), defaultTotal);
         Assert.assertFalse(orderPage.rows().isEmpty());
+    }
+
+    @DataProvider(name = "directFilterPairwiseCombinations")
+    public Object[][] directFilterPairwiseCombinations() {
+        return new Object[][]{
+                {"Không có", "Không", "Không", "Chưa ghi nhận"},
+                {"Không có", "Có", "Có yêu cầu", "Đã ghi nhận"},
+                {"Còn hạn", "Không", "Không", "Đã ghi nhận"},
+                {"Còn hạn", "Có", "Có yêu cầu", "Chưa ghi nhận"},
+                {"Hết hạn", "Không", "Có yêu cầu", "Chưa ghi nhận"},
+                {"Hết hạn", "Có", "Không", "Đã ghi nhận"},
+                {"Huỷ bảo hành", "Không", "Có yêu cầu", "Đã ghi nhận"},
+                {"Huỷ bảo hành", "Có", "Không", "Chưa ghi nhận"}
+        };
+    }
+
+    @Test(dataProvider = "directFilterPairwiseCombinations",
+            groups = {"customer-worker-order", "filter", "combined-filter",
+                    "direct-pairwise-matrix", "data-interaction"},
+            description = "CUSTOMER-WORKER-ORDER-050: Ma trận pairwise bốn nhóm bảo hành và hóa đơn")
+    public void directFilterPairwiseMatrixUsesAndCondition(
+            String workerWarranty, String orderWarranty,
+            String invoice, String recordedInfo) {
+        int previousTotal = orderPage.totalDisplayed();
+        previousTotal = applyDirectFilterAndAssertTotalDoesNotIncrease(
+                "Thợ bảo hành", workerWarranty, previousTotal);
+        previousTotal = applyDirectFilterAndAssertTotalDoesNotIncrease(
+                "Bảo hành đơn", orderWarranty, previousTotal);
+        previousTotal = applyDirectFilterAndAssertTotalDoesNotIncrease(
+                "Xuất hoá đơn", invoice, previousTotal);
+        applyDirectFilterAndAssertTotalDoesNotIncrease(
+                "Ghi nhận thông tin HĐ", recordedInfo, previousTotal);
+
+        List<CustomerWorkerOrderPage.OrderRow> rows = orderPage.rows();
+        if (rows.isEmpty()) {
+            Assert.assertEquals(orderPage.totalDisplayed(), 0,
+                    "Tổ hợp radio không có dòng nhưng tổng hiển thị khác 0.");
+            return;
+        }
+        assertRowsMatchDirectFilters(rows,
+                workerWarranty, orderWarranty, invoice);
+    }
+
+    @Test(groups = {"customer-worker-order", "filter", "combined-filter",
+            "agreement-date-filter", "data-interaction"},
+            description = "CUSTOMER-WORKER-ORDER-052: Thỏa thuận giá và ngày yêu cầu lấy đúng giao")
+    public void agreementStatusAndDateReturnTheirIntersection() {
+        CustomerWorkerOrderPage.OrderRow seed = orderPage.rows().get(0);
+        String agreement = orderPage.statusGroupValue(
+                seed, "Thỏa thuận giá");
+        LocalDate date = requestedDate(seed);
+
+        orderPage.selectAgreementStatus(agreement);
+        orderPage.selectRequestDateRange(date, date);
+
+        Assert.assertFalse(orderPage.rows().isEmpty(),
+                "Thỏa thuận và ngày lấy từ cùng một đơn lại không trả dữ liệu.");
+        Assert.assertTrue(orderPage.rows().stream().allMatch(row ->
+                        orderPage.rowMatchesStatusGroup(
+                                row, "Thỏa thuận giá", agreement)
+                                && requestedDate(row).equals(date)),
+                "Thỏa thuận giá và ngày không áp dụng điều kiện AND.");
+    }
+
+    private int applyDirectFilterAndAssertTotalDoesNotIncrease(
+            String group, String value, int previousTotal) {
+        orderPage.selectDirectFilter(group, value);
+        int actualTotal = orderPage.totalDisplayed();
+        Assert.assertTrue(actualTotal <= previousTotal,
+                "Thêm điều kiện " + group + " = " + value
+                        + " làm tổng tăng từ " + previousTotal
+                        + " lên " + actualTotal + "; bộ lọc không dùng AND.");
+        return actualTotal;
+    }
+
+    private void assertRowsMatchDirectFilters(
+            List<CustomerWorkerOrderPage.OrderRow> rows,
+            String workerWarranty, String orderWarranty,
+            String invoice) {
+        Assert.assertTrue(rows.stream().allMatch(row ->
+                        orderPage.rowMatchesStatusGroup(
+                                row, "Thợ bảo hành", workerWarranty)
+                                && orderPage.rowMatchesStatusGroup(
+                                row, "Bảo hành đơn", orderWarranty)
+                                && orderPage.rowMatchesStatusGroup(
+                                row, "Xuất hoá đơn", invoice)),
+                "Ma trận radio trả dòng không thỏa đồng thời: Thợ bảo hành="
+                        + workerWarranty + ", Bảo hành đơn=" + orderWarranty
+                        + ", Xuất hoá đơn=" + invoice + ".");
+    }
+
+    private void applyOptionalScope(String group, String value) {
+        if (!group.isBlank()) {
+            orderPage.selectDirectFilter(group, value);
+        }
     }
 
     private static List<String> filterValues(List<String> values) {

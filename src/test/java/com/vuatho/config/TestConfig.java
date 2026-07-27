@@ -137,6 +137,16 @@ public final class TestConfig {
         return value("screenshot.dir", "SCREENSHOT_DIR", "target/screenshots");
     }
 
+    public static String downloadDirectory() {
+        return value("download.dir", "DOWNLOAD_DIR", "target/downloads");
+    }
+
+    public static Duration exportDownloadTimeout() {
+        return seconds(
+                "export.download.timeout.seconds",
+                "EXPORT_DOWNLOAD_TIMEOUT_SECONDS", 120);
+    }
+
     /**
      * Thực hiện xử lý summary report path trong luồng kiểm thử.
      * @return kết quả summary report path sau khi xử lý
