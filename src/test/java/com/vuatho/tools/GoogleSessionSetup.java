@@ -30,6 +30,7 @@ public final class GoogleSessionSetup {
                 chrome.toString(),
                 "--user-data-dir=" + profile,
                 "--profile-directory=Default",
+                "--disable-background-mode",
                 url)
                 .start();
 

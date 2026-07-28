@@ -1,0 +1,122 @@
+package com.vuatho.tests.workerprofile;
+
+import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
+
+import com.vuatho.core.TestNgRunner;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.time.Duration;
+
+/**
+ * Kiểm tra danh sách hồ sơ thợ, mở bản ghi đầu tiên và xác nhận chi tiết hiển thị.
+ */
+public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
+    private static final Duration DETAIL_DATA_VIEW_DURATION = Duration.ofSeconds(3);
+    private static final String[] BASIC_WORKER_DETAIL_TABS = {
+            "Tong quan",
+            "Nganh nghe",
+            "Giao dich",
+            "Don dich vu",
+            "Gioi thieu",
+            "Bai dang",
+            "Xu ly vi pham"
+    };
+
+    /**
+     * Cho phép chạy trực tiếp lớp này từ IDE mà không cần cấu hình TestNG XML.
+     * @param args các tham số dòng lệnh
+     */
+    public static void main(String[] args) {
+        TestNgRunner.run(WorkerProfileListDetailTest.class,
+                "Bo test danh sach va chi tiet ho so tho ERP",
+                "Kiem tra danh sach va chi tiet ho so tho");
+    }
+
+    /**
+     * Thực hiện xử lý worker detail tabs trong luồng kiểm thử.
+     * @return kết quả worker detail tabs sau khi xử lý
+     */
+    @DataProvider(name = "workerDetailTabs", parallel = false)
+    public Object[][] workerDetailTabs() {
+        Object[][] tabs = new Object[BASIC_WORKER_DETAIL_TABS.length][1];
+        for (int index = 0; index < BASIC_WORKER_DETAIL_TABS.length; index++) {
+            tabs[index][0] = BASIC_WORKER_DETAIL_TABS[index];
+        }
+        return tabs;
+    }
+
+    /**
+     * Thực thi test “WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
+    @Test(groups = { "partner-worker", "worker-profile", "worker-profile-list" },
+            description = "WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang")
+    public void workerProfileListShowsSummaryAndTable() {
+        Assert.assertTrue(workerProfilePage.hasSearchInput(),
+                "Khong thay o tim kiem tho.");
+        Assert.assertTrue(workerProfilePage.hasKpiSummary(),
+                "Thieu phan tong hop KPI ho so tho.");
+        Assert.assertTrue(workerProfilePage.hasExpectedTableHeaders(),
+                "Thieu tieu de bang ho so tho.");
+        Assert.assertTrue(workerProfilePage.hasWorkerRows(),
+                "Bang ho so tho khong co dong hien thi.");
+    }
+
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
+    @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
+            description = "WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho")
+    public void workerInformationCanBeOpened() {
+        String firstRowText = workerProfilePage.firstWorkerRowText();
+
+        workerProfilePage.openFirstWorkerInformation();
+
+        Assert.assertTrue(workerProfilePage.workerDetailIsOpen(),
+                "Chi tiet tho khong tai duoc. Dong: " + firstRowText);
+        Assert.assertFalse(workerProfilePage.workerDetailText().isBlank(),
+                "Chi tiet tho da mo nhung khong co noi dung hien thi.");
+    }
+
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-TAB-001: Mo duoc cac tab chi tiet tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     * @param tabLabel giá trị tab label được truyền vào
+     */
+    @Test(dataProvider = "workerDetailTabs",
+            groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
+            description = "WORKER-PROFILE-DETAIL-TAB-001: Mo duoc cac tab chi tiet tho")
+    public void workerDetailTabsCanBeOpened(String tabLabel) {
+        workerProfilePage.openFirstWorkerInformation();
+
+        workerProfilePage.openWorkerDetailTab(tabLabel);
+
+        Assert.assertTrue(workerProfilePage.workerDetailTabIsSelected(tabLabel),
+                "Tab chi tiet tho chua duoc chon: " + tabLabel);
+        Assert.assertFalse(workerProfilePage.workerDetailText().isBlank(),
+                "Tab chi tiet tho khong co du lieu hien thi: " + tabLabel);
+        workerProfilePage.keepWorkerDetailVisible(DETAIL_DATA_VIEW_DURATION);
+        workerProfilePage.closeWorkerDetail();
+        Assert.assertTrue(workerProfilePage.hasWorkerRows(),
+                "Danh sach tho khong tai lai sau khi dong chi tiet.");
+    }
+
+    /**
+     * Thực thi test “WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
+    @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
+            description = "WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach")
+    public void workerDetailTabsCanBeSwitchedWithoutReturningToList() {
+        workerProfilePage.openFirstWorkerInformation();
+
+        for (String tabLabel : BASIC_WORKER_DETAIL_TABS) {
+            workerProfilePage.openWorkerDetailTab(tabLabel);
+
+            Assert.assertTrue(workerProfilePage.workerDetailTabIsSelected(tabLabel),
+                    "Tab chi tiet tho chua duoc chon: " + tabLabel);
+            Assert.assertFalse(workerProfilePage.workerDetailText().isBlank(),
+                    "Tab chi tiet tho khong co du lieu hien thi: " + tabLabel);
+            workerProfilePage.keepWorkerDetailVisible(DETAIL_DATA_VIEW_DURATION);
+        }
+    }
+}

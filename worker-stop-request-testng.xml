@@ -12,11 +12,11 @@
             </run>
         </groups>
         <classes>
-            <class name="com.vuatho.tests.WorkerStopRequestOverviewTest"/>
-            <class name="com.vuatho.tests.WorkerStopRequestSearchFilterTest"/>
-            <class name="com.vuatho.tests.WorkerStopRequestPaginationTest"/>
-            <class name="com.vuatho.tests.WorkerStopRequestDetailTest"/>
-            <class name="com.vuatho.tests.WorkerStopRequestApprovalRejectionTest"/>
+            <class name="com.vuatho.tests.workerstoprequest.WorkerStopRequestOverviewTest"/>
+            <class name="com.vuatho.tests.workerstoprequest.WorkerStopRequestSearchFilterTest"/>
+            <class name="com.vuatho.tests.workerstoprequest.WorkerStopRequestPaginationTest"/>
+            <class name="com.vuatho.tests.workerstoprequest.WorkerStopRequestDetailTest"/>
+            <class name="com.vuatho.tests.workerstoprequest.WorkerStopRequestApprovalRejectionTest"/>
         </classes>
     </test>
 </suite>

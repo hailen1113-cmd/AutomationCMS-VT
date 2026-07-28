@@ -66,6 +66,7 @@ public final class DriverFactory {
         options.addArguments("--disable-gpu");
         options.addArguments("--no-first-run");
         options.addArguments("--no-default-browser-check");
+        options.addArguments("--disable-background-mode");
 
         // Chỉ lấy log browser mức SEVERE; log info/warning quá nhiều sẽ làm console khó đọc.
         LoggingPreferences logging = new LoggingPreferences();

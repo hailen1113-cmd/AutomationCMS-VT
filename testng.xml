@@ -8,10 +8,12 @@
     </listeners>
     <test name="ERP Login and eKYC Tests">
         <classes>
-            <class name="com.vuatho.tests.ErpLoginTest"/>
-            <class name="com.vuatho.tests.EkycWorkbookCatalogTest"/>
-            <class name="com.vuatho.tests.EkycApiContractTest"/>
-            <class name="com.vuatho.tests.EkycApiTest"/>
+            <class name="com.vuatho.tests.dashboard.LoginDashboardSourceAccessTest"/>
+            <class name="com.vuatho.tests.ekyc.EkycWorkbookCatalogTest"/>
+            <class name="com.vuatho.tests.ekyc.EkycDashboardApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.EkycListApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.EkycDetailApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.EkycSecurityApiContractTest"/>
         </classes>
     </test>
 </suite>

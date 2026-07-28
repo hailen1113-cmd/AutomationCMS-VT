@@ -39,6 +39,10 @@
     </dependencies>
 
     <build>
+        <!-- Khai báo rõ source root để Maven và Java Language Server của IDE
+             cùng nhận các runner/page/test helper nằm trong src/test/java. -->
+        <sourceDirectory>src/main/java</sourceDirectory>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -130,9 +134,39 @@
             </properties>
         </profile>
         <profile>
+            <id>worker-violation</id>
+            <properties>
+                <suiteXmlFile>worker-violation-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
             <id>customer-worker-order</id>
             <properties>
                 <suiteXmlFile>customer-worker-order-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform-management</id>
+            <properties>
+                <suiteXmlFile>uniform-management-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform-catalog</id>
+            <properties>
+                <suiteXmlFile>uniform-catalog-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform-order</id>
+            <properties>
+                <suiteXmlFile>uniform-order-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform-inventory</id>
+            <properties>
+                <suiteXmlFile>uniform-inventory-testng.xml</suiteXmlFile>
             </properties>
         </profile>
     </profiles>

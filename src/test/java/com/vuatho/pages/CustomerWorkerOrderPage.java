@@ -27,7 +27,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** Page Object cho menu Đơn Khách - Thợ. */
+/**
+ * Page Object của menu Quản lý đơn dịch vụ &gt; Đơn Khách - Thợ.
+ *
+ * <p>Lớp này tập trung toàn bộ locator và thao tác Selenium dùng chung cho
+ * dashboard, bảng/thẻ, bộ lọc, phân trang, drawer chi tiết, popup thống kê,
+ * xuất Excel và tiến trình đơn. Các lớp test chỉ gọi API nghiệp vụ tại đây và
+ * chịu trách nhiệm assertion kết quả.</p>
+ *
+ * <p>Các hàm có tên {@code advance...} hoặc {@code cancel...} có thể thay đổi
+ * dữ liệu sandbox thật. Những thao tác quan trọng đều chờ UI tải xong và giữ
+ * màn hình theo cấu hình quan sát trước khi chuyển bước.</p>
+ */
 public class CustomerWorkerOrderPage {
     public static final String ROUTE = "/vuatho/order";
 
@@ -54,6 +65,7 @@ public class CustomerWorkerOrderPage {
     private String currentRowStatus = "";
     private String currentStatistic = "";
 
+    /** Khởi tạo Page Object và cấu hình timeout/polling dùng chung cho React UI. */
     public CustomerWorkerOrderPage(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(90));
@@ -61,6 +73,7 @@ public class CustomerWorkerOrderPage {
         this.wait.ignoring(StaleElementReferenceException.class);
     }
 
+    /** Mở route Đơn Khách - Thợ và chờ dashboard cùng bảng dữ liệu tải xong. */
     public CustomerWorkerOrderPage open() {
         driver.get(TestConfig.baseUrl().replaceAll("/+$", "") + ROUTE);
         wait.until(d -> d.getCurrentUrl().contains(ROUTE));
@@ -68,12 +81,14 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Trả về danh sách tiêu đề cột đang hiển thị trong chế độ Bảng. */
     public List<String> headers() {
         return driver.findElement(TABLE).findElements(By.cssSelector(
                         "th[role='columnheader']"))
                 .stream().map(WebElement::getText).map(String::trim).toList();
     }
 
+    /** Đọc các dòng đơn hiện tại thành dữ liệu có cấu trúc để testcase đối soát. */
     public List<OrderRow> rows() {
         List<OrderRow> result = new ArrayList<>();
         for (WebElement row : driver.findElements(ROWS)) {
@@ -98,6 +113,7 @@ public class CustomerWorkerOrderPage {
         return result;
     }
 
+    /** Trả về tổng số đơn mà màn hình công bố, không chỉ số dòng của trang hiện tại. */
     public int totalDisplayed() {
         return new WebDriverWait(driver, Duration.ofSeconds(8))
                 .pollingEvery(Duration.ofMillis(200))
@@ -120,6 +136,7 @@ public class CustomerWorkerOrderPage {
                 });
     }
 
+    /** Thu thập các nhãn và giá trị KPI trên khu vực tổng quan. */
     public Map<String, String> summaryValues() {
         Map<String, String> values = new LinkedHashMap<>();
         for (String label : List.of(
@@ -135,10 +152,12 @@ public class CustomerWorkerOrderPage {
         return values;
     }
 
+    /** Trả về toàn bộ nội dung text của vùng main sau khi dữ liệu ổn định. */
     public String mainText() {
         return driver.findElement(By.tagName("main")).getText();
     }
 
+    /** Đếm số dịch vụ xuất hiện trong bảng xếp hạng Top dịch vụ nhiều đơn. */
     public int topServiceCount() {
         String text = mainText();
         int start = text.indexOf("Top dịch vụ nhiều đơn");
@@ -149,10 +168,12 @@ public class CustomerWorkerOrderPage {
         return section.split("HT:", -1).length - 1;
     }
 
+    /** Trả về từ khóa hiện có trong ô tìm kiếm mã đơn. */
     public String searchValue() {
         return exactVisible(SEARCH).getAttribute("value");
     }
 
+    /** Nhập mã/từ khóa tìm kiếm và chờ bảng trả dữ liệu tương ứng. */
     public CustomerWorkerOrderPage search(String keyword) {
         List<String> before = rowIds();
         WebElement input = exactVisible(SEARCH);
@@ -163,6 +184,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Đặt lại tìm kiếm, filter và phân trang; sau đó chờ dữ liệu mặc định phục hồi. */
     public CustomerWorkerOrderPage reset() {
         WebElement reset = exactVisible(RESET);
         observe(reset);
@@ -176,14 +198,17 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Chọn đúng một Trạng thái đơn dịch vụ trong multi-select ẩn của bộ lọc. */
     public CustomerWorkerOrderPage selectOrderStatus(String status) {
         return selectNestedFilter("trạng thái đơn dịch vụ", status);
     }
 
+    /** Chọn Trạng thái thỏa thuận giá và chờ danh sách được lọc lại. */
     public CustomerWorkerOrderPage selectAgreementStatus(String status) {
         return selectNestedFilter("trạng thái thỏa thuận giá", status);
     }
 
+    /** Tìm và chọn một dịch vụ trong bộ lọc Dịch vụ. */
     public CustomerWorkerOrderPage selectService(String service) {
         WebElement panel = openFilter();
         By serviceInput = By.cssSelector(
@@ -260,6 +285,12 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /**
+     * Chọn thủ công khoảng Thời gian yêu cầu.
+     *
+     * @param from ngày bắt đầu, không được sau {@code to}
+     * @param to ngày kết thúc
+     */
     public CustomerWorkerOrderPage selectRequestDateRange(
             LocalDate from, LocalDate to) {
         if (from.isAfter(to)) {
@@ -281,6 +312,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Cuộn tới filter Thời gian yêu cầu và chờ calendar render đủ ngày. */
     private void revealRequestDateCalendar() {
         WebElement panel = openFilter();
         WebElement heading = panel.findElements(By.xpath(
@@ -310,6 +342,7 @@ public class CustomerWorkerOrderPage {
                         }));
     }
 
+    /** Kiểm tra một dòng có giá trị thuộc đúng nhóm trạng thái được yêu cầu. */
     public boolean rowMatchesStatusGroup(
             OrderRow row, String groupLabel, String expectedValue) {
         String statusText = normalized(row.statusDetails())
@@ -333,6 +366,7 @@ public class CustomerWorkerOrderPage {
         return false;
     }
 
+    /** Lấy giá trị của một nhóm trạng thái từ text nhiều dòng trong bảng. */
     public String statusGroupValue(OrderRow row, String groupLabel) {
         List<String> lines = row.statusDetails().lines()
                 .map(String::trim).filter(value -> !value.isBlank()).toList();
@@ -349,6 +383,7 @@ public class CustomerWorkerOrderPage {
                         + " thiếu nhóm trạng thái " + groupLabel);
     }
 
+    /** Mở select lồng nhau và trả về các option ứng viên thực sự hiển thị. */
     public List<String> nestedFilterOptions(String ariaLabel, List<String> candidates) {
         openFilter();
         By selectLocator = By.cssSelector(
@@ -372,6 +407,7 @@ public class CustomerWorkerOrderPage {
         return result;
     }
 
+    /** Chọn radio filter trực tiếp theo tên nhóm và giá trị hiển thị. */
     public CustomerWorkerOrderPage selectDirectFilter(String groupLabel, String value) {
         System.out.println("[FILTER] Chon "
                 + TextNormalizer.normalize(groupLabel) + " -> "
@@ -409,6 +445,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Tìm radio theo đúng label nhóm; tùy tham số có thể chỉ highlight hoặc click. */
     private Boolean locateDirectFilterOption(
             String groupLabel, String value, boolean click) {
         return (Boolean) ((JavascriptExecutor) driver).executeScript("""
@@ -439,6 +476,7 @@ public class CustomerWorkerOrderPage {
                 """, groupLabel, value, click, TestConfig.headless());
     }
 
+    /** Đọc checked/data-selected của radio trong đúng nhóm filter. */
     private boolean directFilterChecked(String groupLabel, String value) {
         return Boolean.TRUE.equals(
                 ((JavascriptExecutor) driver).executeScript("""
@@ -467,10 +505,12 @@ public class CustomerWorkerOrderPage {
                         """, groupLabel, value));
     }
 
+    /** Trả về toàn bộ nội dung popup bộ lọc để kiểm tra cấu trúc/control. */
     public String filterText() {
         return openFilter().getText();
     }
 
+    /** Bấm Đặt lại ngay trong popup filter và chờ danh sách phục hồi. */
     public CustomerWorkerOrderPage resetInsideFilter() {
         List<String> before = rowIds();
         WebElement panel = openFilter();
@@ -485,6 +525,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Chuyển giữa chế độ Bảng và Thẻ, đồng thời giữ màn hình để quan sát. */
     public CustomerWorkerOrderPage switchView(String label) {
         WebElement button = exactVisible(By.xpath(
                 "//button[normalize-space()='" + label + "']"));
@@ -499,6 +540,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Xác nhận chế độ Thẻ đang trả về ít nhất một mã đơn. */
     public boolean cardViewContainsOrders() {
         return driver.findElements(By.xpath(
                         "//*[starts-with(normalize-space(),'#')][contains(normalize-space(),'')]"))
@@ -507,6 +549,7 @@ public class CustomerWorkerOrderPage {
                 .anyMatch(text -> text.matches("#\\d+"));
     }
 
+    /** Mở menu Xuất Excel và trả về đúng các lựa chọn đang khả dụng. */
     public List<String> excelExportMenuOptions() {
         WebElement button = exactVisible(By.xpath(
                 "//button[normalize-space()='Xuất Excel']"));
@@ -527,6 +570,7 @@ public class CustomerWorkerOrderPage {
         return options;
     }
 
+    /** Chọn một loại báo cáo, chờ tải file và trả về dấu vết file mới. */
     public String exportExcel(String optionText) {
         Path directory = Path.of(TestConfig.downloadDirectory())
                 .toAbsolutePath().normalize();
@@ -549,6 +593,7 @@ public class CustomerWorkerOrderPage {
         return waitForNewDownload(directory, before);
     }
 
+    /** Xuất Excel từ popup thống kê đang mở và trả về dấu vết file tải xong. */
     public String exportCurrentStatisticsExcel() {
         WebElement dialog = statisticsDialog();
         if (dialog == null) {
@@ -569,6 +614,7 @@ public class CustomerWorkerOrderPage {
         return waitForNewDownload(directory, before);
     }
 
+    /** Tạo thư mục download nếu chưa tồn tại hoặc báo lỗi có ngữ cảnh. */
     private void ensureDownloadDirectory(Path directory) {
         try {
             Files.createDirectories(directory);
@@ -579,6 +625,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Chờ xuất hiện file hoàn tất mới so với snapshot trước khi click export. */
     private String waitForNewDownload(
             Path directory, Set<String> before) {
         try {
@@ -593,6 +640,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Chụp dấu vết tên, size và thời gian sửa của các file tải hoàn tất. */
     private Set<String> completedDownloadSnapshot(Path directory) {
         try (var files = Files.list(directory)) {
             return files.filter(Files::isRegularFile)
@@ -614,6 +662,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Chọn một báo cáo trong menu Thống kê và chờ đúng popup xuất hiện. */
     public CustomerWorkerOrderPage openStatistic(String optionText) {
         currentStatistic = optionText;
         clickFreshButton("Thống kê", false);
@@ -622,6 +671,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Trả về danh sách báo cáo có trong menu Thống kê. */
     public List<String> statisticsMenuOptions() {
         clickFreshButton("Thống kê", false);
         List<String> options = new WebDriverWait(driver, Duration.ofSeconds(8))
@@ -641,6 +691,7 @@ public class CustomerWorkerOrderPage {
         return options;
     }
 
+    /** Trả về text của popup thống kê hiện tại sau khi dữ liệu đã tải. */
     public String statisticsText() {
         return new WebDriverWait(driver, Duration.ofSeconds(8))
                 .pollingEvery(Duration.ofMillis(200))
@@ -653,6 +704,7 @@ public class CustomerWorkerOrderPage {
                 });
     }
 
+    /** Chờ text popup thống kê khớp biểu thức chính quy rồi trả về text mới nhất. */
     public String waitStatisticsTextMatches(String regex) {
         try {
             return new WebDriverWait(driver, Duration.ofSeconds(15))
@@ -669,6 +721,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Đọc giá trị của các ô ngày tháng trong popup thống kê. */
     public List<String> statisticsInputValues() {
         try {
             return new WebDriverWait(driver, Duration.ofSeconds(8))
@@ -692,6 +745,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Nhập trực tiếp khoảng ngày tùy chỉnh hợp lệ và chờ thống kê áp dụng. */
     public CustomerWorkerOrderPage setStatisticsCustomDateRange(
             String from, String to) {
         WebElement dialog = statisticsDialog();
@@ -724,6 +778,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Chọn khoảng ngày bằng calendar trong popup Thống kê trạng thái. */
     public CustomerWorkerOrderPage selectStatusStatisticsDateRangeFromCalendar(
             LocalDate from, LocalDate to) {
         if (from.isAfter(to)) {
@@ -795,6 +850,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Trả về dòng mô tả khoảng thời gian thực tế đang được áp dụng. */
     public String statisticsAppliedRangeText() {
         WebElement dialog = statisticsDialog();
         if (dialog == null) return "";
@@ -806,6 +862,7 @@ public class CustomerWorkerOrderPage {
                 .orElse("");
     }
 
+    /** Nhập raw value vào hai ô ngày để phục vụ testcase validation. */
     public List<String> enterRawStatisticsDateRange(
             String from, String to) {
         WebElement dialog = statisticsDialog();
@@ -831,6 +888,7 @@ public class CustomerWorkerOrderPage {
         return statisticsInputValues();
     }
 
+    /** Đọc thông báo validation ngày tháng đang hiển thị trong popup. */
     public String statisticsDateValidationText() {
         WebElement dialog = statisticsDialog();
         if (dialog == null) return "";
@@ -856,6 +914,7 @@ public class CustomerWorkerOrderPage {
                 """, dialog);
     }
 
+    /** Nhập ngày hợp lệ và phát các event React cần để cập nhật state. */
     private void typeDateValue(WebElement input, String value) {
         observe(input);
         input.click();
@@ -865,6 +924,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofMillis(700));
     }
 
+    /** Nhập raw date không chuẩn để testcase kiểm tra validation phía UI. */
     private void typeRawDateValue(WebElement input, String value) {
         observe(input);
         input.click();
@@ -877,10 +937,12 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofMillis(700));
     }
 
+    /** Định dạng ngày theo chuẩn dd/MM/yyyy mà màn hình đang sử dụng. */
     private String formatDate(LocalDate date) {
         return date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
+    /** Cuộn tới block thống kê theo nhãn và trả về nội dung block đó. */
     public String statisticsBlockText(String label) {
         WebElement dialog = statisticsDialog();
         if (dialog == null) return "";
@@ -910,6 +972,7 @@ public class CustomerWorkerOrderPage {
                 """, marker, dialog, label);
     }
 
+    /** Bấm tab/mốc thời gian trong popup và chờ nút chuyển sang selected. */
     public CustomerWorkerOrderPage clickStatisticsButton(String label) {
         WebElement dialog = statisticsDialog();
         if (dialog == null) {
@@ -940,6 +1003,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Kiểm tra tab hoặc mốc thời gian thống kê có đang được chọn hay không. */
     public boolean statisticsButtonSelected(String label) {
         WebElement dialog = statisticsDialog();
         if (dialog == null) return false;
@@ -961,6 +1025,7 @@ public class CustomerWorkerOrderPage {
                 });
     }
 
+    /** Đếm số SVG chart đã render trong popup thống kê. */
     public int statisticsChartCount() {
         int minimumCount = normalized(currentStatistic).contains("bao hanh")
                 ? 2 : 0;
@@ -968,11 +1033,13 @@ public class CustomerWorkerOrderPage {
                 ".recharts-wrapper", null, minimumCount);
     }
 
+    /** Đếm số cột có dữ liệu của chart được xác định bằng tên series. */
     public int statisticsBarCount(String dataName) {
         return statisticsElementCount(
                 ".recharts-bar-rectangle path[name='" + dataName + "']", 1, 1);
     }
 
+    /** Trỏ chuột vào một cột có dữ liệu và trả về nội dung tooltip xuất hiện. */
     public String hoverStatisticsBar(String dataName) {
         WebElement path = null;
         boolean observed = false;
@@ -1041,6 +1108,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Chọn cột cao nhất có dữ liệu để hover ổn định và dễ quan sát tooltip. */
     private WebElement tallestStatisticsBar(String dataName) {
         try {
             return new WebDriverWait(driver, Duration.ofSeconds(8))
@@ -1068,6 +1136,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Đếm element chart khớp selector trong popup thống kê hiện tại. */
     private int statisticsElementCount(
             String selector, Integer minimumHeight, int minimumCount) {
         try {
@@ -1097,6 +1166,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Cuộn bên trong popup tới phần chứa nội dung cần quan sát. */
     public CustomerWorkerOrderPage scrollStatisticsTo(String text) {
         WebElement dialog = statisticsDialog();
         if (dialog == null) {
@@ -1113,6 +1183,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Đóng popup thống kê bằng nút X và chờ overlay biến mất. */
     public CustomerWorkerOrderPage closeStatistics() {
         WebElement dialog = statisticsDialog();
         if (dialog == null) return this;
@@ -1132,6 +1203,7 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Trả về popup thống kê đang hiển thị, loại trừ drawer và dialog khác. */
     private WebElement statisticsDialog() {
         if (currentStatistic.isBlank()) return visibleDialog();
         String heading = normalized(currentStatistic).contains("bao hanh")
@@ -1140,6 +1212,7 @@ public class CustomerWorkerOrderPage {
         return visibleDialogContaining(heading);
     }
 
+    /** Tìm tooltip chart đang hiển thị và trả về text đã chuẩn hóa khoảng trắng. */
     private String visibleTooltipText() {
         return driver.findElements(By.cssSelector(
                         ".recharts-tooltip-wrapper,[role='tooltip'],"
@@ -1162,16 +1235,19 @@ public class CustomerWorkerOrderPage {
                 .filter(text -> !text.isBlank()).findFirst().orElse("");
     }
 
+    /** Trả về số trang phân trang đang active. */
     public int activePage() {
         String value = visiblePagination().getAttribute("data-active-page");
         return value != null && value.matches("\\d+") ? Integer.parseInt(value) : 1;
     }
 
+    /** Tính tổng số trang từ các control phân trang đang hiển thị. */
     public int totalPages() {
         String value = visiblePagination().getAttribute("data-total");
         return value != null && value.matches("\\d+") ? Integer.parseInt(value) : 1;
     }
 
+    /** Cuộn tới phân trang, chuyển tới trang chỉ định và chờ dữ liệu mới. */
     public CustomerWorkerOrderPage goToPage(int page) {
         List<String> before = rowIds();
         WebElement pagination = visiblePagination();
@@ -1192,27 +1268,44 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Chuyển sang trang kế tiếp và kiểm tra số trang active tăng một. */
     public CustomerWorkerOrderPage nextPage() {
         return clickPageControl("next page button", activePage() + 1);
     }
 
+    /** Quay về trang trước và kiểm tra số trang active giảm một. */
     public CustomerWorkerOrderPage previousPage() {
         return clickPageControl("previous page button", activePage() - 1);
     }
 
+    /** Mở dòng đầu tiên của trang hiện tại và trả về snapshot drawer. */
     public DetailSnapshot openFirstRow() {
         WebElement row = exactVisible(ROWS);
         return openRow(row);
     }
 
+    /** Tìm trên các trang và mở dòng đầu tiên có trạng thái yêu cầu. */
     public DetailSnapshot openFirstRowWithStatus(String status) {
+        reset();
         selectOrderStatus(status);
         if (rows().isEmpty()) {
             throw new IllegalStateException("Không có đơn trạng thái " + status);
         }
-        return openFirstRow();
+        DetailSnapshot detail = openFirstRow();
+        if (!normalized(detail.status()).equals(normalized(status))) {
+            throw new IllegalStateException(
+                    "Đã lọc trạng thái '" + status + "' nhưng drawer đơn #"
+                            + detail.id() + " trả trạng thái '" + detail.status() + "'.");
+        }
+        return detail;
     }
 
+    /**
+     * Lọc theo trạng thái rồi tìm đơn có đúng action để chạy workflow.
+     *
+     * <p>Không phụ thuộc ID cố định. Nếu không có dữ liệu phù hợp, hàm ném
+     * {@link OrderDataUnavailableException} để testcase báo cần chuẩn bị data.</p>
+     */
     public DetailSnapshot openFirstOrderForWorkflow(String status, String requiredAction) {
         reset();
         selectOrderStatus(status);
@@ -1258,20 +1351,7 @@ public class CustomerWorkerOrderPage {
                         + "' có action '" + requiredAction + "'.");
     }
 
-    public DetailSnapshot openFirstVisibleRowWithStatus(String status) {
-        WebElement row = driver.findElements(ROWS).stream()
-                .filter(element -> {
-                    List<WebElement> cells = element.findElements(By.cssSelector(
-                            "td[role='rowheader'],td[role='gridcell']"));
-                    return cells.size() >= 2
-                            && normalized(cells.get(1).getText())
-                            .contains(normalized(status));
-                })
-                .findFirst().orElseThrow(() -> new IllegalStateException(
-                        "Trang đầu không có đơn trạng thái " + status));
-        return openRow(row);
-    }
-
+    /** Tìm và mở drawer của một mã đơn cụ thể trên các trang dữ liệu. */
     public DetailSnapshot openOrder(String id) {
         search(id);
         WebElement row = driver.findElements(ROWS).stream()
@@ -1281,6 +1361,7 @@ public class CustomerWorkerOrderPage {
         return openRow(row);
     }
 
+    /** Tìm linh động đơn đầu tiên có action yêu cầu trong drawer chi tiết. */
     public DetailSnapshot openFirstOrderWithAction(String action) {
         int lastPage = Math.min(totalPages(), 5);
         for (int page = 1; page <= lastPage; page++) {
@@ -1300,6 +1381,7 @@ public class CustomerWorkerOrderPage {
         throw new IllegalStateException("Không tìm thấy đơn có action " + action);
     }
 
+    /** Bấm section điều hướng trong drawer và chờ nội dung tương ứng hiển thị. */
     public CustomerWorkerOrderPage openDetailSection(String ariaLabel) {
         WebElement drawer = requiredDrawer();
         WebElement button = drawer.findElements(By.cssSelector(
@@ -1309,15 +1391,328 @@ public class CustomerWorkerOrderPage {
                         "Không có section " + ariaLabel));
         observe(button);
         button.click();
-        wait.until(d -> requiredDrawer().getText().length() > 50);
+        String sectionId = detailSectionId(ariaLabel);
+        wait.until(d -> {
+            WebElement currentDrawer = requiredDrawer();
+            WebElement section = currentDrawer.findElement(By.id(sectionId));
+            return Boolean.TRUE.equals(((JavascriptExecutor) d)
+                    .executeScript("""
+                            const drawer = arguments[0].getBoundingClientRect();
+                            const section = arguments[1].getBoundingClientRect();
+                            return section.top >= drawer.top - 60
+                              && section.top < drawer.bottom;
+                            """, currentDrawer, section));
+        });
         pauseForDetailObservation("Da tai section " + TextNormalizer.normalize(ariaLabel));
         return this;
     }
 
+    /** Trả về nội dung của đúng section sau khi điều hướng tới section đó. */
+    public String detailSectionText(String ariaLabel) {
+        openDetailSection(ariaLabel);
+        return requiredDrawer().findElement(
+                By.id(detailSectionId(ariaLabel))).getText().trim();
+    }
+
+    /**
+     * Tìm linh động một đơn thực sự có section cần kiểm tra.
+     *
+     * <p>Một số section chỉ xuất hiện ở trạng thái phù hợp, ví dụ Tiến trình hoặc
+     * Đánh giá &amp; Báo cáo. Hàm không phụ thuộc ID đơn cố định và duyệt tối đa
+     * năm trang dữ liệu trước khi báo không có dữ liệu phù hợp.</p>
+     */
+    public DetailSnapshot openFirstOrderWithDetailSection(String ariaLabel) {
+        int lastPage = Math.min(totalPages(), 5);
+        for (int page = 1; page <= lastPage; page++) {
+            int count = driver.findElements(ROWS).size();
+            for (int index = 0; index < count; index++) {
+                List<WebElement> current = driver.findElements(ROWS);
+                if (index >= current.size()) break;
+                DetailSnapshot detail = openRow(current.get(index), false);
+                boolean hasSection = requiredDrawer().findElements(By.cssSelector(
+                                "button[aria-label='" + ariaLabel + "']"))
+                        .stream().anyMatch(WebElement::isDisplayed);
+                if (hasSection) {
+                    highlightForObservation(requiredDrawer());
+                    return detail;
+                }
+                closeOverlay();
+            }
+            if (page < lastPage) goToPage(page + 1);
+        }
+        throw new OrderDataUnavailableException(
+                "Không tìm thấy đơn có section " + ariaLabel
+                        + " trong " + lastPage + " trang dữ liệu.");
+    }
+
+    /** Ánh xạ aria-label trên thanh điều hướng sang ID section trong drawer. */
+    private String detailSectionId(String ariaLabel) {
+        return switch (normalized(ariaLabel)) {
+            case "tong quan" -> "order-section-overview";
+            case "van de don" -> "order-section-problem";
+            case "tien trinh" -> "order-section-progress";
+            case "hoa don" -> "order-section-invoice";
+            case "bien ban cam ket" -> "order-section-commitment";
+            case "danh gia & bao cao" -> "order-section-feedback";
+            default -> throw new IllegalArgumentException(
+                    "Chưa ánh xạ section " + ariaLabel);
+        };
+    }
+
+    /** Trả về toàn bộ text của drawer chi tiết đang mở. */
     public String drawerText() {
         return requiredDrawer().getText();
     }
 
+    /**
+     * Mở hồ sơ Khách hoặc Thợ trong tab mới, trả URL rồi quay lại drawer.
+     *
+     * @param role nhận {@code Khách} hoặc {@code Thợ}
+     */
+    public String openDetailProfile(String role) {
+        WebElement drawer = requiredDrawer();
+        String path = switch (normalized(role)) {
+            case "khach" -> "/vuatho/user?id=";
+            case "tho" -> "/vuatho/worker?id=";
+            default -> throw new IllegalArgumentException(
+                    "Vai trò hồ sơ không hợp lệ: " + role);
+        };
+        WebElement link = drawer.findElements(By.cssSelector(
+                        "a[target='_blank'][href*='" + path + "']"))
+                .stream().filter(WebElement::isDisplayed).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Drawer thiếu link xem chi tiết " + role));
+        String original = driver.getWindowHandle();
+        Set<String> before = driver.getWindowHandles();
+        observe(link);
+        link.click();
+        String opened = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> d.getWindowHandles().stream()
+                        .filter(handle -> !before.contains(handle))
+                        .findFirst().orElse(null));
+        driver.switchTo().window(opened);
+        new WebDriverWait(driver, Duration.ofSeconds(15))
+                .until(d -> d.getCurrentUrl().contains(path));
+        String url = driver.getCurrentUrl();
+        pauseForDetailObservation(
+                "Da mo trang chi tiet " + TextNormalizer.normalize(role));
+        driver.close();
+        driver.switchTo().window(original);
+        wait.until(d -> visibleDrawer() != null);
+        return url;
+    }
+
+    /** Tìm linh động một đơn có link hồ sơ Khách hoặc Thợ cần kiểm tra. */
+    public DetailSnapshot openFirstOrderWithProfile(String role) {
+        String path = switch (normalized(role)) {
+            case "khach" -> "/vuatho/user?id=";
+            case "tho" -> "/vuatho/worker?id=";
+            default -> throw new IllegalArgumentException(
+                    "Vai trò hồ sơ không hợp lệ: " + role);
+        };
+        int lastPage = Math.min(totalPages(), 5);
+        for (int page = 1; page <= lastPage; page++) {
+            int count = driver.findElements(ROWS).size();
+            for (int index = 0; index < count; index++) {
+                List<WebElement> current = driver.findElements(ROWS);
+                if (index >= current.size()) break;
+                DetailSnapshot detail = openRow(current.get(index), false);
+                if (requiredDrawer().findElements(By.cssSelector(
+                                "a[target='_blank'][href*='" + path + "']"))
+                        .stream().anyMatch(WebElement::isDisplayed)) {
+                    highlightForObservation(requiredDrawer());
+                    pauseForDetailObservation(
+                            "Da tim thay don #" + detail.id()
+                                    + " co ho so "
+                                    + TextNormalizer.normalize(role));
+                    return detail;
+                }
+                closeOverlay();
+            }
+            if (page < lastPage) goToPage(page + 1);
+        }
+        throw new OrderDataUnavailableException(
+                "Không tìm thấy đơn có link hồ sơ " + role
+                        + " trong 5 trang đầu.");
+    }
+
+    /** Trả về toàn bộ Google Maps URL đang có trong địa chỉ và tiến trình. */
+    public List<String> detailMapLinks() {
+        return requiredDrawer().findElements(By.cssSelector(
+                        "a[target='_blank'][href*='google.com/maps?q=']"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(element -> element.getAttribute("href"))
+                .filter(value -> value != null && !value.isBlank())
+                .distinct().toList();
+    }
+
+    /** Tìm linh động một đơn có ảnh hoặc video trong phần Vấn đề đơn. */
+    public DetailSnapshot openFirstOrderWithMedia(String mediaType) {
+        String selector = switch (normalized(mediaType)) {
+            case "hinh anh", "anh" -> "#order-section-problem button img";
+            case "video" -> "#order-section-problem button video";
+            default -> throw new IllegalArgumentException(
+                    "Loại media không hợp lệ: " + mediaType);
+        };
+        int lastPage = Math.min(totalPages(), 3);
+        for (int page = 1; page <= lastPage; page++) {
+            int count = driver.findElements(ROWS).size();
+            for (int index = 0; index < count; index++) {
+                List<WebElement> current = driver.findElements(ROWS);
+                if (index >= current.size()) break;
+                DetailSnapshot detail = openRow(current.get(index), false);
+                if (!requiredDrawer().findElements(
+                        By.cssSelector(selector)).isEmpty()) {
+                    highlightForObservation(requiredDrawer());
+                    pauseForDetailObservation(
+                            "Da tim thay don #" + detail.id() + " co "
+                                    + TextNormalizer.normalize(mediaType));
+                    return detail;
+                }
+                closeOverlay();
+            }
+            if (page < lastPage) nextPage();
+        }
+        throw new OrderDataUnavailableException(
+                "Không tìm thấy đơn có " + mediaType + " trong 3 trang đầu.");
+    }
+
+    /** Click thumbnail ảnh/video và trả snapshot viewer phóng lớn. */
+    public MediaViewerSnapshot openDetailMediaViewer(String mediaType) {
+        WebElement drawer = requiredDrawer();
+        String selector = switch (normalized(mediaType)) {
+            case "hinh anh", "anh" -> "#order-section-problem button:has(img)";
+            case "video" -> "#order-section-problem button:has(video)";
+            default -> throw new IllegalArgumentException(
+                    "Loại media không hợp lệ: " + mediaType);
+        };
+        WebElement trigger = drawer.findElements(By.cssSelector(selector))
+                .stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Đơn hiện tại không có " + mediaType));
+        observe(trigger);
+        trigger.click();
+        WebElement media = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .pollingEvery(Duration.ofMillis(200))
+                .until(d -> visibleMediaOutsideDrawer(mediaType));
+        String source = media.getAttribute("src");
+        pauseForDetailObservation(
+                "Da mo viewer " + TextNormalizer.normalize(mediaType));
+        return new MediaViewerSnapshot(
+                mediaType, source == null ? "" : source,
+                media.getTagName());
+    }
+
+    /** Cố gắng đóng viewer ảnh/video; route mới ở BeforeMethod là fallback cleanup. */
+    public boolean closeDetailMediaViewer() {
+        ((JavascriptExecutor) driver)
+                .executeScript("""
+                        const media = [...document.querySelectorAll('img,video')]
+                          .find(item => item.offsetParent !== null
+                            && !item.closest(
+                              'div[aria-label="drawer-Chi tiết đơn dịch vụ"]')
+                            && item.closest(
+                              '[role="dialog"],[aria-modal="true"],.fixed'));
+                        if (!media) return;
+                        const overlay = media.closest(
+                          '[role="dialog"],[aria-modal="true"],.fixed');
+                        const buttons = [...overlay.querySelectorAll('button')]
+                          .filter(button => button.offsetParent !== null);
+                        const close = buttons.find(button => {
+                          const label = [
+                            button.textContent,
+                            button.getAttribute('aria-label'),
+                            button.getAttribute('title')
+                          ].filter(Boolean).join(' ').toLowerCase();
+                          return /close|dismiss|đóng|dong/.test(label);
+                        });
+                        if (close) close.click();
+                        else overlay.click();
+                        """);
+        pauseLocally(Duration.ofMillis(400));
+        if (visibleMediaOutsideDrawer("media") != null) {
+            new Actions(driver).sendKeys(Keys.ESCAPE).perform();
+        }
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(3))
+                    .until(d -> visibleMediaOutsideDrawer("media") == null);
+        } catch (TimeoutException ignored) {
+            return false;
+        }
+        return visibleDrawer() != null;
+    }
+
+    /** Mở popup Xem chi tiết báo giá và trả về toàn bộ nội dung. */
+    public String openQuoteDetailPopup() {
+        WebElement drawer = requiredDrawer();
+        WebElement button = drawer.findElements(By.xpath(
+                        ".//button[normalize-space()='Xem chi tiết báo giá']"))
+                .stream().filter(WebElement::isDisplayed).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Drawer thiếu nút Xem chi tiết báo giá."));
+        observe(button);
+        button.click();
+        WebElement dialog = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> visibleDialogContaining("báo giá"));
+        pauseForDetailObservation("Da mo popup chi tiet bao gia");
+        return dialog.getText().trim();
+    }
+
+    /** Đóng dialog con bằng ESC và xác nhận drawer phía sau vẫn còn. */
+    public boolean closeDetailDialog() {
+        new Actions(driver).sendKeys(Keys.ESCAPE).perform();
+        new WebDriverWait(driver, Duration.ofSeconds(8))
+                .until(d -> visibleDialog() == null);
+        return visibleDrawer() != null;
+    }
+
+    /** Chọn tab Đánh giá/Báo cáo và trả về nội dung section sau khi đổi tab. */
+    public String selectFeedbackTab(String label) {
+        WebElement section = requiredDrawer().findElement(
+                By.id("order-section-feedback"));
+        WebElement tab = section.findElements(By.cssSelector(
+                        "button[role='tab']"))
+                .stream().filter(WebElement::isDisplayed)
+                .filter(element -> normalized(element.getText())
+                        .equals(normalized(label)))
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        "Không có tab " + label));
+        observe(tab);
+        tab.click();
+        new WebDriverWait(driver, Duration.ofSeconds(8))
+                .until(d -> "true".equalsIgnoreCase(
+                        tab.getAttribute("aria-selected")));
+        pauseForDetailObservation(
+                "Da chon tab " + TextNormalizer.normalize(label));
+        return section.getText().trim();
+    }
+
+    /** Tìm media viewer nằm ngoài drawer để phân biệt với thumbnail ban đầu. */
+    private WebElement visibleMediaOutsideDrawer(String mediaType) {
+        String selector = normalized(mediaType).equals("video")
+                ? "video" : normalized(mediaType).contains("anh")
+                ? "img" : "img,video";
+        for (WebElement media : driver.findElements(By.cssSelector(selector))) {
+            try {
+                if (!media.isDisplayed()
+                        || !media.findElements(By.xpath(
+                        "./ancestor::div[@aria-label='drawer-Chi tiết đơn dịch vụ']"))
+                        .isEmpty()) {
+                    continue;
+                }
+                WebElement overlay = media.findElements(By.xpath(
+                                "./ancestor::*[@role='dialog' or @aria-modal='true'"
+                                        + " or contains(@class,'fixed')][1]"))
+                        .stream().findFirst().orElse(null);
+                if (overlay != null && overlay.isDisplayed()) return media;
+            } catch (StaleElementReferenceException ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /** Mở bản đồ mô phỏng vị trí nếu đơn hiện tại có control bản đồ. */
     public boolean openMap() {
         WebElement drawer = requiredDrawer();
         WebElement button = drawer.findElements(By.cssSelector("button,a")).stream()
@@ -1362,6 +1757,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Mở giao diện chat hỗ trợ khách nếu action khả dụng trong drawer. */
     public boolean openCustomerChat() {
         WebElement drawer = requiredDrawer();
         WebElement button = drawer.findElements(By.cssSelector(
@@ -1377,6 +1773,11 @@ public class CustomerWorkerOrderPage {
         return true;
     }
 
+    /**
+     * Xác nhận Sang bước kế tiếp và kiểm tra lại trạng thái đơn sau cập nhật.
+     *
+     * <p>Đây là thao tác mutation thật trên dữ liệu sandbox.</p>
+     */
     public MutationResult advanceOpenOrder() {
         WebElement drawer = requiredDrawer();
         String id = extractOrderId(drawer.getText());
@@ -1403,6 +1804,7 @@ public class CustomerWorkerOrderPage {
         return new MutationResult(id, before, updated.status(), updated.text());
     }
 
+    /** Mở popup Sang bước kế tiếp nhưng chưa xác nhận thay đổi trạng thái. */
     public AdvanceQuoteSnapshot openAdvanceQuotePopup() {
         clickDrawerButton("Sang bước kế tiếp");
         WebElement dialog = wait.until(d -> visibleDialogContaining("Sang bước kế tiếp"));
@@ -1410,10 +1812,12 @@ public class CustomerWorkerOrderPage {
         return advanceQuoteSnapshot(dialog);
     }
 
+    /** Đọc dữ liệu dịch vụ, giá tiền và button của popup hiện tại. */
     public AdvanceQuoteSnapshot currentAdvanceQuoteSnapshot() {
         return advanceQuoteSnapshot(requiredAdvanceDialog());
     }
 
+    /** Thêm một dòng báo giá và trả về tổng số dòng sau khi UI cập nhật. */
     public int addAdvanceQuoteRow() {
         WebElement dialog = requiredAdvanceDialog();
         int before = advanceServiceFields(dialog).size();
@@ -1428,6 +1832,7 @@ public class CustomerWorkerOrderPage {
         return after;
     }
 
+    /** Xóa dòng báo giá cuối và trả về tổng số dòng còn lại. */
     public int removeLastAdvanceQuoteRow() {
         WebElement dialog = requiredAdvanceDialog();
         List<WebElement> services = advanceServiceFields(dialog);
@@ -1454,6 +1859,7 @@ public class CustomerWorkerOrderPage {
         return after;
     }
 
+    /** Nhập dịch vụ và giá tiền vào dòng báo giá cuối rồi trả về snapshot mới. */
     public AdvanceQuoteSnapshot fillLastAdvanceQuoteRow(
             String service, String price) {
         WebElement dialog = requiredAdvanceDialog();
@@ -1474,6 +1880,7 @@ public class CustomerWorkerOrderPage {
         return currentAdvanceQuoteSnapshot();
     }
 
+    /** Để trống dòng báo giá, submit và trả về thông báo validation. */
     public String submitBlankAdvanceQuoteAndReadValidation() {
         WebElement dialog = requiredAdvanceDialog();
         List<WebElement> services = advanceServiceFields(dialog);
@@ -1500,6 +1907,7 @@ public class CustomerWorkerOrderPage {
         return validation;
     }
 
+    /** Bấm Hủy popup báo giá và xác nhận drawer chi tiết vẫn còn mở. */
     public boolean cancelAdvanceQuotePopup() {
         WebElement dialog = requiredAdvanceDialog();
         clickDialogButton(dialog, "Hủy");
@@ -1508,6 +1916,7 @@ public class CustomerWorkerOrderPage {
         return visibleDrawer() != null;
     }
 
+    /** Đóng popup bằng dấu X và xác nhận không đóng theo drawer phía sau. */
     public boolean closeAdvanceQuotePopupByIcon() {
         WebElement dialog = requiredAdvanceDialog();
         WebElement close = dialog.findElements(By.xpath(
@@ -1524,6 +1933,7 @@ public class CustomerWorkerOrderPage {
         return visibleDrawer() != null;
     }
 
+    /** Chuyển DOM popup báo giá thành snapshot thuần dữ liệu cho assertion. */
     private AdvanceQuoteSnapshot advanceQuoteSnapshot(WebElement dialog) {
         List<String> services = advanceServiceFields(dialog).stream()
                 .map(element -> String.valueOf(element.getAttribute("value")))
@@ -1541,6 +1951,7 @@ public class CustomerWorkerOrderPage {
                 dialog.getText(), services, prices, buttons);
     }
 
+    /** Lấy popup Sang bước kế tiếp hoặc fail ngay nếu popup chưa được mở. */
     private WebElement requiredAdvanceDialog() {
         WebElement dialog = visibleDialogContaining("Sang bước kế tiếp");
         if (dialog == null) {
@@ -1550,24 +1961,32 @@ public class CustomerWorkerOrderPage {
         return dialog;
     }
 
+    /** Trả về các textarea dịch vụ theo đúng thứ tự dòng báo giá. */
     private List<WebElement> advanceServiceFields(WebElement dialog) {
         return dialog.findElements(By.cssSelector(
                         "textarea[aria-label='Nhập dịch vụ']"))
                 .stream().filter(WebElement::isDisplayed).toList();
     }
 
+    /** Trả về các input giá tiền theo đúng thứ tự dòng báo giá. */
     private List<WebElement> advancePriceFields(WebElement dialog) {
         return dialog.findElements(By.cssSelector(
                         "input[aria-label='Nhập giá tiền']"))
                 .stream().filter(WebElement::isDisplayed).toList();
     }
 
+    /** Focus và xóa sạch field bằng phím để React nhận sự kiện người dùng thật. */
     private void clearField(WebElement field) {
         observe(field);
         field.sendKeys(Keys.chord(Keys.CONTROL, "a"));
         field.sendKeys(Keys.BACK_SPACE);
     }
 
+    /**
+     * Nhập lý do, xác nhận hủy đơn và đọc lại trạng thái sau cập nhật.
+     *
+     * <p>Đây là thao tác mutation thật trên dữ liệu sandbox.</p>
+     */
     public MutationResult cancelOpenOrder(String title, String reason) {
         WebElement drawer = requiredDrawer();
         String id = extractOrderId(drawer.getText());
@@ -1592,6 +2011,7 @@ public class CustomerWorkerOrderPage {
         return new MutationResult(id, before, updated.status(), updated.text());
     }
 
+    /** Dọn popup/drawer đang mở để testcase kế tiếp bắt đầu từ trạng thái sạch. */
     public void closeOverlay() {
         new Actions(driver).sendKeys(Keys.ESCAPE).perform();
         try {
@@ -1603,6 +2023,12 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /**
+     * Mở select lồng, quan sát option, cập nhật native select ẩn và chờ dữ liệu.
+     *
+     * <p>Locator được scope theo {@code data-slot="base"} để không chọn nhầm
+     * select trạng thái khác hoặc các role=option của calendar.</p>
+     */
     private CustomerWorkerOrderPage selectNestedFilter(String ariaLabel, String value) {
         closeFilterIfOpen();
         WebElement panel = openFilter();
@@ -1618,8 +2044,10 @@ public class CustomerWorkerOrderPage {
                 .ignoring(StaleElementReferenceException.class)
                 .until(d -> {
                     WebElement currentPanel = visibleFilterPanel();
-                    return currentPanel == null ? null
-                            : visibleNestedFilterTrigger(
+                    if (currentPanel == null) {
+                        currentPanel = openFilter();
+                    }
+                    return visibleNestedFilterTrigger(
                             currentPanel, ariaLabel);
                 });
         ((JavascriptExecutor) driver).executeScript(
@@ -1635,49 +2063,75 @@ public class CustomerWorkerOrderPage {
                     return "true".equalsIgnoreCase(
                             currentTrigger.getAttribute("aria-expanded"));
                 });
-        WebElement option = new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
-                .until(d -> visibleNestedFilterOption(value));
+        scrollNestedFilterListToward(value);
+        WebElement option = visibleNestedFilterOption(value);
+        if (option == null) {
+            new Actions(driver).sendKeys(Keys.END).perform();
+            pauseLocally(Duration.ofMillis(400));
+            option = visibleNestedFilterOption(value);
+        }
         System.out.println("[FILTER] Da mo danh sach lua chon");
         pauseForFilterObservation(
                 "Danh sach " + TextNormalizer.normalize(ariaLabel)
                         + " da mo", 2);
-        highlightForObservation(option);
-        pauseForFilterObservation(
-                "Chon " + TextNormalizer.normalize(value), 2);
+        if (option != null) {
+            highlightForObservation(option);
+            pauseForFilterObservation(
+                    "Chon " + TextNormalizer.normalize(value), 2);
+            WebElement optionToClick = new WebDriverWait(
+                    driver, Duration.ofSeconds(8))
+                    .pollingEvery(Duration.ofMillis(200))
+                    .ignoring(StaleElementReferenceException.class)
+                    .until(d -> visibleNestedFilterOption(value));
+            optionToClick.click();
+        } else {
+            pauseForFilterObservation(
+                    "Chon " + TextNormalizer.normalize(value)
+                            + " bang phim END + ENTER", 2);
+            new Actions(driver)
+                    .sendKeys(Keys.END)
+                    .sendKeys(Keys.ENTER)
+                    .perform();
+        }
         WebElement selectionTrigger = new WebDriverWait(
                 driver, Duration.ofSeconds(8))
                 .pollingEvery(Duration.ofMillis(200))
                 .ignoring(StaleElementReferenceException.class)
                 .until(d -> {
                     WebElement currentPanel = visibleFilterPanel();
-                    return currentPanel == null ? null
-                            : visibleNestedFilterTrigger(
+                    if (currentPanel == null) {
+                        currentPanel = openFilter();
+                    }
+                    return visibleNestedFilterTrigger(
                             currentPanel, ariaLabel);
                 });
+        // Click option giúp người chạy quan sát đúng thao tác; dispatch trên
+        // native select là bước commit để React áp điều kiện vào bảng dữ liệu.
         if (!selectOnlyNestedFilterValue(selectionTrigger, value)) {
             throw new IllegalStateException(
                     "Không cập nhật được giá trị bộ lọc " + ariaLabel
                             + " = " + value);
         }
-        WebElement selectedTrigger = new WebDriverWait(
-                driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
-                .until(d -> {
-                    WebElement currentPanel = visibleFilterPanel();
-                    if (currentPanel == null) return null;
-                    WebElement currentTrigger = visibleNestedFilterTrigger(
-                            currentPanel, ariaLabel);
-                    return normalized(currentTrigger.getText())
-                            .contains(normalized(value))
-                            ? currentTrigger : null;
-                });
+        WebElement selectedTrigger = visibleNestedFilterTrigger(
+                openFilter(), ariaLabel);
         highlightForObservation(selectedTrigger);
         pauseForFilterObservation(
                 "Da chon " + TextNormalizer.normalize(value), 2);
-        new Actions(driver).sendKeys(Keys.ESCAPE).perform();
+        if ("true".equalsIgnoreCase(
+                selectedTrigger.getAttribute("aria-expanded"))) {
+            selectedTrigger.click();
+            new WebDriverWait(driver, Duration.ofSeconds(5))
+                    .pollingEvery(Duration.ofMillis(200))
+                    .ignoring(StaleElementReferenceException.class)
+                    .until(d -> {
+                        WebElement currentPanel = visibleFilterPanel();
+                        if (currentPanel == null) return true;
+                        WebElement currentTrigger = visibleNestedFilterTrigger(
+                                currentPanel, ariaLabel);
+                        return !"true".equalsIgnoreCase(
+                                currentTrigger.getAttribute("aria-expanded"));
+                    });
+        }
         System.out.println("[FILTER] Da chon " + TextNormalizer.normalize(value));
         closeFilterIfOpen();
         waitForFilterResult();
@@ -1686,24 +2140,41 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Chờ mọi dòng trả về khớp trạng thái hoặc màn hình báo không có dữ liệu. */
     private void waitForRowsMatchingStatus(String expectedStatus) {
-        new WebDriverWait(driver, Duration.ofSeconds(20))
-                .pollingEvery(Duration.ofMillis(250))
-                .ignoring(StaleElementReferenceException.class)
-                .until(d -> {
-                    List<OrderRow> currentRows = rows();
-                    if (!currentRows.isEmpty()) {
-                        return currentRows.stream().allMatch(row ->
-                                normalized(row.status())
-                                        .equals(normalized(expectedStatus)));
-                    }
-                    String text = normalized(
-                            d.findElement(By.tagName("main")).getText());
-                    return text.contains("chua co du lieu")
-                            || text.contains("khong co du lieu");
-                });
+        long emptyStateStartedAt = System.nanoTime();
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(20))
+                    .pollingEvery(Duration.ofMillis(250))
+                    .ignoring(StaleElementReferenceException.class)
+                    .until(d -> {
+                        List<OrderRow> currentRows = rows();
+                        if (!currentRows.isEmpty()) {
+                            return currentRows.stream().allMatch(row ->
+                                    normalized(row.status())
+                                            .equals(normalized(expectedStatus)));
+                        }
+                        String text = normalized(
+                                d.findElement(By.tagName("main")).getText());
+                        boolean emptyState = text.contains("chua co du lieu")
+                                || text.contains("khong co du lieu");
+                        long emptyMillis = Duration.ofNanos(
+                                System.nanoTime() - emptyStateStartedAt).toMillis();
+                        return emptyState && emptyMillis >= 5_000;
+                    });
+        } catch (TimeoutException timeout) {
+            List<String> actual = rows().stream()
+                    .map(row -> "#" + row.id() + "="
+                            + TextNormalizer.normalize(row.status()))
+                    .distinct().toList();
+            throw new IllegalStateException(
+                    "Sau khi lọc '" + expectedStatus
+                            + "', bảng không trả đúng trạng thái. Dữ liệu thực tế: "
+                            + actual, timeout);
+        }
     }
 
+    /** Tìm trigger select đang hiển thị theo aria-label chính xác. */
     private WebElement visibleNestedFilterTrigger(
             WebElement panel, String ariaLabel) {
         return panel.findElements(By.cssSelector("button[aria-label]")).stream()
@@ -1721,6 +2192,7 @@ public class CustomerWorkerOrderPage {
                         "Không tìm thấy bộ chọn " + ariaLabel));
     }
 
+    /** Tìm option đang hiển thị theo text và loại trừ option của datepicker. */
     private WebElement visibleNestedFilterOption(String value) {
         return driver.findElements(By.cssSelector(
                         "[role='listbox'] [role='option'],"
@@ -1740,6 +2212,38 @@ public class CustomerWorkerOrderPage {
                 .findFirst().orElse(null);
     }
 
+    /** Cuộn riêng listbox tới option cần chọn; hỗ trợ option cuối được render ảo. */
+    private void scrollNestedFilterListToward(String value) {
+        ((JavascriptExecutor) driver).executeScript("""
+                const expected = arguments[0];
+                const normalize = value => (value || '')
+                  .normalize('NFD')
+                  .replace(/[\\u0300-\\u036f]/g, '')
+                  .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                  .trim().toLowerCase();
+                const listboxes = [...document.querySelectorAll(
+                  '[role="listbox"],[data-slot="listbox"]')]
+                  .filter(list => list.offsetParent !== null
+                    && !list.classList.contains('react-datepicker__month'));
+                for (const listbox of listboxes) {
+                  const option = [...listbox.querySelectorAll(
+                    '[role="option"],[data-key]')]
+                    .find(item => normalize(item.textContent)
+                      === normalize(expected));
+                  if (option) {
+                    option.scrollIntoView({
+                      behavior: arguments[1] ? 'instant' : 'smooth',
+                      block: 'center', inline: 'nearest'
+                    });
+                    return;
+                  }
+                  listbox.scrollTop = listbox.scrollHeight;
+                }
+                """, value, TestConfig.headless());
+        pauseLocally(Duration.ofMillis(400));
+    }
+
+    /** Chỉ chọn một option trong native select ẩn rồi phát input/change event. */
     private boolean selectOnlyNestedFilterValue(
             WebElement trigger, String value) {
         return Boolean.TRUE.equals(
@@ -1775,6 +2279,7 @@ public class CustomerWorkerOrderPage {
                         """, trigger, value));
     }
 
+    /** Vẽ outline quanh control mà không tự cuộn làm thay đổi vị trí quan sát. */
     private void highlightForObservation(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("""
                 arguments[0].style.outline = '3px solid #2563eb';
@@ -1782,6 +2287,7 @@ public class CustomerWorkerOrderPage {
                 """, element);
     }
 
+    /** Click đúng ngày trong đúng tháng, tránh chọn cell outside-month trùng số. */
     private void clickCalendarDay(LocalDate date) {
         String monthToken = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
         String dayClass = String.format(
@@ -1842,6 +2348,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Bấm Previous/Next Month tới tháng đích với giới hạn chống vòng lặp. */
     private void navigateCalendar(YearMonth current, YearMonth target) {
         long difference = ChronoUnit.MONTHS.between(current, target);
         if (Math.abs(difference) > 36) {
@@ -1882,6 +2389,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Mở popup filter nếu đang đóng và luôn trả về panel còn hiệu lực. */
     private WebElement openFilter() {
         WebElement existing = visibleFilterPanel();
         if (existing != null) return existing;
@@ -1900,6 +2408,7 @@ public class CustomerWorkerOrderPage {
                 .until(d -> visibleFilterPanel());
     }
 
+    /** Tìm đúng popover có tiêu đề Tùy chọn lọc giữa các overlay React. */
     private WebElement visibleFilterPanel() {
         for (WebElement element : driver.findElements(By.cssSelector(
                 "[data-slot='content'],[data-slot='popover'],[role='dialog']"))) {
@@ -1916,6 +2425,7 @@ public class CustomerWorkerOrderPage {
         return null;
     }
 
+    /** Đóng filter nếu đang mở; dùng ESC dự phòng khi click trigger không đóng. */
     private void closeFilterIfOpen() {
         WebElement trigger;
         try {
@@ -1938,6 +2448,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Cuộn, click control phân trang theo aria-label và chờ trang đích active. */
     private CustomerWorkerOrderPage clickPageControl(String aria, int expectedPage) {
         List<String> before = rowIds();
         WebElement pagination = visiblePagination();
@@ -1955,10 +2466,12 @@ public class CustomerWorkerOrderPage {
         return this;
     }
 
+    /** Mở dòng với đầy đủ bước quan sát dành cho testcase xem chi tiết. */
     private DetailSnapshot openRow(WebElement row) {
         return openRow(row, true);
     }
 
+    /** Mở drawer từ dòng và cho phép tắt pause khi chỉ đang quét ứng viên. */
     private DetailSnapshot openRow(WebElement row, boolean observation) {
         String id = row.getAttribute("data-key");
         List<WebElement> cells = row.findElements(By.cssSelector(
@@ -1998,6 +2511,7 @@ public class CustomerWorkerOrderPage {
                         .filter(value -> !value.isBlank()).toList());
     }
 
+    /** Chờ dashboard hết loading và bảng hoặc empty-state render ổn định. */
     private void waitForData() {
         wait.until(d -> {
             List<WebElement> tables = d.findElements(TABLE);
@@ -2010,6 +2524,7 @@ public class CustomerWorkerOrderPage {
         });
     }
 
+    /** Chờ danh sách ID thay đổi so với snapshot trước thao tác. */
     private void waitForResultChange(List<String> before) {
         wait.until(d -> {
             waitForData();
@@ -2018,6 +2533,7 @@ public class CustomerWorkerOrderPage {
         });
     }
 
+    /** Chờ network/render sau filter hoàn tất và giữ kết quả để quan sát. */
     private void waitForFilterResult() {
         pauseLocally(Duration.ofMillis(1200));
         new WebDriverWait(driver, Duration.ofSeconds(20))
@@ -2032,6 +2548,7 @@ public class CustomerWorkerOrderPage {
         pauseForFilterObservation("Da hien thi ket qua sau khi loc", 2);
     }
 
+    /** Chờ toast/loading sau thao tác thay đổi dữ liệu thật hoàn tất. */
     private void waitAfterMutation() {
         try {
             new WebDriverWait(driver, Duration.ofSeconds(30))
@@ -2041,16 +2558,19 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Trả về thanh phân trang đang hiển thị hoặc fail nếu bảng không có control. */
     private WebElement visiblePagination() {
         return wait.until(d -> d.findElements(PAGINATION).stream()
                 .filter(WebElement::isDisplayed).findFirst().orElse(null));
     }
 
+    /** Chụp danh sách ID của trang hiện tại để so sánh trước/sau thao tác. */
     private List<String> rowIds() {
         return driver.findElements(ROWS).stream()
                 .map(element -> element.getAttribute("data-key")).toList();
     }
 
+    /** Tìm drawer chi tiết đã mở hoàn toàn, bỏ qua drawer đang translate ra ngoài. */
     private WebElement visibleDrawer() {
         for (WebElement element : driver.findElements(DRAWER)) {
             try {
@@ -2067,12 +2587,14 @@ public class CustomerWorkerOrderPage {
         return null;
     }
 
+    /** Lấy drawer hiện tại hoặc fail rõ ràng khi testcase chưa mở chi tiết. */
     private WebElement requiredDrawer() {
         WebElement drawer = visibleDrawer();
         if (drawer == null) throw new IllegalStateException("Drawer chi tiết chưa mở.");
         return drawer;
     }
 
+    /** Tìm dialog đang hiển thị nhưng loại trừ drawer chi tiết. */
     private WebElement visibleDialog() {
         for (WebElement element : driver.findElements(By.cssSelector(
                 "[role='dialog'],[aria-modal='true']"))) {
@@ -2089,6 +2611,7 @@ public class CustomerWorkerOrderPage {
         return null;
     }
 
+    /** Tìm dialog đang hiển thị có chứa nội dung nhận diện yêu cầu. */
     private WebElement visibleDialogContaining(String text) {
         for (WebElement element : driver.findElements(By.cssSelector(
                 "[role='dialog'],[aria-modal='true']"))) {
@@ -2104,6 +2627,7 @@ public class CustomerWorkerOrderPage {
         return null;
     }
 
+    /** Lấy lại button sau mỗi React render rồi click theo text chính xác/prefix. */
     private void clickFreshButton(String text, boolean startsWith) {
         RuntimeException lastFailure = null;
         WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(8));
@@ -2143,6 +2667,7 @@ public class CustomerWorkerOrderPage {
         throw new IllegalStateException("Không click được button " + text, lastFailure);
     }
 
+    /** Click lựa chọn thống kê từ popover mới nhất, tránh stale element. */
     private void clickFreshStatisticOption(String text) {
         By candidates = By.cssSelector(
                 "button,[role='menuitem'],[data-slot='base'],[data-slot='menu-item']");
@@ -2178,6 +2703,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Tìm action button theo label trong drawer hiện tại. */
     private WebElement drawerButton(String label) {
         WebElement drawer = visibleDrawer();
         if (drawer == null) return null;
@@ -2188,6 +2714,7 @@ public class CustomerWorkerOrderPage {
                 .findFirst().orElse(null);
     }
 
+    /** Quan sát rồi click action trong drawer bằng element được lấy lại mới nhất. */
     private void clickDrawerButton(String label) {
         WebElement button = drawerButton(label);
         if (button == null) throw new IllegalStateException(
@@ -2196,6 +2723,7 @@ public class CustomerWorkerOrderPage {
         button.click();
     }
 
+    /** Quan sát rồi click button theo label trong đúng dialog truyền vào. */
     private void clickDialogButton(WebElement dialog, String label) {
         WebElement button = dialog.findElements(By.tagName("button")).stream()
                 .filter(WebElement::isDisplayed)
@@ -2207,17 +2735,20 @@ public class CustomerWorkerOrderPage {
         button.click();
     }
 
+    /** Đi từ text/icon tới ancestor có thể click gần nhất. */
     private WebElement closestClickable(WebElement element) {
         return (WebElement) ((JavascriptExecutor) driver).executeScript(
                 "return arguments[0].closest('button,label,[role=button],[role=option]')"
                         + " || arguments[0];", element);
     }
 
+    /** Chờ và trả về element đầu tiên vừa hiển thị vừa khớp locator. */
     private WebElement exactVisible(By locator) {
         return wait.until(d -> d.findElements(locator).stream()
                 .filter(WebElement::isDisplayed).findFirst().orElse(null));
     }
 
+    /** Phiên bản wait ngắn dùng cho control tùy chọn hoặc thao tác cleanup. */
     private WebElement shortVisible(By locator, Duration timeout) {
         return new WebDriverWait(driver, timeout)
                 .pollingEvery(Duration.ofMillis(200))
@@ -2227,6 +2758,7 @@ public class CustomerWorkerOrderPage {
                         .findFirst().orElse(null));
     }
 
+    /** Lấy element mới sau bước quan sát rồi click để tránh stale reference. */
     private void clickFresh(By locator) {
         RuntimeException last = null;
         for (int attempt = 0; attempt < 5; attempt++) {
@@ -2242,11 +2774,13 @@ public class CustomerWorkerOrderPage {
                 : last;
     }
 
+    /** Xóa và nhập giá trị vào field theo thao tác bàn phím. */
     private void fill(WebElement field, String value) {
         observe(field);
         field.sendKeys(Keys.chord(Keys.CONTROL, "a"), value);
     }
 
+    /** Cuộn control vào vùng nhìn thấy, highlight và pause khi chạy có giao diện. */
     private void observe(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("""
                 arguments[0].scrollIntoView({
@@ -2259,6 +2793,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Giữ màn hình cho từng bước xem drawer theo cấu hình detail pause. */
     private void pauseForDetailObservation(String step) {
         if (TestConfig.headless()) return;
         int seconds = 2;
@@ -2274,6 +2809,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
+    /** Giữ màn hình cho từng bước workflow theo cấu hình workflow pause. */
     private void pauseForWorkflowObservation(String step) {
         if (TestConfig.headless()) return;
         int seconds = 2;
@@ -2290,6 +2826,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
+    /** Giữ màn hình cho thao tác filter, mặc định theo số giây của caller. */
     private void pauseForFilterObservation(String step, int defaultSeconds) {
         if (TestConfig.headless()) return;
         int seconds = defaultSeconds;
@@ -2306,6 +2843,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
+    /** Giữ màn hình khi chuyển tab, lọc hoặc hover trong popup thống kê. */
     private void pauseForStatisticsObservation(String step) {
         if (TestConfig.headless()) return;
         int seconds = 3;
@@ -2321,6 +2859,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
+    /** Giữ màn hình sau khi chuyển Bảng/Thẻ để người chạy thấy dữ liệu. */
     private void pauseForViewObservation(String step) {
         if (TestConfig.headless()) return;
         int seconds = 5;
@@ -2336,6 +2875,7 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
+    /** Pause bằng Thread.sleep để tránh WebDriver Actions pause bị treo phiên. */
     private void pauseLocally(Duration duration) {
         try {
             Thread.sleep(duration.toMillis());
@@ -2346,6 +2886,7 @@ public class CustomerWorkerOrderPage {
         }
     }
 
+    /** Trích mã số đơn từ text có định dạng dấu #. */
     private static String extractOrderId(String text) {
         java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
                 "Mã đơn dịch vụ\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE)
@@ -2354,10 +2895,12 @@ public class CustomerWorkerOrderPage {
         throw new IllegalStateException("Không đọc được mã đơn trong drawer.");
     }
 
+    /** Chuẩn hóa tiếng Việt, chữ hoa/thường và khoảng trắng để so sánh UI. */
     private static String normalized(String value) {
         return TextNormalizer.normalize(value == null ? "" : value);
     }
 
+    /** Tách trạng thái đơn chính khỏi cell chứa nhiều nhóm trạng thái. */
     private static String extractCurrentOrderStatus(String statusCellText) {
         List<String> lines = statusCellText.lines()
                 .map(String::trim).filter(value -> !value.isBlank()).toList();
@@ -2374,14 +2917,17 @@ public class CustomerWorkerOrderPage {
                 .findFirst().orElse(statusCellText.trim());
     }
 
+    /** Danh sách trạng thái đơn đúng theo thứ tự option của bộ lọc UI. */
     public static final List<String> ORDER_STATUSES = List.of(
             "Tìm kiếm thợ", "Match đơn", "Thợ di chuyển", "Thợ checkin",
             "Yêu cầu giá", "Chấp nhận giá", "Đang làm việc", "Đã xong việc",
             "Hoàn thành đơn", "Hủy đơn", "Đặt lại thợ yêu thích");
 
+    /** Danh sách trạng thái thỏa thuận giá mà bộ lọc hỗ trợ. */
     public static final List<String> AGREEMENT_STATUSES = List.of(
             "Chưa có", "Chờ đợi", "Chấp nhận", "Từ chối");
 
+    /** Dữ liệu đã chuẩn hóa của một dòng trong bảng danh sách đơn. */
     public record OrderRow(
             String id,
             String info,
@@ -2393,24 +2939,35 @@ public class CustomerWorkerOrderPage {
             String rawText) {
     }
 
+    /** Snapshot drawer dùng để đối chiếu ID, trạng thái, text và action khả dụng. */
     public record DetailSnapshot(
             String id, String status, String text, List<String> buttons) {
     }
 
+    /** Kết quả thao tác thật gồm trạng thái trước, sau và chi tiết đọc lại. */
     public record MutationResult(
             String id, String beforeStatus, String afterStatus, String detailText) {
     }
 
+    /** Snapshot popup báo giá gồm text, danh sách dịch vụ, giá và button. */
     public record AdvanceQuoteSnapshot(
             String text, List<String> services, List<String> prices,
             List<String> buttons) {
     }
 
+    /** Snapshot viewer media dùng để đối chiếu loại thẻ và URL tài nguyên. */
+    public record MediaViewerSnapshot(
+            String mediaType, String source, String tagName) {
+    }
+
+    /** Báo thiếu dữ liệu sandbox phù hợp để testcase tự tìm đơn theo nghiệp vụ. */
     public static final class OrderDataUnavailableException extends RuntimeException {
+        /** Tạo lỗi thiếu data với hướng dẫn chuẩn bị dữ liệu. */
         public OrderDataUnavailableException(String message) {
             super(message);
         }
 
+        /** Tạo lỗi thiếu data và giữ nguyên nguyên nhân kỹ thuật ban đầu. */
         public OrderDataUnavailableException(String message, Throwable cause) {
             super(message, cause);
         }

@@ -182,7 +182,7 @@ public final class TestConfig {
      * @return kết quả has vercel bypass secret sau khi xử lý
      */
     public static boolean hasVercelBypassSecret() {
-        return !value("vercel.bypass.secret", "VERCEL_AUTOMATION_BYPASS_SECRET", "").isBlank();
+        return !vercelBypassSecret().isBlank();
     }
 
     /**
@@ -207,7 +207,7 @@ public final class TestConfig {
      * @return kết quả entry url sau khi xử lý
      */
     public static String entryUrl() {
-        String secret = value("vercel.bypass.secret", "VERCEL_AUTOMATION_BYPASS_SECRET", "");
+        String secret = vercelBypassSecret();
         if (secret.isBlank()) {
             return baseUrl();
         }
@@ -217,6 +217,18 @@ public final class TestConfig {
                 + "x-vercel-protection-bypass="
                 + URLEncoder.encode(secret, StandardCharsets.UTF_8)
                 + "&x-vercel-set-bypass-cookie=true";
+    }
+
+    /**
+     * Trả về Vercel bypass secret hợp lệ; bỏ qua các giá trị mẫu chưa được cấu hình.
+     */
+    private static String vercelBypassSecret() {
+        String secret = value(
+                "vercel.bypass.secret", "VERCEL_AUTOMATION_BYPASS_SECRET", "").trim();
+        if (secret.startsWith("<") && secret.endsWith(">")) {
+            return "";
+        }
+        return secret;
     }
 
     /**
