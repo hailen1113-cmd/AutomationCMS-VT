@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.testdata.EkycInformationAction;
 import com.vuatho.testdata.EkycInformationCase;
 import com.vuatho.testdata.EkycInformationDataState;
@@ -20,7 +22,7 @@ public class EkycInformationTestDataTest {
     /**
      * Thực hiện xử lý information test data has unique ids and required coverage trong luồng kiểm thử.
      */
-    @Test
+    @Test(description = EkycTestCases.EKYC_006)
     public void informationTestDataHasUniqueIdsAndRequiredCoverage() {
         var cases = EkycInformationTestData.cases();
         Set<String> ids = cases.stream()

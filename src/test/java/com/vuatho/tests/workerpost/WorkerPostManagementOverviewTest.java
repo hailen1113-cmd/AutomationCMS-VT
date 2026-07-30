@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
 import com.vuatho.pages.WorkerPostManagementPage.PostCard;
@@ -18,7 +20,7 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only"},
-            description = "WORKER-POST-MANAGEMENT-001: Trang có đủ bốn tab trạng thái và mặc định Chờ duyệt")
+            description = WorkerPostTestCases.WORKER_POST_013)
     public void pageHasFourRequiredStatusTabs() {
         Assert.assertTrue(workerPostManagementPage.isLoaded(), "Trang Quản lí bài đăng chưa tải xong.");
         List<String> normalizedTabs = workerPostManagementPage.tabLabels().stream()
@@ -34,7 +36,7 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only"},
-            description = "WORKER-POST-MANAGEMENT-002: Card Chờ duyệt hiển thị đủ thông tin bài đăng")
+            description = WorkerPostTestCases.WORKER_POST_014)
     public void pendingCardsHaveCoreInformation() {
         List<PostCard> cards = workerPostManagementPage.visiblePostCards();
         Assert.assertFalse(cards.isEmpty(), "Tab Chờ duyệt không có card để kiểm tra.");
@@ -51,14 +53,14 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only"},
-            description = "WORKER-POST-MANAGEMENT-003: Mỗi bài Chờ duyệt có nút Duyệt bài và Từ chối")
+            description = WorkerPostTestCases.WORKER_POST_015)
     public void pendingCardsExposeModerationActions() {
         Assert.assertTrue(workerPostManagementPage.hasPendingActionsOnEveryCard(),
                 "Có card Chờ duyệt thiếu nút Duyệt bài hoặc Từ chối.");
     }
 
     @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-004: Bài Đã duyệt hiển thị người và ngày duyệt")
+            description = WorkerPostTestCases.WORKER_POST_016)
     public void approvedCardsHaveReviewAuditInformation() {
         workerPostManagementPage.selectStatus(Status.APPROVED);
         List<PostCard> cards = workerPostManagementPage.visiblePostCards();
@@ -72,7 +74,7 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-005: Bài Từ chối hiển thị audit và lý do từ chối")
+            description = WorkerPostTestCases.WORKER_POST_017)
     public void rejectedCardsHaveAuditAndRejectReason() {
         workerPostManagementPage.selectStatus(Status.REJECTED);
         List<PostCard> cards = workerPostManagementPage.visiblePostCards();
@@ -88,7 +90,7 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-006: Bài Đã xóa là trạng thái chỉ đọc")
+            description = WorkerPostTestCases.WORKER_POST_018)
     public void deletedCardsAreReadOnly() {
         workerPostManagementPage.selectStatus(Status.DELETED);
         Assert.assertFalse(workerPostManagementPage.visiblePostCards().isEmpty(),
@@ -98,7 +100,7 @@ public class WorkerPostManagementOverviewTest extends WorkerPostManagementTestSu
     }
 
     @Test(groups = {"worker-post-management", "read-only"},
-            description = "WORKER-POST-MANAGEMENT-013: Card có timestamp và tổng media hợp lệ")
+            description = WorkerPostTestCases.WORKER_POST_019)
     public void cardsHaveValidTimestampAndMediaSummary() {
         Assert.assertTrue(workerPostManagementPage.cardsHaveValidTimestampAndMediaSummary(),
                 "Có card sai định dạng thời gian hoặc bộ đếm ảnh/video.");

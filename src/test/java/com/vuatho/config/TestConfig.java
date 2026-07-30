@@ -190,7 +190,7 @@ public final class TestConfig {
      * @return kết quả login email sau khi xử lý
      */
     public static String loginEmail() {
-        return value("erp.email", "ERP_EMAIL", "hailen1113@gmail.com");
+        return value("erp.email", "ERP_EMAIL", "hailv@vuatho.com");
     }
 
     /**

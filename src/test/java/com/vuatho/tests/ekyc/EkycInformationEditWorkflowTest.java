@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycWorkflowTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -45,7 +47,7 @@ public class EkycInformationEditWorkflowTest extends EkycWorkflowTestSupport {
      */
     @Test(dataProvider = "ekycEditInformationCases",
             groups = {"ekyc", "information", "edit"},
-            description = "EKYC-INFORMATION-EDIT: Sua thong tin eKYC")
+            description = EkycTestCases.EKYC_005)
     public void runFocusedKycInformationEditCase(EkycInformationCase testCase) {
         if (testCase.action() != EkycInformationAction.EDIT) {
             throw new SkipException(testCase.id() + ": Case khong phai EDIT.");

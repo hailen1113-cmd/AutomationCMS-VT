@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -71,7 +73,7 @@ public class WorkerProfileSearchTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-SEARCH-001: O tim kiem tho co the reset” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 6, groups = { "partner-worker", "worker-profile", "worker-search" },
-            description = "WORKER-PROFILE-SEARCH-001: O tim kiem tho co the reset")
+            description = WorkerProfileTestCases.WORKER_PROFILE_016)
     public void workerSearchCanBeReset() {
         workerProfilePage.searchAndReset(workerProfilePage.firstVisibleWorkerName());
 
@@ -83,7 +85,7 @@ public class WorkerProfileSearchTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-SEARCH-MODE-001: Tim kiem tho co tuy chon ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 2, groups = { "partner-worker", "worker-profile", "worker-search" },
-            description = "WORKER-PROFILE-SEARCH-MODE-001: Tim kiem tho co tuy chon ten va SDT")
+            description = WorkerProfileTestCases.WORKER_PROFILE_017)
     public void workerSearchModeOptionsAreAvailable() {
         Assert.assertTrue(workerProfilePage.hasSearchModeOptions(),
                 "Dropdown kieu tim kiem tho thieu tuy chon ten hoac SDT.");
@@ -93,7 +95,7 @@ public class WorkerProfileSearchTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-SEARCH-MODE-002: Kieu tim kiem tho doi duoc giua ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 3, groups = { "partner-worker", "worker-profile", "worker-search" },
-            description = "WORKER-PROFILE-SEARCH-MODE-002: Kieu tim kiem tho doi duoc giua ten va SDT")
+            description = WorkerProfileTestCases.WORKER_PROFILE_018)
     public void workerSearchModeCanSwitchBetweenNameAndPhone() {
         workerProfilePage.selectSearchMode("ten");
         Assert.assertTrue(TextNormalizer.normalize(workerProfilePage.selectedSearchMode()).contains("ten"),
@@ -109,7 +111,7 @@ public class WorkerProfileSearchTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten tho dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 4, groups = { "partner-worker", "worker-profile", "worker-search" },
-            description = "WORKER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten tho dau tien")
+            description = WorkerProfileTestCases.WORKER_PROFILE_019)
     public void workerCanSearchFirstFiveNames() {
         List<String> workerNames = workerProfilePage.firstVisibleWorkerNames(SEARCH_SAMPLE_SIZE);
         Assert.assertEquals(workerNames.size(), SEARCH_SAMPLE_SIZE,
@@ -132,7 +134,7 @@ public class WorkerProfileSearchTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT tho dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 5, groups = { "partner-worker", "worker-profile", "worker-search" },
-            description = "WORKER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT tho dau tien")
+            description = WorkerProfileTestCases.WORKER_PROFILE_020)
     public void workerCanSearchFirstFivePhoneNumbers() {
         List<String> workerPhones = workerProfilePage.firstVisibleWorkerPhoneSearchTerms(SEARCH_SAMPLE_SIZE);
         Assert.assertEquals(workerPhones.size(), SEARCH_SAMPLE_SIZE,

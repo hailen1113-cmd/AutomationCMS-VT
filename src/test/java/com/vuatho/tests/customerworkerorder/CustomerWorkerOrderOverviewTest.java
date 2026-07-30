@@ -1,5 +1,7 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import com.vuatho.pages.CustomerWorkerOrderPage.OrderRow;
@@ -26,7 +28,7 @@ public class CustomerWorkerOrderOverviewTest extends CustomerWorkerOrderTestSupp
 
     /** Kiểm tra tổng đơn bằng tổng ba nhóm hoàn thành, hủy và còn lại. */
     @Test(groups = {"customer-worker-order", "overview", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-001: Tổng số đơn bằng hoàn thành + hủy + còn lại")
+            description = CustomerWorkerOrderTestCases.CWO_021)
     public void orderSummaryCountsAreConsistent() {
         String text = orderPage.mainText();
         int total = numberAfter(text, "Tổng số đơn dịch vụ");
@@ -41,7 +43,7 @@ public class CustomerWorkerOrderOverviewTest extends CustomerWorkerOrderTestSupp
 
     /** Kiểm tra các KPI hôm nay và tài chính có nhãn, có giá trị số hợp lệ. */
     @Test(groups = {"customer-worker-order", "overview", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-002: Thống kê hôm nay và tài chính trả số liệu")
+            description = CustomerWorkerOrderTestCases.CWO_022)
     public void todayAndFinancialStatisticsReturnData() {
         String text = orderPage.mainText();
         for (String label : List.of(
@@ -55,7 +57,7 @@ public class CustomerWorkerOrderOverviewTest extends CustomerWorkerOrderTestSupp
 
     /** Kiểm tra bảng xếp hạng dịch vụ trả đủ phân rã trạng thái. */
     @Test(groups = {"customer-worker-order", "overview", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-003: Top dịch vụ trả đủ số liệu trạng thái")
+            description = CustomerWorkerOrderTestCases.CWO_023)
     public void topServicesReturnStatusBreakdown() {
         String text = orderPage.mainText();
         Assert.assertTrue(text.contains("Top dịch vụ nhiều đơn"));
@@ -68,7 +70,7 @@ public class CustomerWorkerOrderOverviewTest extends CustomerWorkerOrderTestSupp
 
     /** Kiểm tra schema và định dạng dữ liệu thực tế của từng dòng đơn. */
     @Test(groups = {"customer-worker-order", "overview", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-004: Bảng trả đúng schema và định dạng từng dòng")
+            description = CustomerWorkerOrderTestCases.CWO_024)
     public void tableRowsReturnValidOrderData() {
         Assert.assertEquals(orderPage.headers(), List.of(
                 "Thông tin đơn dịch vụ", "Trạng thái", "Số thợ đã báo giá",

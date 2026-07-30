@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.testcases.WorkerViolationTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerviolation.WorkerViolationTestSupport;
 import com.vuatho.pages.WorkerViolationPage;
@@ -27,7 +29,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-FILTER-001: Du tuy chon cua ba bo loc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_011)
     public void filterCatalogIsComplete() {
         Assert.assertEquals(workerViolationPage.filterOptions(0),
                 List.of("Tất cả trạng thái", "Đang bị phạt", "Đã gỡ hết", "Phạt vĩnh viễn"));
@@ -38,7 +40,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-SEARCH-001: Tim theo ID lay dong dau tien")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_012)
     public void searchByExistingWorkerId() {
         WorkerViolationPage.RowSeed seed = requiredSeed();
         Assert.assertFalse(seed.id().isBlank(), "Dong dau tien khong co ID de tim.");
@@ -48,7 +50,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-SEARCH-002: Tim theo ten lay dong dau tien")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_013)
     public void searchByExistingWorkerName() {
         WorkerViolationPage.RowSeed seed = requiredSeed();
         Assert.assertFalse(seed.name().isBlank(), "Dong dau tien khong co ten de tim.");
@@ -58,7 +60,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-SEARCH-003: Tim theo SDT lay dong dau tien")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_014)
     public void searchByExistingWorkerPhone() {
         WorkerViolationPage.RowSeed seed = requiredSeed();
         Assert.assertFalse(seed.phone().isBlank(), "Dong dau tien khong co SDT de tim.");
@@ -68,14 +70,14 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-SEARCH-004: Tu khoa khong ton tai hien thi empty state")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_015)
     public void nonexistentSearchShowsEmptyState() {
         workerViolationPage.search("__AUTOMATION_NO_SUCH_WORKER_928374__");
         Assert.assertTrue(workerViolationPage.hasEmptyState(), "Tim khong co ket qua nhung khong hien empty state hop le.");
     }
 
     @Test(dataProvider = "filters", groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-FILTER-002: Chon tung tuy chon bo loc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_016)
     public void eachFilterOptionCanBeSelected(int filterIndex, String option) {
         workerViolationPage.selectFilter(filterIndex, option);
         Assert.assertEquals(TextNormalizer.normalize(workerViolationPage.selectedFilter(filterIndex)),
@@ -84,7 +86,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-FILTER-003: Ket hop search va nhieu bo loc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_017)
     public void searchAndFiltersCanBeCombined() {
         workerViolationPage.selectFilter(0, "Đang bị phạt")
                 .selectFilter(1, "≤ 7 ngày")
@@ -96,7 +98,7 @@ public class WorkerViolationSearchFilterTest extends WorkerViolationTestSupport 
     }
 
     @Test(groups = {"violation-worker", "search-filter"},
-            description = "VIOLATION-WORKER-FILTER-004: Reset search va tat ca bo loc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_018)
     public void resetRestoresEveryDefault() {
         workerViolationPage.search("automation")
                 .selectFilter(0, "Đang bị phạt")

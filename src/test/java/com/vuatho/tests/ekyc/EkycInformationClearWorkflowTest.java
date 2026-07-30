@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycWorkflowTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -45,7 +47,7 @@ public class EkycInformationClearWorkflowTest extends EkycWorkflowTestSupport {
      */
     @Test(dataProvider = "ekycClearInformationCases",
             groups = {"ekyc", "information", "clear"},
-            description = "EKYC-INFORMATION-CLEAR: Clear/delete thong tin eKYC")
+            description = EkycTestCases.EKYC_004)
     public void runFocusedKycInformationClearCase(EkycInformationCase testCase) {
         if (testCase.action() != EkycInformationAction.CLEAR) {
             throw new SkipException(testCase.id() + ": Case khong phai CLEAR.");

@@ -7,14 +7,18 @@ import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 /**
  * Lắng nghe vòng đời TestNG và in trạng thái bắt đầu, thành công, bỏ qua hoặc thất bại của từng test.
  */
 public class ConsoleTestListener implements ITestListener, IExecutionListener {
+    private static final String SEPARATOR =
+            "============================================================";
     private static final List<ITestResult> RESULTS = new CopyOnWriteArrayList<>();
     private final HtmlSummaryReporter summaryReporter = new HtmlSummaryReporter();
 
@@ -23,7 +27,7 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
      */
     @Override
     public void onExecutionStart() {
-        ConsoleEncoding.useUtf8();
+        ConsoleEncoding.showOnlyTestReport();
         RESULTS.clear();
     }
     /**
@@ -32,7 +36,15 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
      */
     @Override
     public void onTestStart(ITestResult result) {
-        System.out.printf("%n[DANG CHAY] %s%n", TestResultFormatter.consoleDisplayName(result));
+        TestResultFormatter.TestCaseDescriptor testCase =
+                TestResultFormatter.testCase(result);
+        System.out.println(SEPARATOR);
+        System.out.println("RUNNING: " + testCase.id());
+        System.out.println("Scenario: "
+                + TestResultFormatter.consoleMessage(testCase.scenario()));
+        System.out.println("Class   : " + result.getTestClass().getRealClass().getSimpleName());
+        System.out.println("Method  : " + result.getMethod().getMethodName());
+        System.out.println(SEPARATOR);
     }
 
     /**
@@ -42,8 +54,7 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onTestSuccess(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[DAT]      %s (%s)%n", TestResultFormatter.consoleDisplayName(result),
-                TestResultFormatter.duration(result));
+        printStatus("PASS", result);
     }
 
     /**
@@ -53,16 +64,11 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onTestFailure(ITestResult result) {
         RESULTS.add(result);
-        String message = result.getThrowable() == null
-                ? "Khong co chi tiet loi"
-                : result.getThrowable().getMessage();
-        System.out.printf("[LOI]      %s (%s)%n          %s%n",
-                TestResultFormatter.consoleDisplayName(result),
-                TestResultFormatter.duration(result),
-                TestResultFormatter.consoleMessage(message));
+        printStatus("FAIL", result);
+        System.out.println("Reason: " + failureReason(result));
         if (TestConfig.captureScreenshots()) {
-            System.out.printf("          Anh loi: %s%n",
-                    ScreenshotManager.latestFor(result.getMethod().getMethodName()));
+            // ScreenshotManager vẫn quản lý bằng chứng lỗi; đường dẫn nằm trong HTML report.
+            ScreenshotManager.latestFor(result.getMethod().getMethodName());
         }
     }
 
@@ -73,7 +79,7 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onTestSkipped(ITestResult result) {
         RESULTS.add(result);
-        System.out.printf("[BO QUA]   %s%n", TestResultFormatter.consoleDisplayName(result));
+        printStatus("SKIP", result);
     }
 
     /**
@@ -82,17 +88,33 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
      */
     @Override
     public void onFinish(ITestContext context) {
-        int passed = context.getPassedTests().size();
-        int failed = context.getFailedTests().size();
-        int skipped = context.getSkippedTests().size();
-        int total = passed + failed + skipped;
+        Map<String, Integer> logicalStatuses = new LinkedHashMap<>();
+        Stream.of(
+                        context.getPassedTests().getAllResults(),
+                        context.getFailedTests().getAllResults(),
+                        context.getSkippedTests().getAllResults())
+                .flatMap(java.util.Collection::stream)
+                .forEach(result -> {
+                    String id = TestResultFormatter.testCase(result).id();
+                    int status = result.getStatus();
+                    logicalStatuses.merge(id, status,
+                            ConsoleTestListener::strongerStatus);
+                });
 
-        System.out.println("\n==================================================");
-        System.out.printf("TONG KET TEST: TONG=%d | DAT=%d | LOI=%d | BO QUA=%d%n",
-                total, passed, failed, skipped);
-        System.out.println("Bao cao HTML: "
-                + Path.of("test-output", "index.html").toAbsolutePath());
-        System.out.println("==================================================");
+        long passed = logicalStatuses.values().stream()
+                .filter(status -> status == ITestResult.SUCCESS)
+                .count();
+        long failed = logicalStatuses.values().stream()
+                .filter(status -> status == ITestResult.FAILURE)
+                .count();
+        long skipped = logicalStatuses.size() - passed - failed;
+
+        System.out.println("================ TEST SUMMARY ================");
+        System.out.println("Total : " + logicalStatuses.size());
+        System.out.println("PASS  : " + passed);
+        System.out.println("FAIL  : " + failed);
+        System.out.println("SKIP  : " + skipped);
+        System.out.println("==============================================");
     }
 
     /**
@@ -101,10 +123,42 @@ public class ConsoleTestListener implements ITestListener, IExecutionListener {
     @Override
     public void onExecutionFinish() {
         try {
-            System.out.println("Bao cao tong ket: " + summaryReporter.write(RESULTS));
+            summaryReporter.write(RESULTS);
         } catch (IOException exception) {
-            System.err.println("Khong tao duoc bao cao tong ket: " + exception.getMessage());
+            // Không in log phụ ra terminal theo chế độ chỉ hiển thị testcase đang chạy.
         }
+    }
+
+    private void printStatus(String status, ITestResult result) {
+        TestResultFormatter.TestCaseDescriptor testCase =
+                TestResultFormatter.testCase(result);
+        System.out.printf("[%s] %s - %s%n",
+                status,
+                testCase.id(),
+                TestResultFormatter.consoleMessage(testCase.scenario()));
+    }
+
+    private String failureReason(ITestResult result) {
+        Throwable throwable = result.getThrowable();
+        if (throwable == null) {
+            return "Không có thông tin nguyên nhân.";
+        }
+        String message = throwable.getMessage();
+        if (message == null || message.isBlank()) {
+            message = throwable.toString();
+        }
+        return TestResultFormatter.consoleMessage(
+                message.replaceAll("\\s+", " ").trim());
+    }
+
+    private static int strongerStatus(int current, int candidate) {
+        if (current == ITestResult.FAILURE || candidate == ITestResult.FAILURE) {
+            return ITestResult.FAILURE;
+        }
+        if (current == ITestResult.SUCCESS || candidate == ITestResult.SUCCESS) {
+            return ITestResult.SUCCESS;
+        }
+        return ITestResult.SKIP;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -49,7 +51,7 @@ public class LoginDashboardSourceAccessTest extends BaseTest {
     /**
      * Thực thi test “CMS-DASH-001: Login CMS successfully with Google” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 1, description = "CMS-DASH-001: Login CMS successfully with Google")
+    @Test(priority = 1, description = DashboardTestCases.DASH_024)
     public void loginSuccessfully() {
         // Bắt đầu thu thập lỗi trình duyệt trước khi thực hiện thao tác đăng nhập.
         PageHealthChecker healthChecker = new PageHealthChecker(driver);
@@ -67,7 +69,7 @@ public class LoginDashboardSourceAccessTest extends BaseTest {
     /**
      * Thực thi test “CMS-DASH-LOAD-001: Dashboard loads successfully” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 2, description = "CMS-DASH-LOAD-001: Dashboard loads successfully")
+    @Test(priority = 2, description = DashboardTestCases.DASH_025)
     public void dashboardLoadsSuccessfully() {
         // Đảm bảo test có phiên đăng nhập hợp lệ, kể cả khi chạy riêng lẻ từ IDE.
         openAndLogin();
@@ -94,7 +96,7 @@ public class LoginDashboardSourceAccessTest extends BaseTest {
      * Thực thi test “CMS-SOURCE-001: Source efficiency and cost page loads successfully” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 3,
-            description = "CMS-SOURCE-001: Source efficiency and cost page loads successfully")
+            description = DashboardTestCases.DASH_026)
     public void sourceEfficiencyPageLoadsSuccessfully() {
         // Dashboard là điểm xuất phát bắt buộc trước khi điều hướng sang trang nguồn.
         openAndLogin();

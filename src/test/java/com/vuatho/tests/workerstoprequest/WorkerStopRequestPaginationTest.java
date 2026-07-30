@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerstoprequest;
 
+import com.vuatho.testcases.WorkerStopRequestTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerstoprequest.WorkerStopRequestTestSupport;
 import com.vuatho.pages.WorkerStopRequestPage.RequestRow;
@@ -16,7 +18,7 @@ public class WorkerStopRequestPaginationTest extends WorkerStopRequestTestSuppor
     }
 
     @Test(groups = {"worker-stop-request", "pagination", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-004: Sang trang 2 đổi dữ liệu và quay lại trang 1")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_010)
     public void paginationChangesAndRestoresData() {
         List<String> firstPage = stopRequestPage.rows().stream().map(RequestRow::id).toList();
         Assert.assertTrue(stopRequestPage.totalPages() >= 2,

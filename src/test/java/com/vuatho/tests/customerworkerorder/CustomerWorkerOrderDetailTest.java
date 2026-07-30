@@ -1,5 +1,7 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import com.vuatho.pages.CustomerWorkerOrderPage;
@@ -38,7 +40,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
 
     /** Đối soát các section thông tin, tiến trình và tài chính trong drawer. */
     @Test(groups = {"customer-worker-order", "detail", "detail-summary", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-017: Drawer trả đầy đủ thông tin đơn và đối soát")
+            description = CustomerWorkerOrderTestCases.CWO_007)
     public void detailReturnsOrderTimelineAndFinancialData() {
         DetailSnapshot detail =
                 orderPage.openFirstRowWithStatus("Hoàn thành đơn");
@@ -74,7 +76,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     /** Mở drawer theo từng trạng thái; trạng thái không có data được skip có lý do. */
     @Test(dataProvider = "detailStatuses",
             groups = {"customer-worker-order", "detail", "filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-018: Mở được chi tiết theo từng trạng thái có dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_008)
     public void detailOpensForEachAvailableStatus(String status) {
         DetailSnapshot detail;
         try {
@@ -105,7 +107,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     /** Điều hướng từng section và xác nhận đúng section/nội dung được đưa vào view. */
     @Test(dataProvider = "sections",
             groups = {"customer-worker-order", "detail", "detail-sections", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-019: Các section drawer điều hướng và trả nội dung")
+            description = CustomerWorkerOrderTestCases.CWO_009)
     public void eachDetailSectionReturnsContent(
             String section, String expectedContent) {
         try {
@@ -124,7 +126,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
 
     /** Mở action bản đồ và xác nhận UI vị trí xuất hiện nếu đơn hỗ trợ. */
     @Test(groups = {"customer-worker-order", "detail", "map", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-020: Xem bản đồ mở dữ liệu vị trí")
+            description = CustomerWorkerOrderTestCases.CWO_010)
     public void mapActionOpensLocationData() {
         orderPage.openFirstRowWithStatus("Hoàn thành đơn");
         orderPage.openDetailSection("Tiến trình");
@@ -141,7 +143,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
 
     /** Mở chat hỗ trợ khách và xác nhận giao diện chat được render. */
     @Test(groups = {"customer-worker-order", "detail", "chat", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-021: Chat hỗ trợ khách mở giao diện chat")
+            description = CustomerWorkerOrderTestCases.CWO_011)
     public void customerSupportChatOpens() {
         orderPage.openFirstRow();
         Assert.assertTrue(orderPage.openCustomerChat(),
@@ -161,7 +163,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     @Test(dataProvider = "detailProfiles",
             groups = {"customer-worker-order", "detail", "profile-navigation",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-080: Mở đúng trang chi tiết Khách và Thợ")
+            description = CustomerWorkerOrderTestCases.CWO_012)
     public void customerAndWorkerProfileLinksOpenCorrectRoutes(
             String role, String expectedPath) {
         try {
@@ -189,7 +191,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     @Test(dataProvider = "detailMedia",
             groups = {"customer-worker-order", "detail", "media-viewer",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-081: Mở viewer hình ảnh và video của đơn")
+            description = CustomerWorkerOrderTestCases.CWO_013)
     public void imageAndVideoThumbnailsOpenViewer(
             String mediaType, String expectedTag) {
         try {
@@ -209,7 +211,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     /** Mở popup chi tiết báo giá và kiểm tra popup trả nội dung nghiệp vụ. */
     @Test(groups = {"customer-worker-order", "detail", "quote-detail",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-082: Xem chi tiết báo giá từ Hóa đơn")
+            description = CustomerWorkerOrderTestCases.CWO_014)
     public void quoteDetailButtonOpensPopup() {
         orderPage.openFirstRowWithStatus("Hoàn thành đơn");
         orderPage.openDetailSection("Hóa đơn");
@@ -223,7 +225,7 @@ public class CustomerWorkerOrderDetailTest extends CustomerWorkerOrderTestSuppor
     /** Chuyển qua lại hai tab feedback và kiểm tra selected/content tương ứng. */
     @Test(groups = {"customer-worker-order", "detail", "feedback-tabs",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-083: Chuyển tab Đánh giá và Báo cáo")
+            description = CustomerWorkerOrderTestCases.CWO_015)
     public void ratingAndReportTabsReturnTheirContent() {
         orderPage.openFirstRowWithStatus("Hoàn thành đơn");
         orderPage.openDetailSection("Đánh giá & Báo cáo");

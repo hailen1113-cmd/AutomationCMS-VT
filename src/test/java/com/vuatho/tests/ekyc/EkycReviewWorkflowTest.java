@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycWorkflowTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -44,7 +46,7 @@ public class EkycReviewWorkflowTest extends EkycWorkflowTestSupport {
      */
     @Test(dataProvider = "ekycReviewCases",
             groups = {"ekyc", "workbook", "review"},
-            description = "EKYC-REVIEW: Approve va reject testcase tu workbook")
+            description = EkycTestCases.EKYC_021)
     public void runFocusedKycTestcase(EkycWorkbookCase testCase) {
         switch (testCase.family()) {
             case "REVIEW" -> runReviewCase(testCase);

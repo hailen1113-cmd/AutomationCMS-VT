@@ -143,9 +143,6 @@ abstract class UniformUiPage {
 
     /** Giữ màn hình hai giây ở chế độ có giao diện. */
     protected void pause(String step) {
-        // In ASCII để Windows Terminal không hiển thị sai bảng mã tiếng Việt.
-        System.out.println("[QUAN SAT] " + TextNormalizer.normalize(step)
-                + " - giu man hinh 2 giay");
         if (TestConfig.headless()) {
             return;
         }

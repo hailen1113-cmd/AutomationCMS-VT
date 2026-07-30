@@ -1,5 +1,7 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,7 +18,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-004: Dashboard locators do not depend on dynamic IDs” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-004: Dashboard locators do not depend on dynamic IDs")
+    @Test(description = DashboardTestCases.DASH_001)
     public void dashboardDoesNotUseDynamicIdLocators() throws IOException {
         String source = source("pages", "DashboardPage.java")
                 + source("components", "SidebarComponent.java");
@@ -27,7 +29,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-005: Dashboard locators avoid full XPath and long Tailwind chains” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-005: Dashboard locators avoid full XPath and long Tailwind chains")
+    @Test(description = DashboardTestCases.DASH_002)
     public void dashboardAvoidsBrittleLocators() throws IOException {
         String source = source("pages", "DashboardPage.java")
                 + source("components", "SidebarComponent.java");
@@ -40,7 +42,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-007: Dashboard flow does not use Thread.sleep” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-007: Dashboard flow does not use Thread.sleep")
+    @Test(description = DashboardTestCases.DASH_003)
     public void dashboardFlowUsesExplicitWaits() throws IOException {
         String source = source("pages", "DashboardPage.java")
                 + source("components", "SidebarComponent.java")
@@ -56,7 +58,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-008: Independent tests continue after one failure” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-008: Independent tests continue after one failure")
+    @Test(description = DashboardTestCases.DASH_004)
     public void suiteContinuesAfterIndependentFailure() throws IOException {
         String suite = Files.readString(Path.of("dashboard-testng.xml"));
         Assert.assertTrue(suite.contains("configfailurepolicy=\"continue\""));
@@ -65,7 +67,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-009: Browser lifecycle is controlled at suite level” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-009: Browser lifecycle is controlled at suite level")
+    @Test(description = DashboardTestCases.DASH_005)
     public void browserLifecycleIsCentralized() throws IOException {
         String lifecycle = source("core", "DriverLifecycleListener.java");
         String session = source("core", "DriverSession.java");
@@ -77,7 +79,7 @@ public class DashboardAutomationFrameworkQualityTest {
     /**
      * Thực thi test “CAR-020: Failure evidence includes screenshot reporting” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CAR-020: Failure evidence includes screenshot reporting")
+    @Test(description = DashboardTestCases.DASH_006)
     public void failureEvidenceIsConfigured() throws IOException {
         String listener = source("reporting", "ConsoleTestListener.java");
         String screenshots = source("reporting", "ScreenshotManager.java");

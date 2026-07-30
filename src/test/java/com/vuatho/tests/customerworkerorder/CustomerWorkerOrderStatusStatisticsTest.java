@@ -1,5 +1,7 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import org.testng.Assert;
@@ -38,7 +40,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-037: Popup Trạng thái có đủ cấu trúc và dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_048)
     /** Kiểm tra popup có đủ tab, KPI, danh sách dịch vụ và action xuất file. */
     public void popupReturnsCompleteStructureAndData() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -64,7 +66,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-period", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-039: Tab Hoàn thành lọc đúng Tuần và Tháng")
+            description = CustomerWorkerOrderTestCases.CWO_049)
     /** Kiểm tra tab Hoàn thành với từng mốc Tuần và Tháng. */
     public void completedStatusSupportsEveryPeriod() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -73,7 +75,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-period", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-046: Tab Đơn hủy lọc đúng Tuần và Tháng")
+            description = CustomerWorkerOrderTestCases.CWO_050)
     /** Kiểm tra tab Đơn hủy với từng mốc Tuần và Tháng. */
     public void cancelledStatusSupportsEveryPeriod() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -82,7 +84,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-scroll", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-040: Danh sách dịch vụ cuộn được và popup mở lại sạch")
+            description = CustomerWorkerOrderTestCases.CWO_051)
     /** Cuộn quan sát danh sách dịch vụ, đóng rồi mở lại popup ở trạng thái sạch. */
     public void serviceListCanBeObservedAndDialogReopened() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -101,7 +103,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-custom-date",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-049: Tab Hoàn thành lọc khoảng ngày tùy chỉnh")
+            description = CustomerWorkerOrderTestCases.CWO_052)
     /** Nhập khoảng ngày thủ công trên tab Hoàn thành và đối chiếu range áp dụng. */
     public void completedStatusSupportsCustomDateRange() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -111,7 +113,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-custom-date",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-050: Tab Đơn hủy lọc khoảng ngày tùy chỉnh")
+            description = CustomerWorkerOrderTestCases.CWO_053)
     /** Nhập khoảng ngày thủ công trên tab Đơn hủy và đối chiếu range áp dụng. */
     public void cancelledStatusSupportsCustomDateRange() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -121,7 +123,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-calendar-date",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-052: Icon calendar mở và chọn được khoảng ngày")
+            description = CustomerWorkerOrderTestCases.CWO_054)
     /** Mở calendar bằng icon, chọn hai ngày và kiểm tra input/range cập nhật. */
     public void calendarIconSelectsDateRange() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -140,7 +142,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-custom-date",
             "statistics-tabs", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-054: Đổi tab cập nhật nội dung và giữ khoảng ngày")
+            description = CustomerWorkerOrderTestCases.CWO_055)
     /** Đổi tab sau khi lọc ngày và xác nhận khoảng ngày vẫn được giữ. */
     public void customDateRangeIsPreservedWhenStatusTabChanges() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -171,7 +173,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-date-boundary",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-055: Hai tab lọc được trong cùng một ngày")
+            description = CustomerWorkerOrderTestCases.CWO_056)
     /** Áp cùng ngày bắt đầu/kết thúc lần lượt trên cả hai tab trạng thái. */
     public void bothTabsSupportSameDayRange() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -189,7 +191,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-057: Từ chối khoảng ngày đảo ngược")
+            description = CustomerWorkerOrderTestCases.CWO_057)
     /** Nhập ngày bắt đầu sau ngày kết thúc và kiểm tra validation. */
     public void rejectsReversedDateRange() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -201,7 +203,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-059: Từ chối ngày sai định dạng và để trống")
+            description = CustomerWorkerOrderTestCases.CWO_058)
     /** Kiểm tra popup từ chối ngày sai định dạng và khoảng ngày để trống. */
     public void rejectsMalformedAndBlankDates() {
         orderPage.openStatistic("Trạng thái đơn");
@@ -212,7 +214,7 @@ public class CustomerWorkerOrderStatusStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "order-status-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-061: Xử lý rõ ràng khoảng ngày tương lai")
+            description = CustomerWorkerOrderTestCases.CWO_059)
     /** Chọn khoảng ngày tương lai và kiểm tra UI trả rỗng/thông báo rõ ràng. */
     public void handlesFutureDateRange() {
         orderPage.openStatistic("Trạng thái đơn");

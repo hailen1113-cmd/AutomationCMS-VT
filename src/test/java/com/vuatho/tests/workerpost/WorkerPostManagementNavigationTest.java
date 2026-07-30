@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
 import com.vuatho.pages.WorkerPostManagementPage.Status;
@@ -15,7 +17,7 @@ public class WorkerPostManagementNavigationTest extends WorkerPostManagementTest
     }
 
     @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-007: Chuyển trạng thái cập nhật tab và query URL")
+            description = WorkerPostTestCases.WORKER_POST_011)
     public void switchingStatusUpdatesSelectionAndUrl() {
         for (Status status : Status.values()) {
             workerPostManagementPage.selectStatus(status);
@@ -31,7 +33,7 @@ public class WorkerPostManagementNavigationTest extends WorkerPostManagementTest
     }
 
     @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-009: Tên thợ điều hướng đến đúng hồ sơ")
+            description = WorkerPostTestCases.WORKER_POST_012)
     public void workerNameLinksToWorkerProfile() {
         WorkerProfileNavigation navigation =
                 workerPostManagementPage.clickFirstWorkerProfileLink();

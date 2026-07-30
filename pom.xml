@@ -16,6 +16,7 @@
         <selenium.version>4.46.0</selenium.version>
         <testng.version>7.9.0</testng.version>
         <poi.version>5.4.1</poi.version>
+        <testCaseId></testCaseId>
     </properties>
 
     <dependencies>
@@ -54,7 +55,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
                 <configuration>
-                    <argLine>-Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8</argLine>
+                    <argLine>-Dfile.encoding=UTF-8 -Dnative.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8</argLine>
+                    <encoding>UTF-8</encoding>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>com.vuatho.tests.conditions.TestCaseIdFilter</value>
+                        </property>
+                    </properties>
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
@@ -81,6 +89,7 @@
                         <long.wait.timeout.seconds>${long.wait.timeout.seconds}</long.wait.timeout.seconds>
                         <screenshot.dir>${screenshot.dir}</screenshot.dir>
                         <summary.report.path>${summary.report.path}</summary.report.path>
+                        <testCaseId>${testCaseId}</testCaseId>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -146,27 +155,9 @@
             </properties>
         </profile>
         <profile>
-            <id>uniform-management</id>
-            <properties>
-                <suiteXmlFile>uniform-management-testng.xml</suiteXmlFile>
-            </properties>
-        </profile>
-        <profile>
             <id>uniform-catalog</id>
             <properties>
                 <suiteXmlFile>uniform-catalog-testng.xml</suiteXmlFile>
-            </properties>
-        </profile>
-        <profile>
-            <id>uniform-order</id>
-            <properties>
-                <suiteXmlFile>uniform-order-testng.xml</suiteXmlFile>
-            </properties>
-        </profile>
-        <profile>
-            <id>uniform-inventory</id>
-            <properties>
-                <suiteXmlFile>uniform-inventory-testng.xml</suiteXmlFile>
             </properties>
         </profile>
     </profiles>

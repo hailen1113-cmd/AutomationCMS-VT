@@ -1,5 +1,7 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
+
 import com.vuatho.support.dashboard.DashboardTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -39,7 +41,7 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
      * @param label giá trị label được truyền vào
      */
     @Test(dataProvider = "overviewCards",
-            description = "Workbook OVD-001..006: Card tong quan hien thi va co gia tri so")
+            description = DashboardTestCases.DASH_021)
     public void overviewCardHasNumericValue(String caseId, String label) {
         Assert.assertTrue(dashboard.summaryCardHasNumericValue(label),
                 caseId + " thieu hoac khong co gia tri so: " + label);
@@ -64,7 +66,7 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
      * @param title giá trị title được truyền vào
      */
     @Test(dataProvider = "dashboardSections",
-            description = "Workbook dashboard section hien thi")
+            description = DashboardTestCases.DASH_022)
     public void dashboardSectionIsDisplayed(String caseId, String title) {
         Assert.assertTrue(dashboard.sectionIsVisible(title),
                 caseId + " section khong hien thi: " + title);
@@ -92,7 +94,7 @@ public class DashboardWorkbookUiTest extends DashboardTestSupport {
      * @param label giá trị label được truyền vào
      */
     @Test(dataProvider = "periodSelections",
-            description = "Workbook period selector doi duoc active state")
+            description = DashboardTestCases.DASH_023)
     public void dashboardPeriodCanBeSelected(String caseId, int groupIndex, String label) {
         dashboard.selectPeriod(groupIndex, label);
         Assert.assertTrue(dashboard.periodIsSelected(groupIndex, label),

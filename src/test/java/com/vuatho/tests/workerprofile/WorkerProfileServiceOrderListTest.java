@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -29,7 +31,7 @@ public class WorkerProfileServiceOrderListTest extends WorkerProfileTestSupport 
      * Mở tối đa ba mã đơn đầu tiên, đối chiếu đúng mã ở tab mới và quay lại danh sách sau mỗi lần.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-service-order" },
-            description = "WORKER-PROFILE-ORDER-001: Mo cac don dich vu dau tien trong tab moi")
+            description = WorkerProfileTestCases.WORKER_PROFILE_021)
     public void firstServiceOrdersOpenMatchingDetailsInNewTabs() {
         workerProfilePage.openFirstWorkerInformation();
         workerProfilePage.openWorkerDetailTab("Đơn dịch vụ");

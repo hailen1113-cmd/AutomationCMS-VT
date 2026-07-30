@@ -52,6 +52,30 @@ public final class TestResultFormatter {
     }
 
     /**
+     * Tách ID và Scenario từ description cố định dạng {@code ID - Scenario}.
+     * Nếu testcase cũ chưa có description hợp lệ, method name được dùng làm giá trị dự phòng.
+     */
+    public static TestCaseDescriptor testCase(ITestResult result) {
+        return testCase(
+                result.getMethod().getDescription(),
+                result.getMethod().getMethodName());
+    }
+
+    /** Tách ID/Scenario từ description khi chưa có ITestResult, ví dụ ở method interceptor. */
+    public static TestCaseDescriptor testCase(String description, String fallbackName) {
+        if (description == null || description.isBlank()) {
+            return new TestCaseDescriptor(fallbackName, fallbackName);
+        }
+        int separator = description.indexOf(" - ");
+        if (separator < 1 || separator + 3 >= description.length()) {
+            return new TestCaseDescriptor(description.trim(), description.trim());
+        }
+        return new TestCaseDescriptor(
+                description.substring(0, separator).trim(),
+                description.substring(separator + 3).trim());
+    }
+
+    /**
      * Thực hiện xử lý duration trong luồng kiểm thử.
      * @param result giá trị result được truyền vào
      * @return kết quả duration sau khi xử lý
@@ -88,5 +112,9 @@ public final class TestResultFormatter {
                 .replace('đ', 'd')
                 .replace('Đ', 'D');
         return withoutAccents.replaceAll("[^\\x20-\\x7E\\r\\n\\t]", "");
+    }
+
+    /** ID và kịch bản nghiệp vụ lấy trực tiếp từ @Test description. */
+    public record TestCaseDescriptor(String id, String scenario) {
     }
 }

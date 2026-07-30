@@ -4,8 +4,6 @@ import com.vuatho.core.BaseTest;
 import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.UniformCatalogPage;
-import com.vuatho.pages.UniformInventoryPage;
-import com.vuatho.pages.UniformOrderPage;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
@@ -14,17 +12,15 @@ import org.testng.annotations.BeforeMethod;
 import java.time.Duration;
 
 /**
- * Setup/cleanup dùng chung của module Đồng phục.
+ * Setup/cleanup dùng chung của menu Quản lí Đồng Phục.
  *
  * <p>Đây là lớp hỗ trợ, không chứa {@code @Test}. Mỗi file testcase tự mở đúng
  * route nghiệp vụ của mình nên có thể chạy độc lập từ IDE.</p>
  */
 public abstract class UniformModuleTestSupport extends BaseTest {
     protected UniformCatalogPage catalogPage;
-    protected UniformOrderPage uniformOrderPage;
-    protected UniformInventoryPage inventoryPage;
 
-    /** Đảm bảo đã đăng nhập và khởi tạo ba Page Object trước mỗi testcase. */
+    /** Đảm bảo đã đăng nhập và khởi tạo Page Object Quản lí Đồng Phục. */
     @BeforeMethod(alwaysRun = true)
     public void prepareUniformModule() {
         if (driver == null) {
@@ -40,8 +36,6 @@ public abstract class UniformModuleTestSupport extends BaseTest {
                             + " | Tiêu đề: " + driver.getTitle());
         }
         catalogPage = new UniformCatalogPage(driver);
-        uniformOrderPage = new UniformOrderPage(driver);
-        inventoryPage = new UniformInventoryPage(driver);
     }
 
     /** Đóng drawer/dialog còn mở để testcase sau không bị overlay chặn. */
@@ -51,11 +45,7 @@ public abstract class UniformModuleTestSupport extends BaseTest {
             return;
         }
         try {
-            if (driver.getCurrentUrl().contains("/order-uniform")) {
-                uniformOrderPage.closeOverlay();
-            } else if (driver.getCurrentUrl().contains("/inventory-uniform")) {
-                inventoryPage.closeOverlay();
-            } else if (driver.getCurrentUrl().contains("/uniform")) {
+            if (driver.getCurrentUrl().contains("/uniform")) {
                 catalogPage.closeOverlay();
             }
         } catch (RuntimeException ignored) {

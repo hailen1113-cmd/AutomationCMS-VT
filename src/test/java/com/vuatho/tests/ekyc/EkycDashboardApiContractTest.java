@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycApiTestSupport;
 
 import com.vuatho.api.ApiAssertions;
@@ -22,7 +24,7 @@ public class EkycDashboardApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý dashboard kyc returns statistic contract trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_001, groups = {"ekyc", "api", "contract"})
     public void dashboardKycReturnsStatisticContract() {
         ApiResponse response = api.get("/dashboard/kyc");
         ApiAssertions.assertOkJson(response, "GET /dashboard/kyc");

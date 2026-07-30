@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycApiTestSupport;
 
 import com.vuatho.api.ApiAssertions;
@@ -36,7 +38,7 @@ public class EkycDetailApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý detail returns applicant personal info images and decision state trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_002, groups = {"ekyc", "api", "contract"})
     public void detailReturnsApplicantPersonalInfoImagesAndDecisionState() {
         String applicantId = firstApplicantIdFromList();
         ApiResponse response = api.get("/ekyc/" + applicantId);
@@ -59,7 +61,7 @@ public class EkycDetailApiContractTest extends EkycApiTestSupport {
      * @param applicantId giá trị applicant id được truyền vào
      * @param expectedStatus giá trị expected status được truyền vào
      */
-    @Test(dataProvider = "invalidApplicantIds", groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_003, dataProvider = "invalidApplicantIds", groups = {"ekyc", "api", "contract"})
     public void detailRejectsInvalidOrUnknownApplicantId(String applicantId, int expectedStatus) {
         ApiResponse response = api.get("/ekyc/" + applicantId);
         Assert.assertEquals(response.status(), expectedStatus,

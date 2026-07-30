@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -31,7 +33,7 @@ public class WorkerProfileReferralListTest extends WorkerProfileTestSupport {
      * Click tối đa ba thợ đầu tiên, xác nhận đúng ID trên URL và quay lại danh sách sau mỗi lần.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-referral" },
-            description = "WORKER-PROFILE-REFERRAL-001: Mo cac tho dau tien trong danh sach Da gioi thieu")
+            description = WorkerProfileTestCases.WORKER_PROFILE_015)
     public void firstReferredWorkersOpenMatchingProfilesInNewTabs() {
         System.out.println("[WORKER REFERRAL] Tim ho so nguon: " + SOURCE_WORKER_NAME);
         System.out.println("[WORKER REFERRAL] CLICK mo chi tiet: " + SOURCE_WORKER_NAME);

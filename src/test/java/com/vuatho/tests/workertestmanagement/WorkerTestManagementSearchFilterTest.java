@@ -1,5 +1,7 @@
 package com.vuatho.tests.workertestmanagement;
 
+import com.vuatho.testcases.WorkerTestManagementTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workertestmanagement.WorkerTestManagementTestSupport;
 import com.vuatho.pages.WorkerTestManagementPage.Status;
@@ -19,7 +21,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     }
 
     @Test(groups = {"worker-test-management", "search", "data-interaction"},
-            description = "WORKER-TESTED-003: Tìm theo ID trả đúng bài kiểm tra")
+            description = WorkerTestManagementTestCases.WORKER_TEST_010)
     public void searchByIdReturnsMatchingRecord() {
         String id = workerTestPage.rows().get(0).id();
         workerTestPage.search(id);
@@ -29,7 +31,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     }
 
     @Test(groups = {"worker-test-management", "search", "data-interaction"},
-            description = "WORKER-TESTED-004: Tìm theo tên tài khoản trả dữ liệu phù hợp")
+            description = WorkerTestManagementTestCases.WORKER_TEST_011)
     public void searchByAccountReturnsMatchingRecords() {
         String account = workerTestPage.rows().get(0).account();
         workerTestPage.search(account);
@@ -44,7 +46,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     }
 
     @Test(groups = {"worker-test-management", "search", "reset", "data-interaction"},
-            description = "WORKER-TESTED-005: Từ khóa không tồn tại trả rỗng và Reset phục hồi dữ liệu")
+            description = WorkerTestManagementTestCases.WORKER_TEST_012)
     public void noResultAndResetRestoreDefaultData() {
         int defaultTotal = workerTestPage.totalDisplayed();
         workerTestPage.search("AUTOMATION_NOT_FOUND_987654321");
@@ -78,7 +80,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     @Test(
             dataProvider = "testedStatuses",
             groups = {"worker-test-management", "filter", "data-interaction"},
-            description = "WORKER-TESTED-006: Mỗi trạng thái chỉ trả dữ liệu thuộc trạng thái đã chọn")
+            description = WorkerTestManagementTestCases.WORKER_TEST_013)
     public void eachStatusFilterReturnsMatchingData(Status status) {
         int defaultTotal = workerTestPage.totalDisplayed();
         workerTestPage.selectStatus(status);
@@ -96,7 +98,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     }
 
     @Test(groups = {"worker-test-management", "search", "filter", "data-interaction"},
-            description = "WORKER-TESTED-013: Kết hợp trạng thái và tên tài khoản trả đúng giao dữ liệu")
+            description = WorkerTestManagementTestCases.WORKER_TEST_014)
     public void statusAndAccountSearchReturnIntersection() {
         workerTestPage.selectStatus(Status.PASSED);
         String account = workerTestPage.rows().get(0).account();
@@ -111,7 +113,7 @@ public class WorkerTestManagementSearchFilterTest extends WorkerTestManagementTe
     }
 
     @Test(groups = {"worker-test-management", "filter", "reset", "data-interaction"},
-            description = "WORKER-TESTED-014: Đặt lại trong popover Filter phục hồi dữ liệu mặc định")
+            description = WorkerTestManagementTestCases.WORKER_TEST_015)
     public void filterPanelResetRestoresDefaultData() {
         int defaultTotal = workerTestPage.totalDisplayed();
         workerTestPage.selectStatus(Status.FAILED);

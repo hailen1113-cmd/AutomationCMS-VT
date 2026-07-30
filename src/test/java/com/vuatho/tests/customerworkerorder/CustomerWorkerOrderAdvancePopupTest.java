@@ -1,5 +1,7 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import com.vuatho.pages.CustomerWorkerOrderPage.AdvanceQuoteSnapshot;
@@ -41,7 +43,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 1,
             groups = {"customer-worker-order", "advance-popup", "popup-content",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-029: Popup hiển thị đầy đủ dữ liệu báo giá")
+            description = CustomerWorkerOrderTestCases.CWO_001)
     public void advancePopupReturnsQuoteDataAndControls() {
         openOrderWithQuotePopup();
         AdvanceQuoteSnapshot popup = orderPage.openAdvanceQuotePopup();
@@ -64,7 +66,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 2,
             groups = {"customer-worker-order", "advance-popup", "quote-row",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-030: Thêm và xóa dòng báo giá")
+            description = CustomerWorkerOrderTestCases.CWO_002)
     public void quoteRowCanBeAddedAndRemoved() {
         openOrderWithQuotePopup();
         AdvanceQuoteSnapshot before = orderPage.openAdvanceQuotePopup();
@@ -85,7 +87,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 3,
             groups = {"customer-worker-order", "advance-popup", "validation",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-031: Bắt buộc nhập đủ dịch vụ và giá tiền")
+            description = CustomerWorkerOrderTestCases.CWO_003)
     public void blankQuoteShowsRequiredValidation() {
         openOrderWithQuotePopup();
         orderPage.openAdvanceQuotePopup();
@@ -101,7 +103,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 4,
             groups = {"customer-worker-order", "advance-popup", "cancel-popup",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-032: Hủy popup không chuyển trạng thái đơn")
+            description = CustomerWorkerOrderTestCases.CWO_004)
     public void cancelPopupKeepsOrderStatus() {
         DetailSnapshot before = openOrderWithQuotePopup();
         orderPage.openAdvanceQuotePopup();
@@ -119,7 +121,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 5,
             groups = {"customer-worker-order", "advance-popup", "quote-input",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-033: Nhập dịch vụ và giá tiền cho dòng báo giá mới")
+            description = CustomerWorkerOrderTestCases.CWO_005)
     public void newQuoteRowAcceptsServiceAndPrice() {
         openOrderWithQuotePopup();
         AdvanceQuoteSnapshot before = orderPage.openAdvanceQuotePopup();
@@ -146,7 +148,7 @@ public class CustomerWorkerOrderAdvancePopupTest extends CustomerWorkerOrderTest
     @Test(priority = 6,
             groups = {"customer-worker-order", "advance-popup", "close-popup",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-034: Đóng popup bằng dấu X không chuyển trạng thái đơn")
+            description = CustomerWorkerOrderTestCases.CWO_006)
     public void closeIconKeepsOrderStatus() {
         DetailSnapshot before = openOrderWithQuotePopup();
         orderPage.openAdvanceQuotePopup();

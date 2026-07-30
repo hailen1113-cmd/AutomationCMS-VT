@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -33,7 +35,7 @@ public class WorkerProfilePostListTest extends WorkerProfileTestSupport {
      * Tìm đúng hồ sơ nguồn, mở tab Bài đăng và lần lượt xem chi tiết tối đa ba bài đầu tiên.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-post" },
-            description = "WORKER-PROFILE-POST-001: Mo chi tiet cac bai dang dau tien")
+            description = WorkerProfileTestCases.WORKER_PROFILE_013)
     public void firstWorkerPostsOpenDetails() {
         System.out.println("[WORKER POST] Tim va mo ho so: " + SOURCE_WORKER_NAME);
         workerProfilePage.searchAndOpenWorkerInformationByName(SOURCE_WORKER_NAME);
@@ -69,7 +71,7 @@ public class WorkerProfilePostListTest extends WorkerProfileTestSupport {
      * Kiểm tra các nút chuyển ảnh, phóng to, thu nhỏ, xoay phải và xoay trái trong modal bài đăng.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-post" },
-            description = "WORKER-PROFILE-POST-002: Kiem tra control trong modal bai dang")
+            description = WorkerProfileTestCases.WORKER_PROFILE_014)
     public void postViewerControlsChangeMediaAndImageTransform() {
         // Làm mới state React để testcase độc lập với drawer/modal của case chạy trước.
         driver.navigate().refresh();

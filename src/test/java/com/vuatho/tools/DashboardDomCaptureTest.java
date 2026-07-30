@@ -1,5 +1,7 @@
 package com.vuatho.tools;
 
+import com.vuatho.testcases.DiagnosticTestCases;
+
 import com.vuatho.config.GoogleCredentialProvider;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.BaseTest;
@@ -25,7 +27,7 @@ public class DashboardDomCaptureTest extends BaseTest {
      *
      * @throws IOException khi không thể tạo thư mục hoặc ghi file HTML
      */
-    @Test(description = "Capture the complete live Dashboard DOM for evidence-based analysis")
+    @Test(description = DiagnosticTestCases.DIAG_001)
     public void captureDashboardOuterHtml() throws IOException {
         DashboardPage dashboard = new DashboardPage(driver);
         dashboard.open();

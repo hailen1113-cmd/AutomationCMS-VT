@@ -1,5 +1,7 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
+
 import com.vuatho.support.dashboard.DashboardTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -19,7 +21,7 @@ public class DashboardLogoutTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-010: Logout thanh cong” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 1, description = "CMS-DASH-010: Logout thanh cong")
+    @Test(priority = 1, description = DashboardTestCases.DASH_016)
     public void logoutSuccessfully() {
         skipUnlessLogoutTestsAreEnabled();
         dashboard.logout();
@@ -30,7 +32,7 @@ public class DashboardLogoutTest extends DashboardTestSupport {
      * Thực thi test “CMS-DASH-011: Khong truy cap duoc Dashboard sau logout” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 2, dependsOnMethods = "logoutSuccessfully",
-            description = "CMS-DASH-011: Khong truy cap duoc Dashboard sau logout")
+            description = DashboardTestCases.DASH_017)
     public void dashboardCannotBeAccessedAfterLogout() {
         skipUnlessLogoutTestsAreEnabled();
         dashboard.open();

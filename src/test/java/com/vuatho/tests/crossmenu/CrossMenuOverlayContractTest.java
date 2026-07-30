@@ -1,5 +1,7 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -34,7 +36,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-USER-FILTER: User filter exposes status and date controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-USER-FILTER: User filter exposes status and date controls")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_002)
     public void userFilterHasExpectedControls() {
         open(childOf("Người Dùng", "Quản Lí Người Dùng"));
         OverlayFeaturesPage panel = new OverlayFeaturesPage(driver).open("Filter");
@@ -49,7 +51,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-ORDER-FILTER: Order filter exposes service/status/agreement controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-ORDER-FILTER: Order filter exposes service/status/agreement controls")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_003)
     public void orderFilterHasExpectedControls() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
         OverlayFeaturesPage panel = new OverlayFeaturesPage(driver).open("Bộ lọc đơn dịch vụ");
@@ -65,7 +67,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-ORDER-STATS: Order statistics modal exposes its report cards” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-ORDER-STATS: Order statistics modal exposes its report cards")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_004)
     public void orderStatisticsHasExpectedCards() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
         OverlayFeaturesPage modal = new OverlayFeaturesPage(driver).open("Thống kê");
@@ -79,7 +81,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-TRANSACTION-FILTER: Transaction status filter exposes all statuses” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-TRANSACTION-FILTER: Transaction status filter exposes all statuses")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_005)
     public void transactionStatusHasExpectedOptions() {
         open(childOf("Giao Dịch", "Lịch Sử Giao Dịch"));
         OverlayFeaturesPage dropdown = new OverlayFeaturesPage(driver).open("Chọn trạng thái");
@@ -93,7 +95,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-BLOG-FILTER: Blog filter exposes language/category/date controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-BLOG-FILTER: Blog filter exposes language/category/date controls")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_006)
     public void blogFilterHasExpectedControls() {
         open(childOf("Website", "Quản Lí Bài Viết Nội Bộ"));
         OverlayFeaturesPage panel = new OverlayFeaturesPage(driver).open("Filter");
@@ -108,7 +110,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-MARKETING-FILTER: Marketing filter exposes demographic controls” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-MARKETING-FILTER: Marketing filter exposes demographic controls")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_007)
     public void marketingFilterHasExpectedControls() {
         open(childOf("Marketing", "Thống Kê Thợ - Khách"));
         OverlayFeaturesPage panel = new OverlayFeaturesPage(driver).open("Bộ lọc");
@@ -124,7 +126,7 @@ public class CrossMenuOverlayContractTest extends BaseTest {
     /**
      * Thực thi test “CMS-PROMOTION-FILTER: Promotion filter control opens safely” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-PROMOTION-FILTER: Promotion filter control opens safely")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_008)
     public void promotionFilterControlCanBeOpened() {
         open(childOf("Marketing", "Chương Trình Khuyến Mãi"));
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);

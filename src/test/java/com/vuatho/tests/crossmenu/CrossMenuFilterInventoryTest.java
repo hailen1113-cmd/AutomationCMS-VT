@@ -1,5 +1,7 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiControl;
@@ -36,7 +38,7 @@ public class CrossMenuFilterInventoryTest extends BaseTest {
      * Thu thập filters across all menus trong luồng kiểm thử.
      * @param target giá trị target được truyền vào
      */
-    @Test(dataProvider = "allMenus")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_001, dataProvider = "allMenus")
     public void inventoryFiltersAcrossAllMenus(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         UiFeatureExplorer explorer = new UiFeatureExplorer(driver);

@@ -1,5 +1,7 @@
 package com.vuatho.tests.workertestmanagement;
 
+import com.vuatho.testcases.WorkerTestManagementTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workertestmanagement.WorkerTestManagementTestSupport;
 import com.vuatho.pages.WorkerTestManagementPage.TestRow;
@@ -16,7 +18,7 @@ public class WorkerTestManagementOverviewTest extends WorkerTestManagementTestSu
     }
 
     @Test(groups = {"worker-test-management", "overview", "data-interaction"},
-            description = "WORKER-TESTED-001: Trang trả đúng schema và có dữ liệu bài kiểm tra")
+            description = WorkerTestManagementTestCases.WORKER_TEST_006)
     public void tableReturnsExpectedSchemaAndData() {
         Assert.assertEquals(workerTestPage.columnHeaders(), List.of(
                 "ID", "Tên nghiệp vụ", "Tài khoản", "Số lần làm bài",
@@ -35,7 +37,7 @@ public class WorkerTestManagementOverviewTest extends WorkerTestManagementTestSu
     }
 
     @Test(groups = {"worker-test-management", "overview", "data-interaction"},
-            description = "WORKER-TESTED-002: Mỗi dòng trả dữ liệu và định dạng hợp lệ")
+            description = WorkerTestManagementTestCases.WORKER_TEST_007)
     public void everyVisibleRowReturnsValidValues() {
         for (TestRow row : workerTestPage.rows()) {
             Assert.assertTrue(row.key().matches("\\d+"), "data-key không hợp lệ: " + row.key());

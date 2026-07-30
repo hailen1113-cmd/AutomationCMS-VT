@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -25,7 +27,7 @@ public class WorkerProfilePaginationTest extends WorkerProfileTestSupport {
      * Kiểm tra chuyển trang kế tiếp, quay lại và mở trang cuối của danh sách hồ sơ thợ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-pagination" },
-            description = "WORKER-PROFILE-PAGINATION-001: Phan trang danh sach ho so tho hoat dong dung")
+            description = WorkerProfileTestCases.WORKER_PROFILE_012)
     public void workerProfilePaginationNavigatesBetweenPages() {
         Assert.assertTrue(workerProfilePage.hasVisiblePagination(),
                 "Khong tim thay thanh phan trang o cuoi danh sach ho so tho.");

@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycApiTestSupport;
 
 import com.vuatho.api.ApiResponse;
@@ -20,7 +22,7 @@ public class EkycSecurityApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý kyc apis require authentication trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract", "security"})
+    @Test(description = EkycTestCases.EKYC_022, groups = {"ekyc", "api", "contract", "security"})
     public void kycApisRequireAuthentication() {
         ApiResponse response = api.getWithoutAuth("/ekyc?page=1&limit=1");
         Assert.assertTrue(response.status() == 401 || response.status() == 403,

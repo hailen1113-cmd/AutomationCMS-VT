@@ -1,5 +1,7 @@
 package com.vuatho.tools;
 
+import com.vuatho.testcases.DiagnosticTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.EkycPage;
@@ -35,7 +37,7 @@ public class EkycDomCaptureTest extends BaseTest {
      *
      * @throws IOException khi không thể tạo hoặc ghi các artifact phân tích
      */
-    @Test(description = "Capture live eKYC DOM from https://erp-sandbox.vuatho.com/vuatho/ekyc")
+    @Test(description = DiagnosticTestCases.DIAG_002)
     public void captureEkycOuterHtml() throws IOException {
         // Xác thực trước khi điều hướng trực tiếp để tránh chụp nhầm trang đăng nhập.
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();

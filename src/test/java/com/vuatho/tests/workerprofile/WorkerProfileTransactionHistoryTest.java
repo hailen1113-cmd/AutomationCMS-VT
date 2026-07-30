@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -35,7 +37,7 @@ public class WorkerProfileTransactionHistoryTest extends WorkerProfileTestSuppor
      */
     @Test(priority = 1,
             groups = { "partner-worker", "worker-profile", "worker-transaction" },
-            description = "WORKER-PROFILE-TRANSACTION-001: Mo 3 giao dich dau trong tab moi")
+            description = WorkerProfileTestCases.WORKER_PROFILE_029)
     public void firstThreeTransactionsOpenInNewTabs() {
         openTransactionHistory();
         if (workerProfilePage.transactionHistoryRowCount() < TRANSACTIONS_TO_OPEN) {
@@ -67,7 +69,7 @@ public class WorkerProfileTransactionHistoryTest extends WorkerProfileTestSuppor
      */
     @Test(priority = 2,
             groups = { "partner-worker", "worker-profile", "worker-transaction" },
-            description = "WORKER-PROFILE-TRANSACTION-002: Chuyen trang 1 sang 2 va quay lai trang 1")
+            description = WorkerProfileTestCases.WORKER_PROFILE_030)
     public void transactionHistoryMovesToPageTwoAndBackToPageOne() {
         openTransactionHistory();
 

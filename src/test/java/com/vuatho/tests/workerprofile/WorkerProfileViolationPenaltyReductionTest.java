@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -27,7 +29,7 @@ public class WorkerProfileViolationPenaltyReductionTest extends WorkerProfileTes
     }
 
     @Test(priority = 1, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REDUCE-001: Giam phat va kiem tra so ngay con lai")
+            description = WorkerProfileTestCases.WORKER_PROFILE_031)
     public void activePenaltyCanBeReducedAndRemainingDaysAreUpdated() {
         int remainingDaysBefore = -1;
         int reductionDays = Integer.parseInt(TEST_REDUCTION_DAYS);

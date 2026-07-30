@@ -1,5 +1,7 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -33,7 +35,7 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
     /**
      * Thực thi test “CMS-ORDER-VIEW: Order list can switch between table and card views” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-ORDER-VIEW: Order list can switch between table and card views")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_011)
     public void orderViewCanBeSwitched() {
         open(childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"));
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
@@ -45,7 +47,7 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
     /**
      * Thực thi test “CMS-TRANSACTION-TABS: Transaction tabs and pagination work” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-TRANSACTION-TABS: Transaction tabs and pagination work")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_012)
     public void transactionTabsAndPaginationWork() {
         open(childOf("Giao Dịch", "Lịch Sử Giao Dịch"));
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
@@ -57,7 +59,7 @@ public class CrossMenuReadOnlyInteractionTest extends BaseTest {
     /**
      * Thực thi test “CMS-MARKETING-TABS: Client/worker and period tabs work” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-MARKETING-TABS: Client/worker and period tabs work")
+    @Test(description = CrossMenuTestCases.CROSS_MENU_013)
     public void marketingAudienceAndPeriodTabsWork() {
         open(childOf("Marketing", "Thống Kê Thợ - Khách"));
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);

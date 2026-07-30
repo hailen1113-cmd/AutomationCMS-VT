@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
 import org.testng.Assert;
@@ -15,7 +17,7 @@ public class WorkerPostManagementPaginationTest extends WorkerPostManagementTest
     }
 
     @Test(groups = {"worker-post-management", "read-only", "pagination", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-008: Phân trang đổi dữ liệu và Reset quay về trang đầu")
+            description = WorkerPostTestCases.WORKER_POST_020)
     public void paginationAndResetWork() {
         List<String> firstPageWorkers = workerPostManagementPage.visibleWorkerHrefs();
         Assert.assertFalse(firstPageWorkers.isEmpty(), "Trang đầu không có dữ liệu.");
@@ -40,7 +42,7 @@ public class WorkerPostManagementPaginationTest extends WorkerPostManagementTest
     }
 
     @Test(groups = {"worker-post-management", "read-only", "pagination", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-014: Next và Previous đổi đúng trang")
+            description = WorkerPostTestCases.WORKER_POST_021)
     public void nextAndPreviousPaginationControlsWork() {
         List<String> firstPage = workerPostManagementPage.visibleWorkerHrefs();
         workerPostManagementPage.goToNextPage();

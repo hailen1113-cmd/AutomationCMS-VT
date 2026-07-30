@@ -1,5 +1,7 @@
 package com.vuatho.tests.userprofile;
 
+import com.vuatho.testcases.UserProfileTestCases;
+
 import com.vuatho.support.userprofile.UserProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -52,7 +54,7 @@ public class UserProfileAvatarUpdateWorkflowTest extends UserProfileTestSupport 
      */
     @Test(dataProvider = "avatarUpdateCases",
             groups = {"user-profile", "user-avatar-update"},
-            description = "USER-PROFILE-AVATAR-UPDATE: Duyet va tu choi yeu cau cap nhat anh dai dien")
+            description = UserProfileTestCases.USER_PROFILE_001)
     public void runAvatarUpdateCase(UserProfileCase testCase) {
         userProfilePage.openFromMenu();
         userProfilePage.openUserWithPendingAvatarUpdateRequest();

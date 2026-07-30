@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
+
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -32,7 +34,7 @@ public class WorkerProfileViolationPenaltyRemovalTest extends WorkerProfileTestS
     }
 
     @Test(priority = 1, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REMOVE-001: Kiem tra va huy popup Go phat")
+            description = WorkerProfileTestCases.WORKER_PROFILE_032)
     public void removalDialogCanBeCancelledAndClosedWithoutChangingPenalty() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay hoac tao duoc lenh phat dang hoat dong de kiem tra popup.");
@@ -55,7 +57,7 @@ public class WorkerProfileViolationPenaltyRemovalTest extends WorkerProfileTestS
     }
 
     @Test(priority = 2, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REMOVE-002: Go phat theo Ghi nhan da thu")
+            description = WorkerProfileTestCases.WORKER_PROFILE_033)
     public void activePenaltyCanBeRemovedAsAlreadyPaid() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay hoac tao duoc lenh phat dang hoat dong de go phat.");
@@ -67,7 +69,7 @@ public class WorkerProfileViolationPenaltyRemovalTest extends WorkerProfileTestS
     }
 
     @Test(priority = 3, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REMOVE-003: Go phat theo Tru so du tho")
+            description = WorkerProfileTestCases.WORKER_PROFILE_034)
     public void activePenaltyCanBeRemovedByRefundingWorkerBalance() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay hoac tao duoc lenh phat dang hoat dong de tru so du.");
@@ -83,7 +85,7 @@ public class WorkerProfileViolationPenaltyRemovalTest extends WorkerProfileTestS
     }
 
     @Test(priority = 4, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REMOVE-004: Go phat va tru nguon Ky quy")
+            description = WorkerProfileTestCases.WORKER_PROFILE_035)
     public void activePenaltyCanBeRemovedByRefundingDepositBalance() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay hoac tao duoc lenh phat dang hoat dong de tru ky quy.");
@@ -99,7 +101,7 @@ public class WorkerProfileViolationPenaltyRemovalTest extends WorkerProfileTestS
     }
 
     @Test(priority = 5, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-REMOVE-005: Khong hien Go phat khi khong co lenh active")
+            description = WorkerProfileTestCases.WORKER_PROFILE_036)
     public void workerWithoutActivePenaltyDoesNotShowRemovalAction() {
         if (openSelectedWorkerViolationTab()) {
             Assert.assertTrue(workerProfilePage.activeWorkerPenaltyRemainingDays() < 0,

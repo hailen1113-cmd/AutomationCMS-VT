@@ -1,6 +1,7 @@
 package com.vuatho.core;
 
 import com.vuatho.config.TestConfig;
+import com.vuatho.reporting.ConsoleEncoding;
 import com.vuatho.reporting.ScreenshotManager;
 import com.vuatho.utils.OverlayCleaner;
 import org.openqa.selenium.WebDriver;
@@ -19,6 +20,9 @@ public abstract class BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public final void setUpBaseDriver() {
+        // Bảo đảm cả khi chạy trực tiếp bằng Maven, log setup cũng không xuất hiện
+        // trước dòng testcase đang chạy của ConsoleTestListener.
+        ConsoleEncoding.showOnlyTestReport();
         // Mỗi test method dùng lại browser cấp suite nếu browser đó vẫn còn sống.
         driver = DriverSession.acquire();
         OverlayCleaner.dismissBlockingOverlays(driver);

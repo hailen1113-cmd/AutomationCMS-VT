@@ -1,5 +1,7 @@
 package com.vuatho.tests.smoke;
 
+import com.vuatho.testcases.SmokeTestCases;
+
 import com.vuatho.core.BaseTest;
 import com.vuatho.pages.EntryPage;
 import org.testng.Assert;
@@ -10,7 +12,7 @@ import org.testng.annotations.Test;
  * Xác nhận URL ERP sandbox có thể truy cập và chuyển đến màn hình đăng nhập hoặc Dashboard.
  */
 public class ErpSandboxAccessSmokeTest extends BaseTest {
-    @Test(description = "ERP sandbox responds on the expected domain")
+    @Test(description = SmokeTestCases.SMOKE_001)
     public void sandboxIsReachable() {
         EntryPage page = new EntryPage(driver).open();
 
@@ -21,7 +23,7 @@ public class ErpSandboxAccessSmokeTest extends BaseTest {
     /**
      * Thực thi test “Automation can pass Vercel protection and reach the ERP application” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "Automation can pass Vercel protection and reach the ERP application")
+    @Test(description = SmokeTestCases.SMOKE_002)
     public void erpApplicationIsAccessible() {
         EntryPage page = new EntryPage(driver).open();
 

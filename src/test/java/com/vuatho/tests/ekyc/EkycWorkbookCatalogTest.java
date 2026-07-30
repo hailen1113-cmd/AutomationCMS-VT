@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.testdata.EkycWorkbookCatalog;
 import com.vuatho.testdata.EkycWorkbookCase;
 import org.testng.Assert;
@@ -13,7 +15,7 @@ import java.util.stream.Collectors;
  * Kiểm tra workbook eKYC được đọc đúng và mỗi dòng tạo ra test case hợp lệ.
  */
 public class EkycWorkbookCatalogTest {
-    @Test(description = "EKYC-CATALOG-001: Senior eKYC workbook has 574 unique testcases")
+    @Test(description = EkycTestCases.EKYC_023)
     public void seniorWorkbookHasExpectedCaseCountAndUniqueIds() {
         List<EkycWorkbookCase> cases = EkycWorkbookCatalog.load();
         Set<String> ids = cases.stream()

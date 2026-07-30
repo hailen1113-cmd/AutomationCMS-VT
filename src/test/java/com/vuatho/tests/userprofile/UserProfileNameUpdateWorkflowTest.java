@@ -1,5 +1,7 @@
 package com.vuatho.tests.userprofile;
 
+import com.vuatho.testcases.UserProfileTestCases;
+
 import com.vuatho.support.userprofile.UserProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -52,7 +54,7 @@ public class UserProfileNameUpdateWorkflowTest extends UserProfileTestSupport {
      */
     @Test(dataProvider = "nameUpdateCases",
             groups = {"user-profile", "user-name-update"},
-            description = "USER-PROFILE-NAME-UPDATE: Duyet va tu choi yeu cau cap nhat ho ten")
+            description = UserProfileTestCases.USER_PROFILE_004)
     public void runNameUpdateCase(UserProfileCase testCase) {
         userProfilePage.openFromMenu();
         userProfilePage.openUserWithPendingNameUpdateRequest();

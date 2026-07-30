@@ -7,10 +7,18 @@
     </listeners>
     <test name="Nhom va san pham Dong phuc">
         <classes>
-            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogOverviewTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogSearchFilterTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogDrawerTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogPaginationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogOverviewTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogSearchTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogInventoryFilterTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogSearchFilterCombinationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogDetailTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.UniformGroupCreateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.UniformGroupCreateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.UniformItemCreateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.UniformItemCreateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.update.UniformCatalogUpdateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.delete.UniformCatalogDeleteTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogPaginationTest"/>
         </classes>
     </test>
 </suite>

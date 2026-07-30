@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerstoprequest;
 
+import com.vuatho.testcases.WorkerStopRequestTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerstoprequest.WorkerStopRequestTestSupport;
 import com.vuatho.pages.WorkerStopRequestPage.Action;
@@ -30,7 +32,7 @@ public class WorkerStopRequestApprovalRejectionTest extends WorkerStopRequestTes
     }
 
     @Test(groups = {"worker-stop-request", "mutation", "approve", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-009: Duyệt thật chuyển yêu cầu sang Đã duyệt")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_001)
     public void approveRequestMovesItToApproved() {
         DetailSnapshot request = stopRequestPage.openFirstPendingWithAction(Action.APPROVE);
         System.out.println("Duyệt thật yêu cầu #" + request.requestId());
@@ -41,7 +43,7 @@ public class WorkerStopRequestApprovalRejectionTest extends WorkerStopRequestTes
     }
 
     @Test(groups = {"worker-stop-request", "mutation", "reject", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-010: Từ chối thật chuyển yêu cầu sang Đã từ chối")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_002)
     public void rejectRequestMovesItToRejected() {
         DetailSnapshot request = stopRequestPage.openFirstPendingWithAction(Action.REJECT);
         System.out.println("Từ chối thật yêu cầu #" + request.requestId()
@@ -54,7 +56,7 @@ public class WorkerStopRequestApprovalRejectionTest extends WorkerStopRequestTes
     }
 
     @Test(groups = {"worker-stop-request", "mutation", "skip", "requires-zero-balance"},
-            description = "WORKER-STOP-REQUEST-011: Bỏ qua thật chuyển yêu cầu sang Đã bỏ qua")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_003)
     public void skipZeroBalanceRequestMovesItToSkipped() {
         DetailSnapshot request = stopRequestPage.openFirstPendingWithAction(Action.SKIP);
         stopRequestPage.skipOpenRequest();
@@ -64,7 +66,7 @@ public class WorkerStopRequestApprovalRejectionTest extends WorkerStopRequestTes
     }
 
     @Test(groups = {"worker-stop-request", "mutation", "back-to-work", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-012: Mở khóa thật loại bỏ action Quay lại làm việc")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_004)
     public void backToWorkRemovesUnlockAction() {
         DetailSnapshot request = stopRequestPage.openFirstApprovedForBackToWork();
         System.out.println("Mở khóa quay lại làm việc cho yêu cầu #" + request.requestId());

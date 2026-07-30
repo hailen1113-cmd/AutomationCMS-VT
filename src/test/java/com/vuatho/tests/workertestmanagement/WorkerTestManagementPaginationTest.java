@@ -1,5 +1,7 @@
 package com.vuatho.tests.workertestmanagement;
 
+import com.vuatho.testcases.WorkerTestManagementTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workertestmanagement.WorkerTestManagementTestSupport;
 import org.testng.Assert;
@@ -15,7 +17,7 @@ public class WorkerTestManagementPaginationTest extends WorkerTestManagementTest
     }
 
     @Test(groups = {"worker-test-management", "pagination", "data-interaction"},
-            description = "WORKER-TESTED-007: Trang kế và trang trước trả đúng bộ dữ liệu")
+            description = WorkerTestManagementTestCases.WORKER_TEST_008)
     public void nextAndPreviousPageReturnExpectedData() {
         Assert.assertTrue(workerTestPage.totalPages() > 1,
                 "Không đủ dữ liệu để kiểm tra phân trang.");
@@ -35,7 +37,7 @@ public class WorkerTestManagementPaginationTest extends WorkerTestManagementTest
     }
 
     @Test(groups = {"worker-test-management", "pagination", "data-interaction"},
-            description = "WORKER-TESTED-008: Trang cuối trả dữ liệu và không vượt tổng hiển thị")
+            description = WorkerTestManagementTestCases.WORKER_TEST_009)
     public void lastPageReturnsRemainingRecords() {
         int totalPages = workerTestPage.totalPages();
         int totalDisplayed = workerTestPage.totalDisplayed();

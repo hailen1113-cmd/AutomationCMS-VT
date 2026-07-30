@@ -1,5 +1,7 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
+
 import com.vuatho.testdata.DashboardTestCase;
 import com.vuatho.testdata.DashboardTestCaseCatalog;
 import org.testng.Assert;
@@ -18,7 +20,7 @@ public class DashboardWorkbookCatalogTest {
     /**
      * Thực thi test “The supplied dashboard workbook contains exactly 222 unique test cases” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "The supplied dashboard workbook contains exactly 222 unique test cases")
+    @Test(description = DashboardTestCases.DASH_019)
     public void workbookContainsAllExpectedTestCases() {
         List<DashboardTestCase> cases = DashboardTestCaseCatalog.all();
         Set<String> ids = cases.stream().map(DashboardTestCase::id).collect(Collectors.toSet());
@@ -38,7 +40,7 @@ public class DashboardWorkbookCatalogTest {
      * Thực thi test “The dashboard automation feasibility inventory is explicit and stable” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(dependsOnMethods = "workbookContainsAllExpectedTestCases",
-            description = "The dashboard automation feasibility inventory is explicit and stable")
+            description = DashboardTestCases.DASH_020)
     public void automationFeasibilityIsAccountedFor() {
         Map<String, Long> counts = DashboardTestCaseCatalog.countByAutomationFeasibility();
 

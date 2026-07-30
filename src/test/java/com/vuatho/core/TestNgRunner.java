@@ -3,10 +3,9 @@ package com.vuatho.core;
 import com.vuatho.reporting.ConsoleTestListener;
 import com.vuatho.reporting.ConsoleEncoding;
 import com.vuatho.tests.conditions.LogoutTestsEnabled;
+import com.vuatho.tests.conditions.TestCaseIdFilter;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
-
-import java.util.Arrays;
 
 public final class TestNgRunner {
     /**
@@ -53,7 +52,7 @@ public final class TestNgRunner {
             Class<?>... testClasses) {
         // Mặc định mở Chrome thật để dễ quan sát, nhưng vẫn quit sau test cuối cùng.
         // Có thể ghi đè từ Maven/IDE bằng -Dheadless, -Dinteractive hoặc -Dkeep.browser.open.
-        ConsoleEncoding.useUtf8();
+        ConsoleEncoding.showOnlyTestReport();
         System.setProperty("headless", System.getProperty("headless", "false"));
         System.setProperty("interactive", System.getProperty("interactive", "true"));
         System.setProperty("pause.on.failure", System.getProperty("pause.on.failure", "false"));
@@ -73,11 +72,12 @@ public final class TestNgRunner {
         testNG.setConfigFailurePolicy(XmlSuite.FailurePolicy.CONTINUE);
         // Test logout mặc định bị tắt vì nó sẽ làm mất session đăng nhập của các test phía sau.
         testNG.addListener(new LogoutTestsEnabled());
+        // Cho phép chạy đúng một testcase logic bằng -DtestCaseId=ID.
+        testNG.addListener(new TestCaseIdFilter());
         // Listener này chỉ quit browser khi toàn bộ TestNG run đã kết thúc.
         testNG.addListener(new DriverLifecycleListener());
         // Listener này in tiến trình và kết quả từng test method ra console cho dễ kiểm tra.
         testNG.addListener(new ConsoleTestListener());
-        System.out.println("Running TestNG classes: " + Arrays.toString(testClasses));
         testNG.run();
 
         // Nếu TestNG có test fail thì main process cũng phải fail để IDE/CI báo lỗi thật.

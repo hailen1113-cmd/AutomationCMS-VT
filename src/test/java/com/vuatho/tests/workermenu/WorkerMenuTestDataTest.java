@@ -1,5 +1,7 @@
 package com.vuatho.tests.workermenu;
 
+import com.vuatho.testcases.WorkerMenuTestCases;
+
 import com.vuatho.testdata.PartnerWorkerCase;
 import com.vuatho.testdata.PartnerWorkerTestData;
 import org.testng.Assert;
@@ -16,7 +18,7 @@ public class WorkerMenuTestDataTest {
     /**
      * Thực hiện xử lý worker menu test data has unique ids and worker profile coverage trong luồng kiểm thử.
      */
-    @Test
+    @Test(description = WorkerMenuTestCases.WORKER_MENU_003)
     public void workerMenuTestDataHasUniqueIdsAndWorkerProfileCoverage() {
         var cases = PartnerWorkerTestData.cases();
         Set<String> ids = cases.stream()

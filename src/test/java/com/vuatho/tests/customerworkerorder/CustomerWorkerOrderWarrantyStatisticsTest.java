@@ -1,5 +1,7 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import org.testng.Assert;
@@ -38,7 +40,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-041: Popup Bảo hành có đủ KPI, chart và dịch vụ")
+            description = CustomerWorkerOrderTestCases.CWO_062)
     /** Kiểm tra popup có đủ KPI, hai chart, bộ lọc thời gian và dịch vụ. */
     public void popupReturnsKpisChartsAndServices() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -62,7 +64,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-period", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-042: Lọc đúng Tuần/Tháng/Quý")
+            description = CustomerWorkerOrderTestCases.CWO_063)
     /** Chuyển Tuần/Tháng/Quý và đối chiếu input ngày với range kỳ vọng. */
     public void supportsEveryPeriod() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -78,7 +80,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "chart-hover", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-043: Hover chart số lượng trả tooltip thật")
+            description = CustomerWorkerOrderTestCases.CWO_064)
     /** Hover cột có dữ liệu của chart số lượng và kiểm tra tooltip thật. */
     public void orderCountChartReturnsRealTooltip() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -89,7 +91,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-scroll", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-044: Cuộn tới dịch vụ và mở lại popup")
+            description = CustomerWorkerOrderTestCases.CWO_065)
     /** Cuộn tới thống kê dịch vụ, đóng và mở lại popup ở trạng thái sạch. */
     public void servicesCanBeObservedAndDialogReopened() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -105,7 +107,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
 
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "chart-hover", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-045: Hover chart doanh thu trả tooltip thật")
+            description = CustomerWorkerOrderTestCases.CWO_066)
     /** Hover cột có dữ liệu của chart doanh thu và kiểm tra tooltip thật. */
     public void revenueChartReturnsRealTooltip() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -117,7 +119,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-custom-date",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-051: Lọc khoảng ngày tùy chỉnh")
+            description = CustomerWorkerOrderTestCases.CWO_067)
     /** Nhập thủ công khoảng ngày và đối chiếu input/range sau khi áp dụng. */
     public void supportsCustomDateRange() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -135,7 +137,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-date-boundary",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-056: Lọc được trong cùng một ngày")
+            description = CustomerWorkerOrderTestCases.CWO_068)
     /** Lọc thống kê trong đúng một ngày bằng hai đầu mốc giống nhau. */
     public void supportsSameDayRange() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -149,7 +151,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-058: Từ chối khoảng ngày đảo ngược")
+            description = CustomerWorkerOrderTestCases.CWO_069)
     /** Nhập ngày bắt đầu sau ngày kết thúc và kiểm tra validation. */
     public void rejectsReversedDateRange() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -161,7 +163,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-060: Từ chối ngày sai định dạng và để trống")
+            description = CustomerWorkerOrderTestCases.CWO_070)
     /** Kiểm tra popup từ chối ngày sai định dạng và khoảng ngày để trống. */
     public void rejectsMalformedAndBlankDates() {
         orderPage.openStatistic("Bảo hành 5K");
@@ -172,7 +174,7 @@ public class CustomerWorkerOrderWarrantyStatisticsTest
     @Test(groups = {"customer-worker-order", "statistics",
             "warranty-statistics", "statistics-date-validation",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-062: Xử lý rõ ràng khoảng ngày tương lai")
+            description = CustomerWorkerOrderTestCases.CWO_071)
     /** Chọn ngày tương lai và kiểm tra UI xử lý rõ ràng khi không có dữ liệu. */
     public void handlesFutureDateRange() {
         orderPage.openStatistic("Bảo hành 5K");

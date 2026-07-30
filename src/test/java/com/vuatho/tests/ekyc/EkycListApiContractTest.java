@@ -1,5 +1,7 @@
 package com.vuatho.tests.ekyc;
 
+import com.vuatho.testcases.EkycTestCases;
+
 import com.vuatho.support.ekyc.EkycApiTestSupport;
 
 import com.vuatho.api.ApiAssertions;
@@ -69,7 +71,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý list default returns paginated applicant contract trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_007, groups = {"ekyc", "api", "contract"})
     public void listDefaultReturnsPaginatedApplicantContract() {
         ApiResponse response = api.get("/ekyc?page=1&limit=20");
         ApiAssertions.assertOkJson(response, "GET /ekyc?page=1&limit=20");
@@ -90,7 +92,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý list limit is capped at fifty trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_008, groups = {"ekyc", "api", "contract"})
     public void listLimitIsCappedAtFifty() {
         ApiResponse response = api.get("/ekyc?page=1&limit=51");
         ApiAssertions.assertOkJson(response, "GET /ekyc?page=1&limit=51");
@@ -107,7 +109,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
      * @param status giá trị status được truyền vào
      * @param label giá trị label được truyền vào
      */
-    @Test(dataProvider = "listStatusFilters", groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_009, dataProvider = "listStatusFilters", groups = {"ekyc", "api", "contract"})
     public void listSupportsStatusFilter(int status, String label) {
         ApiResponse response = api.get("/ekyc?page=1&limit=20&status=" + status);
         ApiAssertions.assertOkJson(response, "GET /ekyc status=" + label);
@@ -120,7 +122,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
      * @param type giá trị type được truyền vào
      * @param label giá trị label được truyền vào
      */
-    @Test(dataProvider = "listTypeFilters", groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_010, dataProvider = "listTypeFilters", groups = {"ekyc", "api", "contract"})
     public void listSupportsDocumentTypeFilter(int type, String label) {
         ApiResponse response = api.get("/ekyc?page=1&limit=20&type=" + type);
         ApiAssertions.assertOkJson(response, "GET /ekyc type=" + label);
@@ -131,7 +133,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý list supports search by user id trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_011, groups = {"ekyc", "api", "contract"})
     public void listSupportsSearchByUserId() {
         ApiResponse firstPage = api.get("/ekyc?page=1&limit=20");
         ApiAssertions.assertOkJson(firstPage, "GET /ekyc first page");
@@ -153,7 +155,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý list supports search not found trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_012, groups = {"ekyc", "api", "contract"})
     public void listSupportsSearchNotFound() {
         ApiResponse response = api.get("/ekyc?page=1&limit=20&search=AUTOMATION_NOT_FOUND_999999999");
         ApiAssertions.assertOkJson(response, "GET /ekyc search not found");
@@ -167,7 +169,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý list supports date range query trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_013, groups = {"ekyc", "api", "contract"})
     public void listSupportsDateRangeQuery() {
         ApiResponse response = api.get("/ekyc?page=1&limit=20"
                 + "&start_date=2026-01-01T00%3A00%3A00.000Z"
@@ -182,7 +184,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
     /**
      * Thực hiện xử lý pagination next page changes applicant window when available trong luồng kiểm thử.
      */
-    @Test(groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_014, groups = {"ekyc", "api", "contract"})
     public void paginationNextPageChangesApplicantWindowWhenAvailable() {
         ApiResponse pageOne = api.get("/ekyc?page=1&limit=5");
         ApiAssertions.assertOkJson(pageOne, "GET /ekyc page 1");
@@ -203,7 +205,7 @@ public class EkycListApiContractTest extends EkycApiTestSupport {
      * @param path đường dẫn cần xử lý
      * @param label giá trị label được truyền vào
      */
-    @Test(dataProvider = "invalidListQueries", groups = {"ekyc", "api", "contract"})
+    @Test(description = EkycTestCases.EKYC_015, dataProvider = "invalidListQueries", groups = {"ekyc", "api", "contract"})
     public void listHandlesInvalidQueryWithoutServerError(String path, String label) {
         ApiResponse response = api.get(path);
         Assert.assertTrue(response.status() >= 200 && response.status() < 500,

@@ -1,5 +1,7 @@
 package com.vuatho.tests.userprofile;
 
+import com.vuatho.testcases.UserProfileTestCases;
+
 import com.vuatho.testdata.UserProfileCase;
 import com.vuatho.testdata.UserProfileDecision;
 import com.vuatho.testdata.UserProfileFeature;
@@ -19,7 +21,7 @@ public class UserProfileTestDataTest {
     /**
      * Thực hiện xử lý user profile test data has unique ids and required coverage trong luồng kiểm thử.
      */
-    @Test
+    @Test(description = UserProfileTestCases.USER_PROFILE_009)
     public void userProfileTestDataHasUniqueIdsAndRequiredCoverage() {
         var cases = UserProfileTestData.cases();
         Set<String> ids = cases.stream()

@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.testcases.WorkerViolationTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerviolation.WorkerViolationTestSupport;
 import com.vuatho.pages.WorkerViolationPage;
@@ -23,7 +25,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-001: Popup co du cau truc thong ke bat buoc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_019)
     public void statisticsDialogHasRequiredStructure() {
         workerViolationPage.openStatistics();
         Assert.assertTrue(workerViolationPage.isStatisticsDialogOpen(), "Popup Tien phat theo ngay khong mo.");
@@ -36,7 +38,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-002: Tuan nay bao phu dung bay ngay")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_020)
     public void currentWeekUsesSevenDayRange() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tuần này");
         WorkerViolationPage.StatisticsDateRange range = requiredDateRange();
@@ -45,7 +47,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-003: Thang nay bao phu mot thang lich")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_021)
     public void currentMonthUsesCalendarMonthRange() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tháng này");
         WorkerViolationPage.StatisticsDateRange range = requiredDateRange();
@@ -57,7 +59,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-004: Chuyen Tuan-Thang-Tuan cap nhat va phuc hoi range")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_022)
     public void switchingPeriodsUpdatesAndRestoresDateRange() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tuần này");
         WorkerViolationPage.StatisticsDateRange week = requiredDateRange();
@@ -70,7 +72,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-005: Tuy chinh hien thi control chon ngay")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_023)
     public void customPeriodShowsDateControls() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         Assert.assertTrue(workerViolationPage.statisticsCustomDateControlsVisible(),
@@ -78,7 +80,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-006: Tong phat sinh bang Da thu cong Chua thu")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_024)
     public void moneySummaryIsNonNegativeAndReconciled() {
         workerViolationPage.openStatistics();
         WorkerViolationPage.StatisticsMoney money = workerViolationPage.statisticsMoney()
@@ -90,7 +92,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-007: Bieu do thong ke duoc render")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_025)
     public void statisticsChartIsActuallyRendered() {
         workerViolationPage.openStatistics();
         Assert.assertTrue(workerViolationPage.statisticsChartIsRendered(),
@@ -103,7 +105,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics"},
-            description = "WORKER-VIOLATION-STAT-008: Dong popup quay lai danh sach")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_026)
     public void statisticsDialogCanBeClosed() {
         workerViolationPage.openStatistics();
         workerViolationPage.closeDialog();
@@ -112,7 +114,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics", "custom-date"},
-            description = "WORKER-VIOLATION-STAT-009: Range tuy chinh co rang buoc min/max hop le")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_027)
     public void customDateInputsExposeValidConstraints() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         WorkerViolationPage.CustomDateState state = requiredCustomDateState();
@@ -124,7 +126,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics", "custom-date"},
-            description = "WORKER-VIOLATION-STAT-010: Ap dung range tuy chinh nhieu ngay")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_028)
     public void validMultiDayCustomRangeUpdatesChart() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         java.time.LocalDate to = requiredCustomDateState().toMax();
@@ -139,7 +141,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics", "custom-date"},
-            description = "WORKER-VIOLATION-STAT-011: Ap dung range tuy chinh mot ngay")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_029)
     public void validSingleDayCustomRangeUpdatesChart() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         java.time.LocalDate date = requiredCustomDateState().toMax().minusDays(1);
@@ -153,7 +155,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics", "custom-date"},
-            description = "WORKER-VIOLATION-STAT-012: Khong ap dung ngay bat dau lon hon ngay ket thuc")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_030)
     public void reversedCustomRangeCannotBeApplied() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         java.time.LocalDate endLimit = requiredCustomDateState().toMax();
@@ -167,7 +169,7 @@ public class WorkerViolationStatisticsTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "statistics", "custom-date"},
-            description = "WORKER-VIOLATION-STAT-013: Khong ap dung ngay ket thuc trong tuong lai")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_031)
     public void futureCustomRangeCannotBeApplied() {
         workerViolationPage.openStatistics().selectStatisticsPeriod("Tùy chỉnh");
         java.time.LocalDate max = requiredCustomDateState().toMax();

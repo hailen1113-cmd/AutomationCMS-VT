@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.testcases.WorkerViolationTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerviolation.WorkerViolationTestSupport;
 import org.testng.Assert;
@@ -13,33 +15,33 @@ public class WorkerViolationOverviewTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-001: Mo dung menu va URL")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_005)
     public void pageOpensAtExpectedRoute() {
         Assert.assertTrue(workerViolationPage.isLoaded(), "Trang Quan li tho vi pham chua tai dung.");
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-002: Hien thi du ba KPI")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_006)
     public void allSummaryCardsAreVisible() {
         Assert.assertTrue(workerViolationPage.hasSummaryCards(), "Thieu KPI Tho bi phat, Tong tien phat hoac Ti le thu hoi.");
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-003: Tong tho bi phat la so hop le")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_007)
     public void penalizedWorkerTotalIsValid() {
         Assert.assertTrue(workerViolationPage.summaryValueAfter("Thợ bị phạt") >= 0,
                 "Tong tho bi phat khong phai so khong am.");
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-004: Tong tien phat la so hop le")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_008)
     public void penaltyMoneyTotalIsValid() {
         Assert.assertTrue(workerViolationPage.summaryValueAfter("Tổng tiền phạt") >= 0,
                 "Tong tien phat khong phai so khong am.");
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-005: Ti le thu hoi trong mien 0-100")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_009)
     public void recoveryRateIsWithinPercentageRange() {
         double percentage = workerViolationPage.recoveryPercentage();
         Assert.assertTrue(percentage >= 0 && percentage <= 100,
@@ -47,7 +49,7 @@ public class WorkerViolationOverviewTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "overview"},
-            description = "VIOLATION-WORKER-OVERVIEW-006: Bang va tong hien thi tai thanh cong")
+            description = WorkerViolationTestCases.WORKER_VIOLATION_010)
     public void tableAndResultTotalAreLoaded() {
         Assert.assertTrue(workerViolationPage.hasExpectedHeaders(), "Thieu cot bang tho vi pham.");
         Assert.assertTrue(workerViolationPage.totalDisplayed() >= 0, "Khong doc duoc Tong hien thi.");

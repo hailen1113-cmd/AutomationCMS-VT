@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerstoprequest;
 
+import com.vuatho.testcases.WorkerStopRequestTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerstoprequest.WorkerStopRequestTestSupport;
 import com.vuatho.pages.WorkerStopRequestPage.DetailSnapshot;
@@ -15,7 +17,7 @@ public class WorkerStopRequestDetailTest extends WorkerStopRequestTestSupport {
     }
 
     @Test(groups = {"worker-stop-request", "detail", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-005: Click dòng mở chi tiết đầy đủ dữ liệu")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_005)
     public void pendingRequestDetailReturnsRequiredInformation() {
         DetailSnapshot detail = stopRequestPage.openFirstPendingRequest();
         Assert.assertTrue(detail.text().contains("ID: #"), "Chi tiết thiếu ID yêu cầu.");
@@ -30,14 +32,14 @@ public class WorkerStopRequestDetailTest extends WorkerStopRequestTestSupport {
     }
 
     @Test(groups = {"worker-stop-request", "detail", "history", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-006: Yêu cầu lặp lại hiển thị lịch sử")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_006)
     public void repeatedRequestDisplaysHistory() {
         DetailSnapshot detail = stopRequestPage.openFirstRepeatedRequest();
         Assert.assertTrue(detail.hasHistory(), "Thợ yêu cầu nhiều lần nhưng modal thiếu lịch sử.");
     }
 
     @Test(groups = {"worker-stop-request", "detail", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-007: Bài đã duyệt mở chi tiết đúng trạng thái")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_007)
     public void approvedRequestDisplaysProcessedDetail() {
         stopRequestPage.selectStatus(Status.APPROVED);
         DetailSnapshot detail = stopRequestPage.openFirstRow();
@@ -47,7 +49,7 @@ public class WorkerStopRequestDetailTest extends WorkerStopRequestTestSupport {
     }
 
     @Test(groups = {"worker-stop-request", "detail", "validation", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-008: Từ chối bắt buộc chọn lý do")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_008)
     public void rejectActionRequiresPredefinedReason() {
         DetailSnapshot detail = stopRequestPage.openFirstPendingRequest();
         if (!detail.canReject()) {

@@ -1,5 +1,7 @@
 package com.vuatho.tests.workerstoprequest;
 
+import com.vuatho.testcases.WorkerStopRequestTestCases;
+
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerstoprequest.WorkerStopRequestTestSupport;
 import com.vuatho.pages.WorkerStopRequestPage.RequestRow;
@@ -17,7 +19,7 @@ public class WorkerStopRequestOverviewTest extends WorkerStopRequestTestSupport 
     }
 
     @Test(groups = {"worker-stop-request", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-001: Thống kê và bảng trả về dữ liệu hợp lệ")
+            description = WorkerStopRequestTestCases.STOP_REQUEST_009)
     public void statisticsAndTableReturnValidData() {
         Map<String, Integer> statistics = stopRequestPage.statistics();
         Assert.assertEquals(statistics.size(), 5, "Không đủ 5 thẻ thống kê.");
