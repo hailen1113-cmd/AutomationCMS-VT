@@ -4,6 +4,7 @@
     <listeners>
         <listener class-name="com.vuatho.core.DriverLifecycleListener"/>
         <listener class-name="com.vuatho.reporting.ConsoleTestListener"/>
+        <listener class-name="com.vuatho.reporting.UniformCatalogResultReporter"/>
     </listeners>
     <test name="Danh muc, don hang va kho Dong phuc">
         <groups>
@@ -16,6 +17,8 @@
             <class name="com.vuatho.tests.uniform.catalog.UniformCatalogSearchFilterTest"/>
             <class name="com.vuatho.tests.uniform.catalog.UniformCatalogDrawerTest"/>
             <class name="com.vuatho.tests.uniform.catalog.UniformCatalogPaginationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogSafeInteractionTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.UniformCatalogCrudTest"/>
             <class name="com.vuatho.tests.uniform.order.UniformOrderOverviewTest"/>
             <class name="com.vuatho.tests.uniform.order.UniformOrderSearchFilterTest"/>
             <class name="com.vuatho.tests.uniform.order.UniformOrderDrawerTest"/>

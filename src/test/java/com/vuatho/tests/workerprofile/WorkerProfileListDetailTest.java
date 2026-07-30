@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -51,7 +52,7 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-list" },
-            description = "WORKER-PROFILE-LIST-001: Danh sach ho so tho hien thi tong hop va bang")
+            description = WorkerProfileTestCases.WORKER_PROFILE_008)
     public void workerProfileListShowsSummaryAndTable() {
         Assert.assertTrue(workerProfilePage.hasSearchInput(),
                 "Khong thay o tim kiem tho.");
@@ -67,7 +68,7 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
-            description = "WORKER-PROFILE-DETAIL-001: Mo duoc chi tiet thong tin tho")
+            description = WorkerProfileTestCases.WORKER_PROFILE_009)
     public void workerInformationCanBeOpened() {
         String firstRowText = workerProfilePage.firstWorkerRowText();
 
@@ -85,7 +86,7 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
      */
     @Test(dataProvider = "workerDetailTabs",
             groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
-            description = "WORKER-PROFILE-DETAIL-TAB-001: Mo duoc cac tab chi tiet tho")
+            description = WorkerProfileTestCases.WORKER_PROFILE_010)
     public void workerDetailTabsCanBeOpened(String tabLabel) {
         workerProfilePage.openFirstWorkerInformation();
 
@@ -105,7 +106,7 @@ public class WorkerProfileListDetailTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-detail" },
-            description = "WORKER-PROFILE-DETAIL-TAB-002: Doi duoc tab chi tiet tho ma khong quay ve danh sach")
+            description = WorkerProfileTestCases.WORKER_PROFILE_011)
     public void workerDetailTabsCanBeSwitchedWithoutReturningToList() {
         workerProfilePage.openFirstWorkerInformation();
 

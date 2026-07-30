@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -69,7 +70,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-001: Tab 10 Tiêu chí hiển thị đủ bảng, tổng hợp và có nút Cập nhật” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-001: Tab 10 Tiêu chí hiển thị đủ bảng, tổng hợp và có nút Cập nhật")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_022)
         public void workerTenCriteriaTabShowsSummaryRowsAndEditableRules() {
                 Assert.assertTrue(workerProfilePage.hasTenCriteriaSection(),
                                 "Tab 10 Tiêu chí chưa hiển thị đúng nội dung chính.");
@@ -87,7 +88,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-002: Thấy nút Cập nhật thì bấm và mở popup trạng thái” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-002: Thấy nút Cập nhật thì bấm và mở popup trạng thái")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_023)
         public void visibleCriteriaUpdateButtonCanBeClicked() {
                 clickVisibleCriteriaUpdateButtonAndAssertDialog();
         }
@@ -96,7 +97,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-DEMO-001: Bấm Cập nhật và giữ popup trạng thái để quan sát” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-DEMO-001: Bấm Cập nhật và giữ popup trạng thái để quan sát")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_024)
         public void workerCriteriaUpdateButtonShowsPopupForVisualCheck() {
                 workerProfilePage.clickFirstVisibleCriteriaUpdateButton();
 
@@ -110,7 +111,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-005: Hủy cập nhật trạng thái không làm đổi tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-005: Hủy cập nhật trạng thái không làm đổi tiêu chí")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_025)
         public void workerCriteriaStatusCancelDoesNotChangeCurrentStatus() {
                 String originalStatus = workerProfilePage.firstVisibleUpdateCriteriaStatus();
                 String targetStatus = oppositeCriteriaStatus(originalStatus);
@@ -127,7 +128,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-006: Đóng popup cập nhật trạng thái không làm đổi tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-006: Đóng popup cập nhật trạng thái không làm đổi tiêu chí")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_026)
         public void workerCriteriaStatusCloseDoesNotChangeCurrentStatus() {
                 String originalStatus = workerProfilePage.firstVisibleUpdateCriteriaStatus();
                 String targetStatus = oppositeCriteriaStatus(originalStatus);
@@ -144,7 +145,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-007: Xác nhận cập nhật trạng thái làm reload và đổi trạng thái tiêu chí” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-007: Xác nhận cập nhật trạng thái làm reload và đổi trạng thái tiêu chí")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_027)
         public void workerCriteriaStatusCanBeUpdatedAndRestored() {
                 String originalStatus = workerProfilePage.firstVisibleUpdateCriteriaStatus();
                 String targetStatus = oppositeCriteriaStatus(originalStatus);
@@ -165,7 +166,7 @@ public class WorkerProfileTenCriteriaTest extends BaseTest {
      * Thực thi test “WORKER-PROFILE-CRITERIA-008: Cập nhật nhiều tiêu chí có nút Cập nhật và khôi phục trạng thái ban đầu” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
         @Test(groups = { "partner-worker",
-                        "worker-profile-criteria" }, description = "WORKER-PROFILE-CRITERIA-008: Cập nhật nhiều tiêu chí có nút Cập nhật và khôi phục trạng thái ban đầu")
+                        "worker-profile-criteria" }, description = WorkerProfileTestCases.WORKER_PROFILE_028)
         public void multipleVisibleCriteriaStatusesCanBeUpdatedAndRestored() {
                 int updateButtonCount = workerProfilePage.visibleCriteriaUpdateButtonCount();
                 Assert.assertTrue(updateButtonCount > 1,

@@ -1,5 +1,6 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -49,7 +50,7 @@ public class CrossMenuSearchFilterResetTest extends BaseTest {
      * @param target giá trị target được truyền vào
      */
     @Test(dataProvider = "searchFilters",
-            description = "CMS-FILTER: Search filter waits for results and can be reset")
+            description = CrossMenuTestCases.MENU_014)
     public void searchFilterCanBeAppliedAndReset(FilterTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target.page(), false);

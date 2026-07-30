@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
 import org.openqa.selenium.Dimension;
@@ -14,7 +15,7 @@ public class WorkerPostManagementResponsiveTest extends WorkerPostManagementTest
     }
 
     @Test(groups = {"worker-post-management", "read-only", "responsive"},
-            description = "WORKER-POST-MANAGEMENT-019: Tab và card vẫn dùng được ở viewport tablet")
+            description = WorkerPostTestCases.WORKER_POST_022)
     public void tabletViewportKeepsCoreContentUsable() {
         Dimension original = driver.manage().window().getSize();
         try {

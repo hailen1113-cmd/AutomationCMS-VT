@@ -1,5 +1,6 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
@@ -49,7 +50,7 @@ public class CrossMenuSidebarNavigationTest extends BaseTest {
      */
     @Test(dataProvider = "menuPages",
             groups = {"smoke", "navigation", "loadpage"},
-            description = "CMS-MENU: Menu destination loads and scrolls to the bottom")
+            description = CrossMenuTestCases.MENU_015)
     public void menuDestinationLoadsSuccessfully(MenuTarget target) {
         LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
         Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),

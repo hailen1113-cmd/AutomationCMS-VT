@@ -1,5 +1,6 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import org.testng.Assert;
@@ -33,7 +34,7 @@ public class CustomerWorkerOrderViewModeTest
 
     /** Chuyển Bảng sang Thẻ rồi quay lại và kiểm tra cả hai chế độ có dữ liệu. */
     @Test(groups = {"customer-worker-order", "view", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-012: Chuyển Bảng sang Thẻ và quay lại")
+            description = CustomerWorkerOrderTestCases.CWO_060)
     public void tableAndCardViewsReturnOrders() {
         orderPage.switchView("Thẻ");
         Assert.assertTrue(orderPage.cardViewContainsOrders(),
@@ -46,7 +47,7 @@ public class CustomerWorkerOrderViewModeTest
     /** Kiểm tra menu Thống kê chỉ chứa hai báo cáo được thiết kế. */
     @Test(groups = {"customer-worker-order", "statistics",
             "statistics-menu", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-014: Menu Thống kê hiển thị đúng hai báo cáo")
+            description = CustomerWorkerOrderTestCases.CWO_061)
     public void statisticsMenuContainsExactlyTwoReports() {
         List<String> options = orderPage.statisticsMenuOptions();
         Assert.assertEquals(options.size(), 2);

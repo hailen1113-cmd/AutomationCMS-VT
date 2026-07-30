@@ -1,5 +1,6 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import org.testng.Assert;
@@ -23,7 +24,7 @@ public class CustomerWorkerOrderPaginationTest extends CustomerWorkerOrderTestSu
 
     /** Đi tới trang 2 rồi quay lại trang 1 và đối chiếu danh sách ID hai chiều. */
     @Test(groups = {"customer-worker-order", "pagination", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-015: Trang kế và trang trước trả đúng dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_025)
     public void nextAndPreviousPagesReturnExpectedOrders() {
         List<String> first = orderPage.rows().stream().map(row -> row.id()).toList();
         orderPage.nextPage();
@@ -38,7 +39,7 @@ public class CustomerWorkerOrderPaginationTest extends CustomerWorkerOrderTestSu
 
     /** Đi tới trang cuối và đối chiếu số dòng còn lại với Tổng hiển thị. */
     @Test(groups = {"customer-worker-order", "pagination", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-016: Trang cuối khớp Tổng hiển thị")
+            description = CustomerWorkerOrderTestCases.CWO_026)
     public void lastPageReturnsRemainingOrders() {
         int total = orderPage.totalDisplayed();
         int last = orderPage.totalPages();

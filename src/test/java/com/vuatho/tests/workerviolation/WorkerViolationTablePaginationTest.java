@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.testcases.WorkerViolationTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerviolation.WorkerViolationTestSupport;
 import org.testng.Assert;
@@ -17,7 +18,7 @@ public class WorkerViolationTablePaginationTest extends WorkerViolationTestSuppo
     }
 
     @Test(groups = {"violation-worker", "pagination"},
-            description = "WORKER-VIOLATION-PAGE-001: Trang dau active va Previous bi khoa")
+            description = WorkerViolationTestCases.WORKER_VIO_032)
     public void firstPageHasCorrectBoundaryState() {
         workerViolationPage.scrollToPagination();
         Assert.assertEquals(workerViolationPage.activePage(), 1,
@@ -27,7 +28,7 @@ public class WorkerViolationTablePaginationTest extends WorkerViolationTestSuppo
     }
 
     @Test(groups = {"violation-worker", "pagination"},
-            description = "WORKER-VIOLATION-PAGE-002: Next va Previous chuyen dung mot trang")
+            description = WorkerViolationTestCases.WORKER_VIO_033)
     public void nextAndPreviousNavigateExactlyOnePage() {
         if (workerViolationPage.availablePages().stream().noneMatch(page -> page == 2)) {
             throw new SkipException("Du lieu chi co mot trang, khong the test Next/Previous.");
@@ -43,7 +44,7 @@ public class WorkerViolationTablePaginationTest extends WorkerViolationTestSuppo
     }
 
     @Test(groups = {"violation-worker", "pagination"},
-            description = "WORKER-VIOLATION-PAGE-003: Chon truc tiep mot so trang")
+            description = WorkerViolationTestCases.WORKER_VIO_034)
     public void directPageSelectionWorks() {
         List<Integer> pages = workerViolationPage.availablePages();
         int targetPage = pages.stream()
@@ -57,7 +58,7 @@ public class WorkerViolationTablePaginationTest extends WorkerViolationTestSuppo
     }
 
     @Test(groups = {"violation-worker", "pagination"},
-            description = "WORKER-VIOLATION-PAGE-004: Tong ban ghi khong doi khi chuyen trang")
+            description = WorkerViolationTestCases.WORKER_VIO_035)
     public void totalRecordCountRemainsStableAcrossPages() {
         if (workerViolationPage.availablePages().stream().noneMatch(page -> page == 2)) {
             throw new SkipException("Du lieu chi co mot trang, khong the doi chieu tong ban ghi.");

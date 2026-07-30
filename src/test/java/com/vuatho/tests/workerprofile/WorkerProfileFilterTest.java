@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -35,7 +36,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-001: Bo loc hien thi trang thai KYC va chon ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-001: Bo loc hien thi trang thai KYC va chon ngay")
+            description = WorkerProfileTestCases.WORKER_PROFILE_001)
     public void workerFilterShowsKycStatusAndDateControls() {
         workerProfilePage.openFilter();
 
@@ -51,7 +52,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      */
     @Test(dataProvider = "kycStatusFilters",
             groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-002: Chon duoc bo loc trang thai KYC cua tho")
+            description = WorkerProfileTestCases.WORKER_PROFILE_002)
     public void workerKycStatusFilterCanBeSelected(String statusLabel) {
         workerProfilePage.openFilter();
         workerProfilePage.selectKycStatus(statusLabel);
@@ -68,7 +69,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-003: Reset duoc bo loc trang thai KYC cua tho” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-003: Reset duoc bo loc trang thai KYC cua tho")
+            description = WorkerProfileTestCases.WORKER_PROFILE_003)
     public void workerKycStatusFilterCanBeResetSafely() {
         workerProfilePage.openFilter();
         workerProfilePage.selectKycStatus("Da KYC");
@@ -86,7 +87,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-004: Lich loc theo ngay co the chuyen thang” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-004: Lich loc theo ngay co the chuyen thang")
+            description = WorkerProfileTestCases.WORKER_PROFILE_004)
     public void workerDateFilterCanNavigateMonth() {
         workerProfilePage.openFilter();
 
@@ -98,7 +99,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-005: Bo loc ngay khong chon ngay tuong lai” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-005: Bo loc ngay khong chon ngay tuong lai")
+            description = WorkerProfileTestCases.WORKER_PROFILE_005)
     public void workerDateFilterDoesNotUseFutureDate() {
         workerProfilePage.openFilter();
 
@@ -110,7 +111,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-006: Ho so tho loc duoc theo mot ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-006: Ho so tho loc duoc theo mot ngay")
+            description = WorkerProfileTestCases.WORKER_PROFILE_006)
     public void workerDateFilterCanApplySingleDay() {
         workerProfilePage.openFilter();
         workerProfilePage.selectSinglePastDateInDateFilter();
@@ -125,7 +126,7 @@ public class WorkerProfileFilterTest extends WorkerProfileTestSupport {
      * Thực thi test “WORKER-PROFILE-FILTER-007: Ho so tho loc duoc theo nhieu ngay” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(groups = { "partner-worker", "worker-profile", "worker-profile-filter" },
-            description = "WORKER-PROFILE-FILTER-007: Ho so tho loc duoc theo nhieu ngay")
+            description = WorkerProfileTestCases.WORKER_PROFILE_007)
     public void workerDateFilterCanApplyMultipleDays() {
         workerProfilePage.openFilter();
         workerProfilePage.selectMultiplePastDatesInDateFilter();

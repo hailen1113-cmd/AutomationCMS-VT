@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.inventory;
 
+import com.vuatho.testcases.UniformInventoryTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.UniformModuleTestSupport;
 import org.testng.Assert;
@@ -16,7 +17,7 @@ public class UniformInventoryOverviewTest extends UniformModuleTestSupport {
     /** Mỗi kho phải trả KPI, cảnh báo tồn và đúng nhóm action. */
     @Test(dataProvider = "warehouses",
             groups = {"uniform", "inventory", "data-interaction"},
-            description = "UNIFORM-INVENTORY-001: Hai kho trả KPI và action phù hợp")
+            description = UniformInventoryTestCases.UNI_INV_002)
     public void eachWarehouseReturnsOverviewAndActions(
             String warehouse, String[] actions) {
         inventoryPage.open().selectWarehouse(warehouse);
@@ -36,7 +37,7 @@ public class UniformInventoryOverviewTest extends UniformModuleTestSupport {
     /** Lưới tháng và Danh sách phải trả hai cấu trúc dữ liệu khác nhau. */
     @Test(dataProvider = "warehouseNames",
             groups = {"uniform", "inventory", "view-mode", "data-interaction"},
-            description = "UNIFORM-INVENTORY-002: Lưới tháng và Danh sách trả dữ liệu")
+            description = UniformInventoryTestCases.UNI_INV_003)
     public void bothInventoryViewModesReturnData(String warehouse) {
         inventoryPage.open().selectWarehouse(warehouse)
                 .selectSection("Tồn kho")
@@ -56,7 +57,7 @@ public class UniformInventoryOverviewTest extends UniformModuleTestSupport {
     /** Tìm mã lô lấy động từ bảng phải giữ lại đúng lô trong kết quả. */
     @Test(dataProvider = "warehouseNames",
             groups = {"uniform", "inventory", "search", "data-interaction"},
-            description = "UNIFORM-INVENTORY-003: Tìm mã lô trả đúng dữ liệu")
+            description = UniformInventoryTestCases.UNI_INV_004)
     public void searchLotReturnsMatchingData(String warehouse) {
         inventoryPage.open().selectWarehouse(warehouse)
                 .selectSection("Tồn kho");

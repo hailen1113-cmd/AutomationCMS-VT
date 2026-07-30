@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
 import com.vuatho.pages.WorkerPostManagementPage.ImageTransformResult;
@@ -34,7 +35,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     }
 
     @Test(groups = {"worker-post-management", "read-only", "media", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-010: Click thumbnail mở modal đủ thông tin và đóng được")
+            description = WorkerPostTestCases.WORKER_POST_004)
     public void mediaDialogOpensWithPostInformationAndCloses() {
         workerPostManagementPage.openFirstPostWithMultipleMedia();
         Assert.assertTrue(workerPostManagementPage.isMediaDialogOpen(), "Click media nhưng modal không mở.");
@@ -57,7 +58,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     }
 
     @Test(groups = {"worker-post-management", "read-only", "media", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-011: Nút next/previous thay đổi và phục hồi media")
+            description = WorkerPostTestCases.WORKER_POST_005)
     public void mediaNextAndPreviousControlsWork() {
         workerPostManagementPage.openFirstPostWithMultipleMedia();
         MediaNavigationResult result = workerPostManagementPage.exerciseMediaNavigation();
@@ -68,7 +69,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     }
 
     @Test(groups = {"worker-post-management", "read-only", "media", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-012: Zoom và xoay ảnh cập nhật đúng transform")
+            description = WorkerPostTestCases.WORKER_POST_006)
     public void imageZoomAndRotationControlsWork() {
         workerPostManagementPage.openFirstPostWithMultipleMedia();
         ImageTransformResult result = workerPostManagementPage.exerciseImageTransforms();
@@ -85,7 +86,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     @Test(
             dataProvider = "workerPostStatuses",
             groups = {"worker-post-management", "read-only", "media", "image", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-022: Xem ảnh thành công ở từng tab trạng thái")
+            description = WorkerPostTestCases.WORKER_POST_007)
     public void imageCanBeViewedInEveryStatus(Status status) {
         workerPostManagementPage.openFirstPostContainingMediaAcrossPages(status, MediaType.IMAGE);
         ImageState image = workerPostManagementPage.navigateToImage();
@@ -99,7 +100,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     @Test(
             dataProvider = "workerPostStatuses",
             groups = {"worker-post-management", "read-only", "media", "video", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-017: Xem video thành công ở từng tab trạng thái")
+            description = WorkerPostTestCases.WORKER_POST_008)
     public void videoCanBeViewedInEveryStatus(Status status) {
         workerPostManagementPage.openFirstPostContainingMediaAcrossPages(status, MediaType.VIDEO);
         VideoState video = workerPostManagementPage.navigateToVideo();
@@ -115,7 +116,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     }
 
     @Test(groups = {"worker-post-management", "read-only", "media", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-015: Nút X đóng modal media")
+            description = WorkerPostTestCases.WORKER_POST_009)
     public void mediaDialogCloseButtonWorks() {
         workerPostManagementPage.openFirstPostWithMultipleMedia();
         Assert.assertTrue(workerPostManagementPage.isMediaDialogOpen(), "Modal media chưa mở.");
@@ -125,7 +126,7 @@ public class WorkerPostManagementMediaTest extends WorkerPostManagementTestSuppo
     }
 
     @Test(groups = {"worker-post-management", "read-only", "media", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-016: Thumbnail +N mở viewer media")
+            description = WorkerPostTestCases.WORKER_POST_010)
     public void overflowThumbnailOpensMediaViewer() {
         workerPostManagementPage.selectStatus(Status.APPROVED)
                 .openOverflowMediaThumbnail();

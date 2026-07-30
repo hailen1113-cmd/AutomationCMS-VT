@@ -16,6 +16,7 @@
         <selenium.version>4.46.0</selenium.version>
         <testng.version>7.9.0</testng.version>
         <poi.version>5.4.1</poi.version>
+        <jackson.version>2.22.0</jackson.version>
     </properties>
 
     <dependencies>
@@ -34,6 +35,12 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -63,6 +70,7 @@
                         <api.baseUrl>${api.baseUrl}</api.baseUrl>
                         <headless>${headless}</headless>
                         <interactive>${interactive}</interactive>
+                        <chrome.debugger.address>${chrome.debugger.address}</chrome.debugger.address>
                         <capture.screenshots>${capture.screenshots}</capture.screenshots>
                         <keep.browser.open>${keep.browser.open}</keep.browser.open>
                         <run.logout.tests>${run.logout.tests}</run.logout.tests>
@@ -100,7 +108,31 @@
         <profile>
             <id>dashboard</id>
             <properties>
+                <suiteXmlFile>src/test/resources/suites/dashboard.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>legacy-dashboard</id>
+            <properties>
                 <suiteXmlFile>dashboard-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>smoke</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/smoke.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>regression</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/regression.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>ekyc</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/ekyc.xml</suiteXmlFile>
             </properties>
         </profile>
         <profile>
@@ -142,11 +174,35 @@
         <profile>
             <id>customer-worker-order</id>
             <properties>
+                <suiteXmlFile>src/test/resources/suites/customer-worker-order.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>customerworkerorder</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/customer-worker-order.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>legacy-customer-worker-order</id>
+            <properties>
                 <suiteXmlFile>customer-worker-order-testng.xml</suiteXmlFile>
             </properties>
         </profile>
         <profile>
             <id>uniform-management</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/uniform.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/suites/uniform.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>legacy-uniform-management</id>
             <properties>
                 <suiteXmlFile>uniform-management-testng.xml</suiteXmlFile>
             </properties>

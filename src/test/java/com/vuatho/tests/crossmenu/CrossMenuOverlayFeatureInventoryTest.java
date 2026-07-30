@@ -1,5 +1,6 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
@@ -51,7 +52,7 @@ public class CrossMenuOverlayFeatureInventoryTest extends BaseTest {
      * @param target giá trị target được truyền vào
      * @param controlLabel giá trị control label được truyền vào
      */
-    @Test(dataProvider = "overlays")
+    @Test(description = CrossMenuTestCases.MENU_009, dataProvider = "overlays")
     public void inventoryOverlayFeatures(MenuTarget target, String controlLabel) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);

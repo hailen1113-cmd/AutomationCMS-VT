@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.inventory;
 
+import com.vuatho.testcases.UniformInventoryTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.UniformInventoryPage.DialogSnapshot;
 import com.vuatho.support.UniformModuleTestSupport;
@@ -17,7 +18,7 @@ public class UniformInventoryDialogTest extends UniformModuleTestSupport {
     /** Các popup phải hiển thị đúng nội dung và khóa submit khi chưa có lô. */
     @Test(dataProvider = "warehouseActions",
             groups = {"uniform", "inventory", "dialog", "data-interaction"},
-            description = "UNIFORM-INVENTORY-006: Popup kho có đủ trường và validation")
+            description = UniformInventoryTestCases.UNI_INV_001)
     public void warehouseActionDialogHasRequiredFields(
             String warehouse, String action, String[] expectedText) {
         inventoryPage.open().selectWarehouse(warehouse).selectSection("Tồn kho");

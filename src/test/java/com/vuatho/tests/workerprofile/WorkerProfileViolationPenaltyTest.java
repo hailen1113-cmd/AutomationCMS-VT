@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerprofile;
 
+import com.vuatho.testcases.WorkerProfileTestCases;
 import com.vuatho.support.workerprofile.WorkerProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -50,7 +51,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
      * Kiểm tra popup xử phạt của một user và hủy mà không tạo dữ liệu thật.
      */
     @Test(priority = 1, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-CANCEL-001: Kiem tra va huy popup xu phat tren 1 user")
+            description = WorkerProfileTestCases.WORKER_PROFILE_037)
     public void penaltyDialogShowsExpectedControlsAndCanBeCancelled() {
         Assert.assertTrue(openWorkerWithServiceOrderForPenalty(),
                 "Khong tim thay tho khong co lenh active va co don chua dung de xu phat.");
@@ -92,7 +93,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
      * Tìm động một thợ có đơn phù hợp, áp dụng xử phạt và kiểm tra bản ghi lịch sử mới.
      */
     @Test(priority = 2, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-VALIDATE-002: Chan du lieu xu phat khong hop le")
+            description = WorkerProfileTestCases.WORKER_PROFILE_038)
     public void invalidPenaltyValuesAreBlockedWithoutDirtyingFixture() {
         Assert.assertTrue(openSelectedWorkerViolationTab() || openWorkerWithServiceOrderForPenalty(),
                 "Khong tim thay tho va don phu hop de kiem tra validation.");
@@ -116,7 +117,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
     }
 
     @Test(priority = 3, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-APPLY-003: Ap dung xu phat va kiem tra lich su")
+            description = WorkerProfileTestCases.WORKER_PROFILE_039)
     public void validPenaltyCanBeAppliedAndAppearsInHistory() {
         Assert.assertTrue(openSelectedWorkerViolationTab() || openWorkerWithServiceOrderForPenalty(),
                 "Khong tim thay tho khong co lenh active va co don chua dung de xu phat.");
@@ -152,7 +153,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
     }
 
     @Test(priority = 4, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-PERSIST-004: Kiem tra luu ben va chan phat trung")
+            description = WorkerProfileTestCases.WORKER_PROFILE_040)
     public void activePenaltyPersistsAndBlocksDuplicateCreation() {
         // Đóng drawer và tải lại danh sách để kiểm tra dữ liệu từ backend, không chỉ trạng thái DOM cũ.
         workerProfilePage.closeWorkerDetailIfOpen();
@@ -177,7 +178,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
     }
 
     @Test(priority = 5, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-FEE-005: Kiem tra popup Phi phat ket noi")
+            description = WorkerProfileTestCases.WORKER_PROFILE_041)
     public void connectionPenaltyDialogSupportsPresetsValidationAndCancel() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay tho co lenh phat dang hoat dong de kiem tra Muc phat.");
@@ -208,7 +209,7 @@ public class WorkerProfileViolationPenaltyTest extends WorkerProfileTestSupport 
     }
 
     @Test(priority = 6, groups = { "partner-worker", "worker-profile", "worker-violation" },
-            description = "WORKER-PROFILE-VIOLATION-FEE-006: Ap dung that Phi phat ket noi")
+            description = WorkerProfileTestCases.WORKER_PROFILE_042)
     public void validConnectionPenaltyCanBeAppliedAndPersisted() {
         Assert.assertTrue(openWorkerWithActivePenalty(),
                 "Khong tim thay tho co lenh phat dang hoat dong de Ap dung Muc phat.");

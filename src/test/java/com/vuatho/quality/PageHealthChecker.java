@@ -5,8 +5,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -92,13 +94,14 @@ public class PageHealthChecker {
      * @param problems giá trị problems được truyền vào
      */
     private void validateMainContent(List<String> problems) {
-        String text = driver.findElements(MAIN_CONTENT).stream()
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .map(WebElement::getText)
-                .orElse("")
-                .trim();
-        if (text.length() < 20) {
+        try {
+            new WebDriverWait(driver, TestConfig.defaultWaitTimeout()).until(candidate -> {
+                Object value = ((JavascriptExecutor) candidate).executeScript(
+                        "const root=document.querySelector('main,[role=main],#__next');"
+                                + "return (root?.innerText||root?.textContent||'').trim();");
+                return String.valueOf(value).length() >= 20;
+            });
+        } catch (TimeoutException timeout) {
             problems.add("Main content is missing or nearly empty");
         }
     }

@@ -1,10 +1,10 @@
 package com.vuatho.utils;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.WheelInput.ScrollOrigin;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
@@ -13,7 +13,6 @@ import java.time.Duration;
  */
 public final class PageScroller {
     private static final int SCROLL_STEP_PIXELS = 350;
-    private static final Duration STEP_DELAY = Duration.ofMillis(200);
     private static final Duration MAX_SCROLL_TIME = Duration.ofSeconds(45);
 
     /**
@@ -42,11 +41,11 @@ public final class PageScroller {
             long positionBefore = scrollTop(javascript, scrollContainer);
             long heightBefore = scrollHeight(javascript, scrollContainer);
 
-            new Actions(driver)
-                    .scrollFromOrigin(ScrollOrigin.fromElement(scrollContainer),
-                            0, SCROLL_STEP_PIXELS)
-                    .perform();
-            pause();
+            javascript.executeScript(
+                    "arguments[0].scrollTo({top:arguments[0].scrollTop+arguments[1],behavior:'auto'});",
+                    scrollContainer, SCROLL_STEP_PIXELS);
+            waitForScrollProgress(
+                    driver, javascript, scrollContainer, positionBefore, heightBefore);
             steps++;
 
             long positionAfter = scrollTop(javascript, scrollContainer);
@@ -63,7 +62,10 @@ public final class PageScroller {
         }
 
         scrollLastContentIntoView(javascript);
-        pause();
+        waitForScrollProgress(
+                driver, javascript, scrollContainer,
+                scrollTop(javascript, scrollContainer),
+                scrollHeight(javascript, scrollContainer));
 
         System.out.printf("[SCROLL] Reached page bottom at %dpx%n",
                 scrollTop(javascript, scrollContainer));
@@ -144,12 +146,22 @@ public final class PageScroller {
     /**
      * Thực hiện xử lý pause trong luồng kiểm thử.
      */
-    private static void pause() {
+    private static void waitForScrollProgress(
+            WebDriver driver,
+            JavascriptExecutor javascript,
+            WebElement container,
+            long previousPosition,
+            long previousHeight) {
         try {
-            Thread.sleep(STEP_DELAY.toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Scrolling was interrupted.", exception);
+            new WebDriverWait(driver, Duration.ofSeconds(2))
+                    .pollingEvery(Duration.ofMillis(50))
+                    .until(webDriver -> scrollTop(javascript, container) != previousPosition
+                            || scrollHeight(javascript, container) != previousHeight
+                            || scrollTop(javascript, container)
+                            + clientHeight(javascript, container)
+                            >= scrollHeight(javascript, container) - 2);
+        } catch (TimeoutException noProgress) {
+            // Stable-bottom checks in the caller decide whether scrolling is complete.
         }
     }
 }

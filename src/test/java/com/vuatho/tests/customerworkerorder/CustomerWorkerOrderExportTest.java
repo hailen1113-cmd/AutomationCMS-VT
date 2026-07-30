@@ -1,5 +1,6 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
@@ -43,7 +44,7 @@ public class CustomerWorkerOrderExportTest
     /** Kiểm tra menu có đúng hai loại báo cáo và đúng mô tả nghiệp vụ. */
     @Test(groups = {"customer-worker-order", "export", "export-menu",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-013: Menu Excel có đúng hai loại báo cáo")
+            description = CustomerWorkerOrderTestCases.CWO_016)
     public void excelMenuContainsExactlyTwoExports() {
         List<String> options = orderPage.excelExportMenuOptions();
         Assert.assertEquals(options.size(), 2);
@@ -59,7 +60,7 @@ public class CustomerWorkerOrderExportTest
     /** Tải báo cáo chi tiết thật rồi kiểm tra file Excel có dữ liệu. */
     @Test(groups = {"customer-worker-order", "export", "export-detail",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-047: Xuất chi tiết tải file thật")
+            description = CustomerWorkerOrderTestCases.CWO_017)
     public void detailedOrderExportDownloadsRealFile() {
         assertExcelDownloaded(
                 orderPage.exportExcel("Xuất chi tiết đơn hàng"),
@@ -69,7 +70,7 @@ public class CustomerWorkerOrderExportTest
     /** Tải báo cáo tổng hợp theo ngày thật rồi kiểm tra file Excel. */
     @Test(groups = {"customer-worker-order", "export", "export-daily",
             "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-048: Xuất tổng hợp ngày tải file thật")
+            description = CustomerWorkerOrderTestCases.CWO_018)
     public void dailySummaryExportDownloadsRealFile() {
         assertExcelDownloaded(
                 orderPage.exportExcel("Xuất tổng hợp theo ngày"),
@@ -79,7 +80,7 @@ public class CustomerWorkerOrderExportTest
     /** Xuất tab Hoàn thành với khoảng ngày tùy chỉnh đang được áp dụng. */
     @Test(groups = {"customer-worker-order", "export",
             "statistics-export", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-063: Xuất thống kê tab Hoàn thành theo ngày tùy chỉnh")
+            description = CustomerWorkerOrderTestCases.CWO_019)
     public void completedStatusStatisticsExportUsesActiveRange() {
         assertStatusStatisticsExport(
                 "ĐƠN HOÀN THÀNH", "hoàn thành");
@@ -88,7 +89,7 @@ public class CustomerWorkerOrderExportTest
     /** Xuất tab Đơn hủy với khoảng ngày tùy chỉnh đang được áp dụng. */
     @Test(groups = {"customer-worker-order", "export",
             "statistics-export", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-064: Xuất thống kê tab Đơn hủy theo ngày tùy chỉnh")
+            description = CustomerWorkerOrderTestCases.CWO_020)
     public void cancelledStatusStatisticsExportUsesActiveRange() {
         assertStatusStatisticsExport("ĐƠN HỦY", "hủy");
     }

@@ -30,15 +30,12 @@ public abstract class UniformModuleTestSupport extends BaseTest {
         if (driver == null) {
             throw new SkipException("WebDriver không khởi tạo được.");
         }
-        if (!driver.getCurrentUrl().contains("/vuatho/")) {
-            LoginPage loginPage = new AuthenticationFlow(driver)
-                    .openApplicationAndLogin();
-            boolean dashboardVisible = loginPage.isDashboardVisible(Duration.ofSeconds(20));
-            Assert.assertTrue(dashboardVisible,
+        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
+        boolean dashboardVisible = loginPage.isDashboardVisible(Duration.ofSeconds(20));
+        Assert.assertTrue(dashboardVisible,
                     "Không đăng nhập được trước khi kiểm tra module Đồng phục."
                             + " URL hiện tại: " + driver.getCurrentUrl()
                             + " | Tiêu đề: " + driver.getTitle());
-        }
         catalogPage = new UniformCatalogPage(driver);
         uniformOrderPage = new UniformOrderPage(driver);
         inventoryPage = new UniformInventoryPage(driver);

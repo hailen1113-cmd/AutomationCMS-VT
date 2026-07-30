@@ -3,17 +3,17 @@
 <suite name="ERP Sandbox Test Suite" parallel="false" preserve-order="true" configfailurepolicy="continue">
     <listeners>
         <listener class-name="com.vuatho.reporting.ConsoleTestListener"/>
-        <listener class-name="com.vuatho.tests.conditions.LogoutTestsEnabled"/>
+        <listener class-name="com.vuatho.listeners.LogoutTestsEnabled"/>
         <listener class-name="com.vuatho.core.DriverLifecycleListener"/>
     </listeners>
     <test name="ERP Login and eKYC Tests">
         <classes>
             <class name="com.vuatho.tests.dashboard.LoginDashboardSourceAccessTest"/>
-            <class name="com.vuatho.tests.ekyc.EkycWorkbookCatalogTest"/>
-            <class name="com.vuatho.tests.ekyc.EkycDashboardApiContractTest"/>
-            <class name="com.vuatho.tests.ekyc.EkycListApiContractTest"/>
-            <class name="com.vuatho.tests.ekyc.EkycDetailApiContractTest"/>
-            <class name="com.vuatho.tests.ekyc.EkycSecurityApiContractTest"/>
+            <class name="com.vuatho.validation.catalog.EkycWorkbookCatalogTest"/>
+            <class name="com.vuatho.tests.ekyc.api.EkycDashboardApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.api.EkycListApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.api.EkycDetailApiContractTest"/>
+            <class name="com.vuatho.tests.ekyc.api.EkycSecurityApiContractTest"/>
         </classes>
     </test>
 </suite>

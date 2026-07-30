@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.order;
 
+import com.vuatho.testcases.UniformOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.UniformOrderPage.OrderRow;
 import com.vuatho.support.UniformModuleTestSupport;
@@ -18,7 +19,7 @@ public class UniformOrderOverviewTest extends UniformModuleTestSupport {
 
     /** KPI, cột bảng và dữ liệu đơn hàng phải được trả đầy đủ. */
     @Test(groups = {"uniform", "order", "data-interaction"},
-            description = "UNIFORM-ORDER-001: Dashboard và bảng đơn trả dữ liệu hợp lệ")
+            description = UniformOrderTestCases.UNI_ORD_005)
     public void dashboardAndOrderTableReturnValidData() {
         uniformOrderPage.open();
         Map<String, String> statistics = uniformOrderPage.statistics();

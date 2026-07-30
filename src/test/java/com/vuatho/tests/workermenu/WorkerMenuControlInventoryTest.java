@@ -1,5 +1,6 @@
 package com.vuatho.tests.workermenu;
 
+import com.vuatho.testcases.WorkerMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
@@ -47,7 +48,7 @@ public class WorkerMenuControlInventoryTest extends BaseTest {
      */
     @Test(dataProvider = "partnerWorkerCases",
             groups = {"partner-worker", "discovery"},
-            description = "Khám phá control trên màn Đối Tác - Thợ")
+            description = WorkerMenuTestCases.WORKER_MENU_001)
     public void inventoryWorkerMenuControls(PartnerWorkerCase testCase) {
         // Mỗi case chủ động khôi phục điểm bắt đầu hợp lệ trước khi điều hướng.
         new AuthenticationFlow(driver).openApplicationAndLogin();

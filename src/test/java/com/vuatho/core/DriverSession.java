@@ -11,6 +11,9 @@ final class DriverSession {
     // Không quit driver ở @AfterMethod, nếu không các test load page phía sau sẽ mất trạng thái login.
     private static WebDriver sharedDriver;
     private static boolean shutdownHookRegistered;
+    private static boolean executionActive;
+    private static boolean driverAcquiredDuringExecution;
+    private static int acquireCount;
 
     /**
      * Khởi tạo DriverSession với các phụ thuộc cần thiết.
@@ -18,14 +21,20 @@ final class DriverSession {
     private DriverSession() {
     }
 
-    static WebDriver acquire() {
+    static synchronized WebDriver acquire() {
         // Chỉ mở browser mới khi chưa có browser hoặc browser cũ đã bị đóng/crash.
         if (!isAlive(sharedDriver)) {
+            if (executionActive && driverAcquiredDuringExecution && sharedDriver != null) {
+                throw new IllegalStateException(
+                        "WebDriver was closed or crashed before the TestNG execution finished. "
+                                + "The framework will not silently create a replacement browser.");
+            }
             System.out.println("Mo WebDriver moi cho bo test...");
             try {
                 sharedDriver = DriverFactory.createChromeDriver();
                 configureTimeouts(sharedDriver);
                 registerShutdownHook();
+                driverAcquiredDuringExecution = true;
             } catch (RuntimeException exception) {
                 sharedDriver = null;
                 throw exception;
@@ -33,10 +42,37 @@ final class DriverSession {
         } else {
             System.out.println("Dung lai WebDriver hien tai cho testcase tiep theo...");
         }
+        acquireCount++;
         return sharedDriver;
     }
 
-    static void releaseAfterSuite() {
+    static synchronized void beginExecution() {
+        executionActive = true;
+        driverAcquiredDuringExecution = isAlive(sharedDriver);
+        acquireCount = 0;
+        System.out.println("[BROWSER LIFECYCLE] TestNG execution started.");
+    }
+
+    static synchronized void finishExecution() {
+        System.out.println("[BROWSER LIFECYCLE] TestNG execution finished; driver acquisitions="
+                + acquireCount + ". Browser release is now allowed.");
+        try {
+            releaseAfterSuite();
+        } finally {
+            executionActive = false;
+            driverAcquiredDuringExecution = false;
+            acquireCount = 0;
+        }
+    }
+
+    static synchronized void assertBrowserAliveIfAcquired() {
+        if (executionActive && driverAcquiredDuringExecution && !isAlive(sharedDriver)) {
+            throw new IllegalStateException(
+                    "WebDriver became unavailable before the TestNG execution finished.");
+        }
+    }
+
+    static synchronized void releaseAfterSuite() {
         if (sharedDriver == null) {
             return;
         }

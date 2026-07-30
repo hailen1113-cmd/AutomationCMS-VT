@@ -1,0 +1,32 @@
+package com.vuatho.validation.testdata;
+
+import com.vuatho.testdata.PartnerWorkerCase;
+import com.vuatho.testdata.PartnerWorkerTestData;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * Kiểm tra dữ liệu test của nhóm Đối tác - Thợ không trùng lặp hoặc thiếu trường bắt buộc.
+ */
+public class WorkerMenuTestDataTest {
+
+    /**
+     * Thực hiện xử lý worker menu test data has unique ids and worker profile coverage trong luồng kiểm thử.
+     */
+    @Test(description = "WORKER-MENU-003 - Worker Menu Test Data Has Unique Ids And Worker Profile Coverage")
+    public void workerMenuTestDataHasUniqueIdsAndWorkerProfileCoverage() {
+        var cases = PartnerWorkerTestData.cases();
+        Set<String> ids = cases.stream()
+                .map(PartnerWorkerCase::id)
+                .collect(Collectors.toSet());
+
+        Assert.assertEquals(ids.size(), cases.size(),
+                "Partner-worker testcase IDs must be unique.");
+        Assert.assertTrue(cases.stream()
+                        .anyMatch(testCase -> testCase.page().equals(PartnerWorkerTestData.WORKER_PROFILE)),
+                "Partner-worker testdata must include worker profile management coverage.");
+    }
+}

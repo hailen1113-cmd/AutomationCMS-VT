@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.order;
 
+import com.vuatho.testcases.UniformOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.UniformOrderPage.OrderRow;
 import com.vuatho.support.UniformModuleTestSupport;
@@ -20,7 +21,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
 
     /** Tìm theo tên khách được lấy động từ dòng dữ liệu thật. */
     @Test(groups = {"uniform", "order", "search", "data-interaction"},
-            description = "UNIFORM-ORDER-002: Tìm đơn theo tên khách")
+            description = UniformOrderTestCases.UNI_ORD_006)
     public void searchByCustomerNameReturnsMatchingRows() {
         uniformOrderPage.open();
         String customer = asciiCustomerSeed();
@@ -31,7 +32,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
 
     /** Tìm theo SĐT được lấy động từ dòng dữ liệu thật. */
     @Test(groups = {"uniform", "order", "search", "data-interaction"},
-            description = "UNIFORM-ORDER-003: Tìm đơn theo số điện thoại")
+            description = UniformOrderTestCases.UNI_ORD_007)
     public void searchByPhoneReturnsMatchingRows() {
         uniformOrderPage.open();
         String phone = uniformOrderPage.rows().get(0).phone();
@@ -44,7 +45,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
 
     /** Popup lọc phải công bố đủ ba nhóm điều kiện nghiệp vụ. */
     @Test(groups = {"uniform", "order", "filter", "data-interaction"},
-            description = "UNIFORM-ORDER-004: Popup lọc có đủ trạng thái và phương thức")
+            description = UniformOrderTestCases.UNI_ORD_008)
     public void filterPopupContainsAllOptions() {
         String popup = uniformOrderPage.open().openFilter();
         for (String option : new String[]{
@@ -61,7 +62,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
     /** Mỗi trạng thái đơn phải chỉ trả dòng đúng trạng thái đã chọn. */
     @Test(dataProvider = "orderStatuses",
             groups = {"uniform", "order", "filter", "data-interaction"},
-            description = "UNIFORM-ORDER-005: Lọc từng trạng thái đơn")
+            description = UniformOrderTestCases.UNI_ORD_009)
     public void eachOrderStatusFiltersRows(String status) {
         uniformOrderPage.open().openFilter();
         uniformOrderPage.chooseFilter(status);
@@ -74,7 +75,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
     /** Mỗi trạng thái thanh toán phải chỉ trả dòng đúng điều kiện. */
     @Test(dataProvider = "paymentStatuses",
             groups = {"uniform", "order", "filter", "data-interaction"},
-            description = "UNIFORM-ORDER-006: Lọc từng trạng thái thanh toán")
+            description = UniformOrderTestCases.UNI_ORD_010)
     public void eachPaymentStatusFiltersRows(String status) {
         uniformOrderPage.open().openFilter();
         uniformOrderPage.chooseFilter(status);
@@ -86,7 +87,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
     /** Mỗi phương thức thanh toán phải chỉ trả dòng đúng điều kiện. */
     @Test(dataProvider = "paymentMethods",
             groups = {"uniform", "order", "filter", "data-interaction"},
-            description = "UNIFORM-ORDER-007: Lọc từng phương thức thanh toán")
+            description = UniformOrderTestCases.UNI_ORD_011)
     public void eachPaymentMethodFiltersRows(String method) {
         uniformOrderPage.open().openFilter();
         uniformOrderPage.chooseFilter(method);
@@ -97,7 +98,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
 
     /** Kết hợp ba nhóm lọc bằng dữ liệu của dòng thật để chắc chắn có kết quả. */
     @Test(groups = {"uniform", "order", "filter-combination", "data-interaction"},
-            description = "UNIFORM-ORDER-008: Kết hợp trạng thái đơn, thanh toán và phương thức")
+            description = UniformOrderTestCases.UNI_ORD_012)
     public void combinedFiltersReturnOnlyMatchingRows() {
         uniformOrderPage.open();
         OrderRow seed = uniformOrderPage.rows().stream()
@@ -124,7 +125,7 @@ public class UniformOrderSearchFilterTest extends UniformModuleTestSupport {
     /** Từ khóa và trạng thái đơn phải kết hợp đồng thời, reset phải xóa điều kiện. */
     @Test(groups = {"uniform", "order", "filter-combination", "search",
             "data-interaction"},
-            description = "UNIFORM-ORDER-009: Kết hợp tìm tên và trạng thái rồi reset")
+            description = UniformOrderTestCases.UNI_ORD_013)
     public void searchAndStatusCombinationCanBeReset() {
         uniformOrderPage.open();
         String customer = asciiCustomerSeed();

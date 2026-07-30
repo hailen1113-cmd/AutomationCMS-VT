@@ -1,5 +1,6 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import com.vuatho.pages.CustomerWorkerOrderPage.DetailSnapshot;
@@ -43,7 +44,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     /** Kiểm tra đơn Tìm kiếm thợ chỉ có action Hủy và chưa được chuyển bước. */
     @Test(priority = 1,
             groups = {"customer-worker-order", "workflow", "searching-worker", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-022: Đơn Tìm kiếm thợ chỉ cho phép hủy")
+            description = CustomerWorkerOrderTestCases.CWO_072)
     public void searchingWorkerOrderOnlyAllowsCancellation() {
         DetailSnapshot detail = requireWorkflowOrder("Tìm kiếm thợ", "Hủy đơn");
         Assert.assertTrue(detail.buttons().contains("Hủy đơn"),
@@ -56,7 +57,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     @Test(priority = 2,
             groups = {"customer-worker-order", "mutation", "advance", "match-to-travelling",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-023: Match đơn sang Thợ di chuyển")
+            description = CustomerWorkerOrderTestCases.CWO_073)
     public void matchedOrderAdvancesToWorkerTravelling() {
         assertRealTransition("Match đơn", "Thợ di chuyển");
     }
@@ -65,7 +66,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     @Test(priority = 3,
             groups = {"customer-worker-order", "mutation", "advance", "travelling-to-checkin",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-024: Thợ di chuyển sang Thợ checkin")
+            description = CustomerWorkerOrderTestCases.CWO_074)
     public void travellingOrderAdvancesToWorkerCheckin() {
         assertRealTransition("Thợ di chuyển", "Thợ checkin");
     }
@@ -74,7 +75,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     @Test(priority = 4,
             groups = {"customer-worker-order", "mutation", "advance", "checkin-to-working",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-025: Thợ checkin sang Đang làm việc")
+            description = CustomerWorkerOrderTestCases.CWO_075)
     public void checkedInOrderAdvancesToWorking() {
         assertRealTransition("Thợ checkin", "Đang làm việc");
     }
@@ -83,7 +84,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     @Test(priority = 5,
             groups = {"customer-worker-order", "mutation", "advance", "working-to-done",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-026: Đang làm việc sang Đã xong việc")
+            description = CustomerWorkerOrderTestCases.CWO_076)
     public void workingOrderAdvancesToWorkDone() {
         assertRealTransition("Đang làm việc", "Đã xong việc");
     }
@@ -92,7 +93,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     @Test(priority = 6,
             groups = {"customer-worker-order", "mutation", "advance", "done-to-completed",
                     "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-027: Đã xong việc sang Hoàn thành đơn")
+            description = CustomerWorkerOrderTestCases.CWO_077)
     public void workDoneOrderAdvancesToCompleted() {
         assertRealTransition("Đã xong việc", "Hoàn thành đơn");
     }
@@ -100,7 +101,7 @@ public class CustomerWorkerOrderWorkflowTest extends CustomerWorkerOrderTestSupp
     /** Mutation thật: hủy đơn, sau đó kiểm tra trạng thái và lý do đã lưu. */
     @Test(priority = 10,
             groups = {"customer-worker-order", "mutation", "cancel", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-028: Hủy đơn thật cập nhật trạng thái và lý do")
+            description = CustomerWorkerOrderTestCases.CWO_078)
     public void cancelOrderReallyChangesStatus() {
         DetailSnapshot detail = requireAnyCancelableOrder();
         System.out.println("Huy that don #" + detail.id());

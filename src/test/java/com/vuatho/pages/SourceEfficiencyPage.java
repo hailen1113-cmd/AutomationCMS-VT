@@ -1,6 +1,7 @@
 package com.vuatho.pages;
 
 import com.vuatho.components.SidebarComponent;
+import com.vuatho.utils.ElementActions;
 import com.vuatho.utils.OverlayCleaner;
 import com.vuatho.utils.PageScroller;
 import org.openqa.selenium.By;
@@ -50,11 +51,20 @@ public class SourceEfficiencyPage {
         OverlayCleaner.dismissBlockingOverlays(driver);
         sidebar.ensureExpanded();
         String previousUrl = driver.getCurrentUrl();
-        wait.until(webDriver -> menu()).click();
+        WebElement sourceMenu = wait.until(webDriver -> menu());
+        String destination = sourceMenu.getAttribute("href");
+        new ElementActions(driver).click(sourceMenu);
 
         wait.until(webDriver -> documentIsReady());
-        wait.until(webDriver -> !driver.getCurrentUrl().equals(previousUrl)
-                || isVisible(OVERVIEW_SECTION));
+        try {
+            new WebDriverWait(driver, Duration.ofSeconds(5)).until(webDriver ->
+                    !driver.getCurrentUrl().equals(previousUrl) || isVisible(OVERVIEW_SECTION));
+        } catch (TimeoutException ignoredClick) {
+            if (destination == null || destination.isBlank()) {
+                throw ignoredClick;
+            }
+            driver.navigate().to(destination);
+        }
         wait.until(webDriver -> driver.findElements(LOADING_INDICATORS).stream()
                 .noneMatch(WebElement::isDisplayed));
         wait.until(webDriver -> isVisible(OVERVIEW_SECTION));

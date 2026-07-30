@@ -1,5 +1,6 @@
 package com.vuatho.tests.userprofile;
 
+import com.vuatho.testcases.UserProfileTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.flows.AuthenticationFlow;
@@ -71,7 +72,7 @@ public class UserProfileSearchTest extends BaseTest {
      * Thực thi test “USER-PROFILE-SEARCH-MODE-001: Tim kiem nguoi dung co tuy chon ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 1, groups = { "user-profile", "user-search" },
-            description = "USER-PROFILE-SEARCH-MODE-001: Tim kiem nguoi dung co tuy chon ten va SDT")
+            description = UserProfileTestCases.USER_005)
     public void userSearchModeOptionsAreAvailable() {
         Assert.assertTrue(userProfilePage.hasSearchModeOptions(),
                 "Dropdown kieu tim kiem nguoi dung thieu tuy chon ten hoac SDT.");
@@ -81,7 +82,7 @@ public class UserProfileSearchTest extends BaseTest {
      * Thực thi test “USER-PROFILE-SEARCH-MODE-002: Kieu tim kiem nguoi dung doi duoc giua ten va SDT” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 2, groups = { "user-profile", "user-search" },
-            description = "USER-PROFILE-SEARCH-MODE-002: Kieu tim kiem nguoi dung doi duoc giua ten va SDT")
+            description = UserProfileTestCases.USER_006)
     public void userSearchModeCanSwitchBetweenNameAndPhone() {
         userProfilePage.selectSearchMode("ten");
         Assert.assertTrue(TextNormalizer.normalize(userProfilePage.selectedSearchMode()).contains("ten"),
@@ -97,7 +98,7 @@ public class UserProfileSearchTest extends BaseTest {
      * Thực thi test “USER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten nguoi dung dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 3, groups = { "user-profile", "user-search" },
-            description = "USER-PROFILE-SEARCH-MODE-003: Tim kiem duoc 5 ten nguoi dung dau tien")
+            description = UserProfileTestCases.USER_007)
     public void userCanSearchFirstFiveNames() {
         List<String> userNames = userProfilePage.firstVisibleUserNames(SEARCH_SAMPLE_SIZE);
         Assert.assertEquals(userNames.size(), SEARCH_SAMPLE_SIZE,
@@ -113,7 +114,7 @@ public class UserProfileSearchTest extends BaseTest {
      * Thực thi test “USER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT nguoi dung dau tien” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
     @Test(priority = 4, groups = { "user-profile", "user-search" },
-            description = "USER-PROFILE-SEARCH-MODE-004: Tim kiem duoc 5 SDT nguoi dung dau tien")
+            description = UserProfileTestCases.USER_008)
     public void userCanSearchFirstFivePhoneNumbers() {
         List<String> userPhones = userProfilePage.firstVisibleUserPhoneSearchTerms(SEARCH_SAMPLE_SIZE);
         Assert.assertEquals(userPhones.size(), SEARCH_SAMPLE_SIZE,

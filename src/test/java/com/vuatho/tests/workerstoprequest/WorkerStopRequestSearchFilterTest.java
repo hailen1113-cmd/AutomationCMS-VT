@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerstoprequest;
 
+import com.vuatho.testcases.WorkerStopRequestTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerstoprequest.WorkerStopRequestTestSupport;
 import com.vuatho.pages.WorkerStopRequestPage.RequestRow;
@@ -27,7 +28,7 @@ public class WorkerStopRequestSearchFilterTest extends WorkerStopRequestTestSupp
     }
 
     @Test(groups = {"worker-stop-request", "search", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-002: Tìm kiếm theo tên trả đúng dữ liệu và Reset phục hồi")
+            description = WorkerStopRequestTestCases.WORKER_STOP_011)
     public void searchByWorkerNameAndResetWork() {
         List<String> original = stopRequestPage.rows().stream().map(RequestRow::id).toList();
         String workerName = stopRequestPage.rows().get(0).workerName();
@@ -51,7 +52,7 @@ public class WorkerStopRequestSearchFilterTest extends WorkerStopRequestTestSupp
     @Test(
             dataProvider = "requestStatuses",
             groups = {"worker-stop-request", "filter", "data-interaction"},
-            description = "WORKER-STOP-REQUEST-003: Mỗi bộ lọc chỉ trả đúng trạng thái")
+            description = WorkerStopRequestTestCases.WORKER_STOP_012)
     public void eachStatusFilterReturnsMatchingRows(Status status) {
         stopRequestPage.selectStatus(status);
         List<RequestRow> rows = stopRequestPage.rows();

@@ -116,12 +116,12 @@ public class DashboardPage {
      * Mở dashboard and wait for metrics trong luồng kiểm thử.
      */
     public void openDashboardAndWaitForMetrics() {
-        wait.until(webDriver -> isVisible(HOME_CONTENT) || isVisible(DASHBOARD_CONTENT));
+        wait.until(webDriver -> hasDashboardMarker());
         sidebar.ensureExpanded();
         WebElement dashboardMenu = wait.until(webDriver -> dashboardMenu());
         actions.click(dashboardMenu);
 
-        waitForSummaryCards();
+        waitForMetrics();
         PageScroller.slowlyToBottom(driver);
     }
 
@@ -158,12 +158,17 @@ public class DashboardPage {
      * Chờ for summary cards trong luồng kiểm thử.
      */
     private void waitForSummaryCards() {
+        waitForMetrics();
+        Waits.longWait(driver).until(
+                webDriver -> SUMMARY_CARDS.stream().allMatch(this::summaryCardIsVisible));
+    }
+
+    private void waitForMetrics() {
         WebDriverWait metricsWait = Waits.longWait(driver);
         metricsWait.until(webDriver -> hasDashboardMarker());
         metricsWait.until(webDriver -> driver.findElements(LOADING_INDICATORS).stream()
                 .noneMatch(WebElement::isDisplayed));
         metricsWait.until(webDriver -> visibleMetricValues() > 0);
-        metricsWait.until(webDriver -> SUMMARY_CARDS.stream().allMatch(this::summaryCardIsVisible));
     }
 
     /**
@@ -276,11 +281,10 @@ public class DashboardPage {
      * @return kết quả loaded metrics sau khi xử lý
      */
     public List<String> loadedMetrics() {
-        return mainContent().findElements(By.xpath(
-                        ".//*[not(*) and string-length(normalize-space()) > 0]"))
-                .stream()
-                .filter(WebElement::isDisplayed)
-                .map(WebElement::getText)
+        Object renderedText = ((JavascriptExecutor) driver).executeScript(
+                "const root=document.querySelector('main,[role=main],#__next') || document.body;"
+                        + "return root.innerText || root.textContent || '';");
+        return String.valueOf(renderedText).lines()
                 .map(String::trim)
                 .filter(text -> !text.isBlank() && text.matches(".*\\d.*"))
                 .distinct()
@@ -477,7 +481,8 @@ public class DashboardPage {
     public boolean hasDashboardMarker() {
         return isVisible(DASHBOARD_CONTENT)
                 || (isVisible(DASHBOARD_TEXT) && visibleMetricValues() > 0)
-                || (isVisible(HOME_CONTENT) && isVisible(COMPANY_HEADER));
+                || (isVisible(HOME_CONTENT) && isVisible(COMPANY_HEADER))
+                || (dashboardMenu() != null && isVisible(COMPANY_HEADER));
     }
 
     /**

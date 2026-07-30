@@ -1,5 +1,6 @@
 package com.vuatho.tests.userprofile;
 
+import com.vuatho.testcases.UserProfileTestCases;
 import com.vuatho.support.userprofile.UserProfileTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -40,7 +41,7 @@ public class UserProfileDetailInteractionTest extends UserProfileTestSupport {
      */
     @Test(priority = 1,
             groups = {"user-profile", "user-detail"},
-            description = "USER-PROFILE-DETAIL-001: Mo duoc chi tiet nguoi dung dau tien")
+            description = UserProfileTestCases.USER_002)
     public void firstUserDetailCanBeOpened() {
         // Luôn mở lại danh sách để test có thể chạy độc lập.
         userProfilePage.openFromMenu();
@@ -63,7 +64,7 @@ public class UserProfileDetailInteractionTest extends UserProfileTestSupport {
      */
     @Test(priority = 2,
             groups = {"user-profile", "user-detail", "user-detail-tabs"},
-            description = "USER-PROFILE-DETAIL-TAB-001: Bam lan luot cac tab chi tiet nguoi dung va doi load xong")
+            description = UserProfileTestCases.USER_003)
     public void userDetailTabsCanBeOpenedOneByOne() {
         userProfilePage.openFromMenu();
         if (!userProfilePage.hasUserRows()) {

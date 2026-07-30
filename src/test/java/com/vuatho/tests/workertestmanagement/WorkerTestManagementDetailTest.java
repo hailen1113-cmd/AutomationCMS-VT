@@ -1,5 +1,6 @@
 package com.vuatho.tests.workertestmanagement;
 
+import com.vuatho.testcases.WorkerTestManagementTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workertestmanagement.WorkerTestManagementTestSupport;
 import com.vuatho.pages.WorkerTestManagementPage.DetailSnapshot;
@@ -18,7 +19,7 @@ public class WorkerTestManagementDetailTest extends WorkerTestManagementTestSupp
     }
 
     @Test(groups = {"worker-test-management", "detail", "data-interaction"},
-            description = "WORKER-TESTED-009: Click dòng mở nội dung câu hỏi và đáp án")
+            description = WorkerTestManagementTestCases.WORKER_TEST_001)
     public void detailReturnsTestContentQuestionsAndAnswers() {
         DetailSnapshot detail = workerTestPage.openFirstRow();
         for (String label : new String[]{
@@ -34,7 +35,7 @@ public class WorkerTestManagementDetailTest extends WorkerTestManagementTestSupp
     }
 
     @Test(groups = {"worker-test-management", "detail", "history", "data-interaction"},
-            description = "WORKER-TESTED-010: Drawer trả lịch sử làm bài và thông tin tài khoản")
+            description = WorkerTestManagementTestCases.WORKER_TEST_002)
     public void detailReturnsAttemptHistoryAndAccountInformation() {
         TestRow row = workerTestPage.rows().get(0);
         DetailSnapshot detail = workerTestPage.openFirstRow();
@@ -55,7 +56,7 @@ public class WorkerTestManagementDetailTest extends WorkerTestManagementTestSupp
     }
 
     @Test(groups = {"worker-test-management", "detail", "data-interaction"},
-            description = "WORKER-TESTED-011: Drawer chỉ xem và đóng được bằng nút đóng")
+            description = WorkerTestManagementTestCases.WORKER_TEST_003)
     public void detailIsReadOnlyAndCanBeClosed() {
         DetailSnapshot detail = workerTestPage.openFirstRow();
         Assert.assertEquals(detail.visibleFormFieldCount(), 0,
@@ -67,7 +68,7 @@ public class WorkerTestManagementDetailTest extends WorkerTestManagementTestSupp
     }
 
     @Test(groups = {"worker-test-management", "detail", "data-interaction"},
-            description = "WORKER-TESTED-015: Dữ liệu nghiệp vụ và tài khoản khớp giữa bảng và drawer")
+            description = WorkerTestManagementTestCases.WORKER_TEST_004)
     public void tableAndDetailReturnConsistentData() {
         TestRow row = workerTestPage.rows().get(0);
         DetailSnapshot detail = workerTestPage.openRowById(row.id());
@@ -91,7 +92,7 @@ public class WorkerTestManagementDetailTest extends WorkerTestManagementTestSupp
     @Test(
             dataProvider = "detailStatuses",
             groups = {"worker-test-management", "detail", "filter", "data-interaction"},
-            description = "WORKER-TESTED-012: Mở được chi tiết ở từng trạng thái bài kiểm tra")
+            description = WorkerTestManagementTestCases.WORKER_TEST_005)
     public void detailOpensForEveryStatus(Status status) {
         workerTestPage.selectStatus(status);
         TestRow row = workerTestPage.rows().stream().findFirst().orElse(null);

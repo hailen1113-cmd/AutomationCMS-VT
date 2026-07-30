@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerpost;
 
+import com.vuatho.testcases.WorkerPostTestCases;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerpost.WorkerPostManagementTestSupport;
@@ -21,7 +22,7 @@ public class WorkerPostManagementApprovalRejectionTest extends WorkerPostManagem
     }
 
     @Test(groups = {"worker-post-management", "read-only", "moderation", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-018: Dialog Từ chối bắt buộc lý do và Hủy được")
+            description = WorkerPostTestCases.WORKER_POST_001)
     public void rejectDialogRequiresReasonAndCanBeCancelled() {
         int beforeTotal = workerPostManagementPage.totalPosts();
         workerPostManagementPage.openFirstRejectDialog();
@@ -38,7 +39,7 @@ public class WorkerPostManagementApprovalRejectionTest extends WorkerPostManagem
     }
 
     @Test(groups = {"worker-post-management", "mutation", "approve", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-020: Duyệt bài chuyển bài sang Đã duyệt")
+            description = WorkerPostTestCases.WORKER_POST_002)
     public void approvingDedicatedPostMovesItToApproved() {
         requireMutationsEnabled();
         String marker = markerOrFirstPending(TestConfig.workerPostApproveMarker());
@@ -48,7 +49,7 @@ public class WorkerPostManagementApprovalRejectionTest extends WorkerPostManagem
     }
 
     @Test(groups = {"worker-post-management", "mutation", "reject", "data-interaction"},
-            description = "WORKER-POST-MANAGEMENT-021: Từ chối bài lưu lý do và chuyển tab")
+            description = WorkerPostTestCases.WORKER_POST_003)
     public void rejectingDedicatedPostMovesItToRejectedWithReason() {
         requireMutationsEnabled();
         String marker = markerOrFirstPending(TestConfig.workerPostRejectMarker());

@@ -81,17 +81,26 @@ abstract class UniformUiPage {
     /** Click có cuộn và thời gian quan sát. */
     protected void click(WebElement element, String step) {
         observe(element, step);
-        try {
-            element.click();
-        } catch (RuntimeException exception) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
-        }
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+        finishFiniteAnimations();
     }
 
     /** Nhập dữ liệu có cuộn và thời gian quan sát. */
     protected void fill(WebElement input, String value, String step) {
         observe(input, step);
-        input.sendKeys(Keys.chord(Keys.CONTROL, "a"), value);
+        ((JavascriptExecutor) driver).executeScript("""
+                const input = arguments[0];
+                const value = arguments[1];
+                const setter = Object.getOwnPropertyDescriptor(
+                    HTMLInputElement.prototype, 'value').set;
+                setter.call(input, value);
+                input.dispatchEvent(new InputEvent('input', {
+                  bubbles: true,
+                  inputType: 'insertText',
+                  data: value
+                }));
+                input.dispatchEvent(new Event('change', {bubbles: true}));
+                """, input, value);
     }
 
     /** Đóng drawer/dialog đang mở mà không xác nhận thay đổi dữ liệu. */
@@ -100,7 +109,9 @@ abstract class UniformUiPage {
             List<WebElement> buttons = visibleElements(By.xpath(
                     "//button[normalize-space()=" + xpathLiteral(label) + "]"));
             if (!buttons.isEmpty()) {
-                buttons.get(buttons.size() - 1).click();
+                ((JavascriptExecutor) driver).executeScript(
+                        "arguments[0].click();", buttons.get(buttons.size() - 1));
+                finishFiniteAnimations();
                 return;
             }
         }
@@ -158,10 +169,32 @@ abstract class UniformUiPage {
 
     private void observe(WebElement element, String step) {
         ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center', inline:'center'});"
+                "arguments[0].scrollIntoView({block:'center', inline:'nearest'});"
                         + "arguments[0].style.outline='3px solid #2563eb';",
                 element);
         pause(step);
+    }
+
+    /**
+     * Kết thúc các transition hữu hạn sau thao tác.
+     *
+     * <p>Chrome trên Windows có thể đóng băng CSS animation ở 0 ms khi cửa sổ bị
+     * minimize/occluded. Khi đó React đã cập nhật state nhưng drawer vẫn nằm ngoài
+     * viewport, làm Selenium chờ hết timeout. Không tác động animation vô hạn như
+     * spinner/loading.</p>
+     */
+    protected final void finishFiniteAnimations() {
+        settle(100);
+        ((JavascriptExecutor) driver).executeScript("""
+                document.getAnimations().forEach(animation => {
+                  const timing = animation.effect && animation.effect.getTiming
+                      ? animation.effect.getTiming()
+                      : null;
+                  if (timing && Number.isFinite(timing.iterations)) {
+                    try { animation.finish(); } catch (ignored) {}
+                  }
+                });
+                """);
     }
 
     protected static String xpathLiteral(String value) {

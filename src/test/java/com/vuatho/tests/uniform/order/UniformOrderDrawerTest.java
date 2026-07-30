@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.order;
 
+import com.vuatho.testcases.UniformOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.UniformOrderPage.DetailSnapshot;
 import com.vuatho.support.UniformModuleTestSupport;
@@ -17,7 +18,7 @@ public class UniformOrderDrawerTest extends UniformModuleTestSupport {
 
     /** Form tạo phải có đủ trường và không tạo đơn khi thiếu dữ liệu bắt buộc. */
     @Test(groups = {"uniform", "order", "drawer", "data-interaction"},
-            description = "UNIFORM-ORDER-010: Form tạo đơn có đủ trường và validation")
+            description = UniformOrderTestCases.UNI_ORD_001)
     public void createOrderDrawerContainsRequiredControls() {
         String form = uniformOrderPage.open().openCreateDrawer();
         for (String field : new String[]{
@@ -34,7 +35,7 @@ public class UniformOrderDrawerTest extends UniformModuleTestSupport {
     /** Mỗi trạng thái có dữ liệu phải mở drawer và trả đúng trạng thái. */
     @Test(dataProvider = "statuses",
             groups = {"uniform", "order", "detail", "data-interaction"},
-            description = "UNIFORM-ORDER-011: Mở chi tiết theo từng trạng thái đơn")
+            description = UniformOrderTestCases.UNI_ORD_002)
     public void detailOpensForEachStatus(String status) {
         uniformOrderPage.open().openFilter();
         uniformOrderPage.chooseFilter(status);
@@ -53,7 +54,7 @@ public class UniformOrderDrawerTest extends UniformModuleTestSupport {
 
     /** Đơn chờ xác nhận phải hiển thị các hành động nghiệp vụ phù hợp. */
     @Test(groups = {"uniform", "order", "detail", "data-interaction"},
-            description = "UNIFORM-ORDER-012: Đơn chờ xác nhận có đủ action")
+            description = UniformOrderTestCases.UNI_ORD_003)
     public void pendingOrderShowsExpectedActions() {
         uniformOrderPage.open();
         DetailSnapshot detail = uniformOrderPage.openFirstDetail("Chờ xác nhận");
@@ -67,7 +68,7 @@ public class UniformOrderDrawerTest extends UniformModuleTestSupport {
 
     /** Nút chỉnh sửa phải mở form có combo, người nhận và lưu thay đổi. */
     @Test(groups = {"uniform", "order", "detail", "edit", "data-interaction"},
-            description = "UNIFORM-ORDER-013: Chế độ sửa trả dữ liệu đơn hiện tại")
+            description = UniformOrderTestCases.UNI_ORD_004)
     public void editModeReturnsEditableOrderData() {
         uniformOrderPage.open();
         uniformOrderPage.openFirstDetail("Chờ xác nhận");

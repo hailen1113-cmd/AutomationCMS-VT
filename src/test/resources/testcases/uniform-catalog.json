@@ -1,0 +1,278 @@
+{
+  "testCases": [
+    {
+      "id": "UNIFORM-CATALOG-001",
+      "title": "Hai tab danh mục trả dữ liệu card hợp lệ",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["overview", "smoke"],
+      "executions": [
+        {
+          "name": "group",
+          "tab": "Nhóm Đồng Phục",
+          "searchPlaceholder": "Tìm kiếm nhóm đồng phục",
+          "quantityLabel": "Số đồng phục"
+        },
+        {
+          "name": "uniform",
+          "tab": "Đồng Phục",
+          "searchPlaceholder": "Tìm kiếm đồng phục",
+          "quantityLabel": "Tồn kho"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-002",
+      "title": "Tìm tên nhóm hoặc sản phẩm trả đúng dữ liệu",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["search", "positive"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-003",
+      "title": "Lọc Còn hàng hoặc Hết hàng và reset",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["filter", "regression"],
+      "executions": [
+        {
+          "name": "group-in-stock",
+          "tab": "Nhóm Đồng Phục",
+          "filterStatus": "Còn hàng"
+        },
+        {
+          "name": "group-out-of-stock",
+          "tab": "Nhóm Đồng Phục",
+          "filterStatus": "Hết hàng"
+        },
+        {
+          "name": "uniform-in-stock",
+          "tab": "Đồng Phục",
+          "filterStatus": "Còn hàng"
+        },
+        {
+          "name": "uniform-out-of-stock",
+          "tab": "Đồng Phục",
+          "filterStatus": "Hết hàng"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-004",
+      "title": "Form tạo nhóm có đủ trường nghiệp vụ",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["drawer", "validation", "negative"],
+      "executions": [
+        {
+          "name": "create-group-validation",
+          "tab": "Nhóm Đồng Phục",
+          "expectedUiLabels": [
+            "Tên nhóm",
+            "Giá bán",
+            "Tài khoản thanh toán",
+            "Ảnh đại diện",
+            "Trạng thái hết hàng",
+            "Packages",
+            "Chọn đồng phục"
+          ],
+          "expectedValidation": [
+            "Nhập tên nhóm",
+            "Nhập giá bán",
+            "Chọn tài khoản thanh toán"
+          ],
+          "notes": "Không xác nhận dữ liệu hợp lệ"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-005",
+      "title": "Form tạo sản phẩm hỗ trợ ảnh và biến thể",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["drawer", "validation", "variant"],
+      "executions": [
+        {
+          "name": "create-uniform-validation",
+          "tab": "Đồng Phục",
+          "expectedUiLabels": [
+            "Tên đồng phục",
+            "Hình ảnh sản phẩm",
+            "Tối đa 5 ảnh",
+            "Không có biến thể",
+            "Có biến thể"
+          ],
+          "expectedValidation": [
+            "Nhập tên đồng phục",
+            "Nhập giá bán",
+            "Vui lòng chọn loại biến thể"
+          ],
+          "expectedVariantFields": [
+            "Tên biến thể (VI)",
+            "Tên biến thể (EN)",
+            "Màu sắc",
+            "Văn bản"
+          ],
+          "notes": "Không xác nhận dữ liệu hợp lệ"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-006",
+      "title": "Card mở drawer chi tiết có dữ liệu",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["detail", "drawer"],
+      "executions": [
+        {
+          "name": "group-detail",
+          "tab": "Nhóm Đồng Phục",
+          "drawerTitle": "Chi tiết nhóm đồng phục"
+        },
+        {
+          "name": "uniform-detail",
+          "tab": "Đồng Phục",
+          "drawerTitle": "Chi tiết đồng phục"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-007",
+      "title": "Card có đủ dữ liệu nghiệp vụ",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["data-quality", "card"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-008",
+      "title": "Kết hợp tìm kiếm và lọc tồn kho",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["search", "filter", "combination"],
+      "executions": [
+        {
+          "name": "group",
+          "tab": "Nhóm Đồng Phục",
+          "filterStatus": "Còn hàng"
+        },
+        {
+          "name": "uniform",
+          "tab": "Đồng Phục",
+          "filterStatus": "Còn hàng"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-009",
+      "title": "Phân trang khớp tổng dữ liệu",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["pagination"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-010",
+      "title": "Chuyển tab cập nhật đúng context",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["tab", "state", "accessibility"],
+      "executions": [
+        {
+          "name": "group",
+          "tab": "Nhóm Đồng Phục",
+          "searchPlaceholder": "Tìm kiếm nhóm đồng phục"
+        },
+        {
+          "name": "uniform",
+          "tab": "Đồng Phục",
+          "searchPlaceholder": "Tìm kiếm đồng phục"
+        }
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-011",
+      "title": "Từ khóa không tồn tại và reset",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["search", "negative"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-012",
+      "title": "Radio tồn kho truy cập được",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["filter", "accessibility"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-013",
+      "title": "Hủy form tạo không thay đổi danh mục",
+      "enabled": true,
+      "priority": "P0",
+      "tags": ["drawer", "cancel", "safety"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-014",
+      "title": "Input upload chỉ nhận ảnh đúng chế độ",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["upload", "contract", "security"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-015",
+      "title": "Đóng chi tiết không thay đổi dữ liệu",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["detail", "safety"],
+      "executions": [
+        {"name": "group", "tab": "Nhóm Đồng Phục"},
+        {"name": "uniform", "tab": "Đồng Phục"}
+      ]
+    },
+    {
+      "id": "UNIFORM-CATALOG-016",
+      "title": "Next hoặc Previous đổi trang và quay lại dữ liệu",
+      "enabled": true,
+      "priority": "P1",
+      "tags": ["pagination", "navigation"],
+      "executions": [
+        {
+          "name": "group",
+          "tab": "Nhóm Đồng Phục",
+          "notes": "Nếu chỉ có một trang thì kiểm tra trạng thái disabled"
+        },
+        {
+          "name": "uniform",
+          "tab": "Đồng Phục",
+          "notes": "Nếu chỉ có một trang thì kiểm tra trạng thái disabled"
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 package com.vuatho.tests.uniform.catalog;
 
+import com.vuatho.testcases.UniformCatalogTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.UniformModuleTestSupport;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog.Execution;
 import com.vuatho.utils.TextNormalizer;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -17,10 +20,11 @@ public class UniformCatalogSearchFilterTest extends UniformModuleTestSupport {
     }
 
     /** Từ khóa lấy động từ card đầu tiên phải trả lại đúng item. */
-    @Test(dataProvider = "tabs",
+    @Test(dataProvider = "case002",
             groups = {"uniform", "catalog", "search", "data-interaction"},
-            description = "UNIFORM-CATALOG-002: Tìm tên nhóm/sản phẩm trả đúng dữ liệu")
-    public void searchReturnsMatchingCards(String tab) {
+            description = UniformCatalogTestCases.UNI_CAT_016)
+    public void searchReturnsMatchingCards(Execution testCase) {
+        String tab = testCase.tab();
         catalogPage.open().selectTab(tab);
         String keyword = catalogPage.firstItemName();
         Assert.assertFalse(keyword.isBlank(), "Không lấy được tên item để tìm kiếm.");
@@ -35,10 +39,12 @@ public class UniformCatalogSearchFilterTest extends UniformModuleTestSupport {
     }
 
     /** Mỗi trạng thái tồn phải thao tác được và reset phải phục hồi danh sách. */
-    @Test(dataProvider = "tabAndInventoryStatus",
+    @Test(dataProvider = "case003",
             groups = {"uniform", "catalog", "filter", "data-interaction"},
-            description = "UNIFORM-CATALOG-003: Lọc Còn hàng/Hết hàng và reset")
-    public void inventoryStatusFilterAndResetWork(String tab, String status) {
+            description = UniformCatalogTestCases.UNI_CAT_017)
+    public void inventoryStatusFilterAndResetWork(Execution testCase) {
+        String tab = testCase.tab();
+        String status = testCase.filterStatus();
         catalogPage.open().selectTab(tab);
         int before = catalogPage.totalDisplayed();
         String popup = catalogPage.openFilter();
@@ -55,15 +61,16 @@ public class UniformCatalogSearchFilterTest extends UniformModuleTestSupport {
     }
 
     /** Tìm kiếm và lọc Còn hàng phải cùng giữ hiệu lực trên tập kết quả. */
-    @Test(dataProvider = "tabs",
+    @Test(dataProvider = "case008",
             groups = {"uniform", "catalog", "search", "filter-combination",
                     "data-interaction"},
-            description = "UNIFORM-CATALOG-008: Kết hợp tìm kiếm và lọc tồn kho")
-    public void searchAndInventoryFilterWorkTogether(String tab) {
+            description = UniformCatalogTestCases.UNI_CAT_018)
+    public void searchAndInventoryFilterWorkTogether(Execution testCase) {
+        String tab = testCase.tab();
         catalogPage.open().selectTab(tab);
         String keyword = catalogPage.firstItemName();
         catalogPage.search(keyword).openFilter();
-        catalogPage.chooseFilter("Còn hàng");
+        catalogPage.chooseFilter(testCase.filterStatus());
 
         List<String> result = catalogPage.displayedItemNames();
         Assert.assertFalse(result.isEmpty(),
@@ -74,18 +81,18 @@ public class UniformCatalogSearchFilterTest extends UniformModuleTestSupport {
                 "Bộ lọc làm mất điều kiện tìm kiếm " + keyword + ": " + result);
     }
 
-    @DataProvider(name = "tabs")
-    public Object[][] tabs() {
-        return new Object[][]{{"Nhóm Đồng Phục"}, {"Đồng Phục"}};
+    @DataProvider(name = "case002")
+    public Object[][] case002() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-002");
     }
 
-    @DataProvider(name = "tabAndInventoryStatus")
-    public Object[][] tabAndInventoryStatus() {
-        return new Object[][]{
-                {"Nhóm Đồng Phục", "Còn hàng"},
-                {"Nhóm Đồng Phục", "Hết hàng"},
-                {"Đồng Phục", "Còn hàng"},
-                {"Đồng Phục", "Hết hàng"}
-        };
+    @DataProvider(name = "case003")
+    public Object[][] case003() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-003");
+    }
+
+    @DataProvider(name = "case008")
+    public Object[][] case008() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-008");
     }
 }

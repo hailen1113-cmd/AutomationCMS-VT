@@ -1,5 +1,6 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
 import com.vuatho.support.dashboard.DashboardTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -21,7 +22,7 @@ public class DashboardSummaryCardsTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-CARDS-001: Card tong quan Dashboard dieu huong va tai thanh cong” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(description = "CMS-DASH-CARDS-001: Card tong quan Dashboard dieu huong va tai thanh cong")
+    @Test(description = DashboardTestCases.DASH_018)
     public void dashboardSummaryCardsLoadDestinations() {
         List<String> cards = dashboard.clickSummaryCardsAndWaitForDestinations();
 

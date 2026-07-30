@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.testcases.WorkerViolationTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.workerviolation.WorkerViolationTestSupport;
 import org.testng.Assert;
@@ -13,7 +14,7 @@ public class WorkerViolationDetailStateTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "detail"},
-            description = "VIOLATION-WORKER-DETAIL-001: Click dong mo xac nhan xem thong tin tho")
+            description = WorkerViolationTestCases.WORKER_VIO_001)
     public void rowOpensWorkerInformationConfirmation() {
         Assert.assertTrue(workerViolationPage.openFirstWorkerConfirmation(),
                 "Click dong khong mo popup xac nhan thong tin tho.");
@@ -23,7 +24,7 @@ public class WorkerViolationDetailStateTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "detail"},
-            description = "VIOLATION-WORKER-DETAIL-002: Huy xem chi tiet giu nguyen danh sach")
+            description = WorkerViolationTestCases.WORKER_VIO_002)
     public void cancelWorkerInformationKeepsList() {
         Assert.assertTrue(workerViolationPage.openFirstWorkerConfirmation(), "Khong mo duoc popup thong tin tho.");
         Assert.assertTrue(workerViolationPage.clickDialogAction("Hủy"), "Popup thieu nut Huy.");
@@ -31,7 +32,7 @@ public class WorkerViolationDetailStateTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "state"},
-            description = "VIOLATION-WORKER-STATE-001: Refresh tai lai trang thanh cong")
+            description = WorkerViolationTestCases.WORKER_VIO_003)
     public void browserRefreshRestoresLoadedPage() {
         long before = workerViolationPage.totalDisplayed();
         workerViolationPage.refresh();
@@ -40,7 +41,7 @@ public class WorkerViolationDetailStateTest extends WorkerViolationTestSupport {
     }
 
     @Test(groups = {"violation-worker", "state"},
-            description = "VIOLATION-WORKER-STATE-002: Clear search phuc hoi danh sach")
+            description = WorkerViolationTestCases.WORKER_VIO_004)
     public void clearSearchRestoresResults() {
         long original = workerViolationPage.totalDisplayed();
         workerViolationPage.search("__AUTOMATION_EMPTY_019283__");

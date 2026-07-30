@@ -1,8 +1,11 @@
 package com.vuatho.tests.uniform.catalog;
 
+import com.vuatho.testcases.UniformCatalogTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.UniformCatalogPage.PaginationSnapshot;
 import com.vuatho.support.UniformModuleTestSupport;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog.Execution;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -18,10 +21,11 @@ public class UniformCatalogPaginationTest extends UniformModuleTestSupport {
     }
 
     /** Điều khiển trang phải thống nhất với tổng số card mà UI công bố. */
-    @Test(dataProvider = "tabs",
+    @Test(dataProvider = "case009",
             groups = {"uniform", "catalog", "pagination", "data-interaction"},
-            description = "UNIFORM-CATALOG-009: Phân trang khớp tổng dữ liệu")
-    public void paginationMatchesDisplayedData(String tab) {
+            description = UniformCatalogTestCases.UNI_CAT_008)
+    public void paginationMatchesDisplayedData(Execution testCase) {
+        String tab = testCase.tab();
         catalogPage.open().selectTab(tab);
         int total = catalogPage.totalDisplayed();
         int visibleCards = catalogPage.displayedCards().size();
@@ -44,8 +48,8 @@ public class UniformCatalogPaginationTest extends UniformModuleTestSupport {
         }
     }
 
-    @DataProvider(name = "tabs")
-    public Object[][] tabs() {
-        return new Object[][]{{"Nhóm Đồng Phục"}, {"Đồng Phục"}};
+    @DataProvider(name = "case009")
+    public Object[][] case009() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-009");
     }
 }

@@ -1,5 +1,6 @@
 package com.vuatho.tests.customerworkerorder;
 
+import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
 import com.vuatho.pages.CustomerWorkerOrderPage;
@@ -35,7 +36,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "search", "search-reset", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-005: Tìm mã đơn trả đúng đơn")
+            description = CustomerWorkerOrderTestCases.CWO_027)
     /** Lấy một ID thật, tìm kiếm và bảo đảm mọi dòng trả về đúng ID đó. */
     public void searchByOrderIdReturnsExactOrder() {
         String id = orderPage.rows().get(0).id();
@@ -46,7 +47,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "search", "reset", "search-reset", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-006: Từ khóa không tồn tại và Reset phục hồi dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_028)
     /** Tìm từ khóa không tồn tại rồi Reset và đối chiếu dữ liệu được phục hồi. */
     public void noResultAndResetRestoreOrders() {
         int total = orderPage.totalDisplayed();
@@ -68,7 +69,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(dataProvider = "orderStatuses",
             groups = {"customer-worker-order", "filter", "order-status-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-007: Áp từng trạng thái đơn và kiểm tra dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_029)
     /** Áp từng trạng thái đơn và kiểm tra trực tiếp trạng thái của các dòng trả về. */
     public void eachOrderStatusReturnsMatchingRows(String status) {
         orderPage.selectOrderStatus(status);
@@ -88,7 +89,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(dataProvider = "agreementStatuses",
             groups = {"customer-worker-order", "filter", "agreement-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-008: Áp từng trạng thái thỏa thuận và kiểm tra dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_030)
     /** Áp từng trạng thái thỏa thuận và kiểm tra giá trị trong đúng nhóm cột. */
     public void eachAgreementStatusReturnsMatchingRows(String agreement) {
         orderPage.selectAgreementStatus(agreement);
@@ -134,7 +135,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(dataProvider = "directFilters",
             groups = {"customer-worker-order", "filter", "direct-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-009: Các lựa chọn bảo hành và hóa đơn trả dữ liệu")
+            description = CustomerWorkerOrderTestCases.CWO_031)
     /** Áp một filter trực tiếp và xác nhận total/dữ liệu không trái điều kiện. */
     public void warrantyAndInvoiceFiltersReturnData(String group, String value) {
         int defaultTotal = orderPage.totalDisplayed();
@@ -155,7 +156,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "filter-inventory", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-010: Popover hiển thị đủ nhóm filter và lịch")
+            description = CustomerWorkerOrderTestCases.CWO_032)
     /** Kiểm tra popup filter có đủ service, trạng thái, radio và lịch ngày. */
     public void filterPanelContainsAllControls() {
         String text = orderPage.filterText();
@@ -168,7 +169,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "service-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-065: Lọc Dịch vụ trả đúng dịch vụ và cập nhật tổng")
+            description = CustomerWorkerOrderTestCases.CWO_033)
     /** Chọn dịch vụ từ data thật và xác nhận mọi dòng thuộc dịch vụ đó. */
     public void serviceFilterReturnsOnlySelectedService() {
         int total = orderPage.totalDisplayed();
@@ -185,7 +186,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "date-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-066: Lọc một ngày trả đúng thời gian yêu cầu")
+            description = CustomerWorkerOrderTestCases.CWO_034)
     /** Chọn cùng ngày bắt đầu/kết thúc và kiểm tra thời gian của từng dòng. */
     public void singleRequestDateReturnsOnlyThatDate() {
         LocalDate date = requestedDate(orderPage.rows().get(0));
@@ -198,7 +199,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "date-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-067: Lọc khoảng ngày trả dữ liệu nằm trong biên")
+            description = CustomerWorkerOrderTestCases.CWO_035)
     /** Chọn khoảng ngày thủ công và xác nhận mọi dòng nằm trong hai biên. */
     public void requestDateRangeReturnsRowsInsideBoundaries() {
         List<LocalDate> dates = orderPage.rows().stream()
@@ -217,7 +218,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "direct-combination", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-068: Kết hợp nhiều filter trả dòng thỏa tất cả điều kiện")
+            description = CustomerWorkerOrderTestCases.CWO_036)
     /** Kết hợp nhiều filter và chứng minh kết quả dùng điều kiện AND. */
     public void multipleFiltersUseAndCondition() {
         orderPage.selectDirectFilter("Bảo hành đơn", "Có");
@@ -232,7 +233,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     }
 
     @Test(groups = {"customer-worker-order", "filter", "search-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-069: Search trong kết quả đã lọc giữ nguyên điều kiện filter")
+            description = CustomerWorkerOrderTestCases.CWO_037)
     /** Tìm ID trong tập đã lọc và xác nhận filter trước đó vẫn còn hiệu lực. */
     public void searchInsideFilteredResultsKeepsFilter() {
         orderPage.selectDirectFilter("Bảo hành đơn", "Có");
@@ -259,7 +260,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
             groups = {"customer-worker-order", "filter",
                     "recorded-info-filter", "combined-filter",
                     "invoice-recorded-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-070: Ghi nhận HĐ phân hoạch đúng từng phạm vi đơn")
+            description = CustomerWorkerOrderTestCases.CWO_038)
     /** Kiểm tra từng phạm vi ghi nhận hóa đơn phân hoạch đúng tập đơn trả về. */
     public void recordedInvoiceInformationPartitionsSelectedScope(
             String scopeName, String scopeGroup, String scopeValue) {
@@ -293,7 +294,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     @Test(dataProvider = "orderAgreementCombinations",
             groups = {"customer-worker-order", "filter", "combined-filter",
                     "combined-filter-matrix", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-071: Ma trận trạng thái đơn và thỏa thuận áp dụng điều kiện AND")
+            description = CustomerWorkerOrderTestCases.CWO_039)
     /** Chạy ma trận trạng thái đơn × thỏa thuận và kiểm tra điều kiện AND. */
     public void orderAndAgreementCombinationMatrix(
             String orderStatus, String agreementStatus) {
@@ -325,7 +326,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "service-date-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-072: Kết hợp Dịch vụ và ngày yêu cầu trả đúng giao")
+            description = CustomerWorkerOrderTestCases.CWO_040)
     /** Kết hợp dịch vụ với ngày yêu cầu và kiểm tra phần giao dữ liệu. */
     public void serviceAndRequestDateReturnTheirIntersection() {
         String service = "Sửa máy lạnh";
@@ -347,7 +348,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "status-date-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-073: Kết hợp trạng thái đơn và ngày yêu cầu")
+            description = CustomerWorkerOrderTestCases.CWO_041)
     /** Kết hợp trạng thái đơn với ngày yêu cầu và kiểm tra phần giao. */
     public void orderStatusAndRequestDateReturnTheirIntersection() {
         CustomerWorkerOrderPage.OrderRow seed = orderPage.rows().get(0);
@@ -367,7 +368,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "search-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-074: Search kết hợp trạng thái đơn và thỏa thuận")
+            description = CustomerWorkerOrderTestCases.CWO_042)
     /** Kết hợp search, trạng thái đơn và thỏa thuận mà không làm rơi điều kiện. */
     public void searchWithOrderAndAgreementFiltersKeepsAllConditions() {
         CustomerWorkerOrderPage.OrderRow seed = orderPage.rows().get(0);
@@ -391,7 +392,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "visible-filter-combination", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-075: Kết hợp năm nhóm có dữ liệu đối chiếu trực tiếp trên bảng")
+            description = CustomerWorkerOrderTestCases.CWO_043)
     /** Áp năm loại filter có thể đối chiếu trên bảng và kiểm tra từng điều kiện. */
     public void fiveVisibleFilterTypesReturnOnlyMatchingRows() {
         String service = "Sửa máy lạnh";
@@ -450,7 +451,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "empty-result", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-076: Search không tồn tại sau nhiều filter trả rỗng ngay")
+            description = CustomerWorkerOrderTestCases.CWO_044)
     /** Sau nhiều filter, tìm ID vô lý phải trả rỗng trong timeout cho phép. */
     public void impossibleSearchAfterFiltersReturnsZeroWithoutHanging() {
         orderPage.selectService("Sửa máy lạnh");
@@ -466,7 +467,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "filter-reset", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-077: Reset xóa đồng thời nhiều điều kiện filter")
+            description = CustomerWorkerOrderTestCases.CWO_045)
     /** Reset sau tổ hợp filter và xác nhận search/control/dữ liệu đều về mặc định. */
     public void resetClearsAllCombinedFilters() {
         int defaultTotal = orderPage.totalDisplayed();
@@ -498,7 +499,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
     @Test(dataProvider = "directFilterPairwiseCombinations",
             groups = {"customer-worker-order", "filter", "combined-filter",
                     "direct-pairwise-matrix", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-078: Ma trận pairwise bốn nhóm bảo hành và hóa đơn")
+            description = CustomerWorkerOrderTestCases.CWO_046)
     /** Áp từng cặp radio và kiểm tra cả hai điều kiện cùng có hiệu lực. */
     public void directFilterPairwiseMatrixUsesAndCondition(
             String workerWarranty, String orderWarranty,
@@ -525,7 +526,7 @@ public class CustomerWorkerOrderSearchFilterTest extends CustomerWorkerOrderTest
 
     @Test(groups = {"customer-worker-order", "filter", "combined-filter",
             "agreement-date-filter", "data-interaction"},
-            description = "CUSTOMER-WORKER-ORDER-079: Thỏa thuận giá và ngày yêu cầu lấy đúng giao")
+            description = CustomerWorkerOrderTestCases.CWO_047)
     /** Kết hợp thỏa thuận giá với ngày yêu cầu và kiểm tra phần giao. */
     public void agreementStatusAndDateReturnTheirIntersection() {
         CustomerWorkerOrderPage.OrderRow seed = orderPage.rows().get(0);

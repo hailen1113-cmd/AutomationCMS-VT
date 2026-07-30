@@ -1,5 +1,6 @@
 package com.vuatho.tests.dashboard;
 
+import com.vuatho.testcases.DashboardTestCases;
 import com.vuatho.support.dashboard.DashboardTestSupport;
 
 import com.vuatho.core.TestNgRunner;
@@ -19,7 +20,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-002: URL Dashboard dung sau dang nhap” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 1, description = "CMS-DASH-002: URL Dashboard dung sau dang nhap")
+    @Test(priority = 1, description = DashboardTestCases.DASH_007)
     public void dashboardUrlIsCorrect() {
         Assert.assertTrue(dashboard.hasValidDashboardUrl(), "URL Dashboard khong dung sandbox CMS.");
     }
@@ -27,7 +28,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-003: Sidebar menu hien thi” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 2, description = "CMS-DASH-003: Sidebar menu hien thi")
+    @Test(priority = 2, description = DashboardTestCases.DASH_008)
     public void sidebarMenuIsDisplayed() {
         Assert.assertTrue(dashboard.missingMenuGroups().isEmpty(),
                 "Sidebar thieu menu: " + dashboard.missingMenuGroups());
@@ -36,7 +37,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-004: Logo/app icon hien thi” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 3, description = "CMS-DASH-004: Logo/app icon hien thi")
+    @Test(priority = 3, description = DashboardTestCases.DASH_009)
     public void logoIsDisplayedAndLoaded() {
         Assert.assertTrue(dashboard.isLogoLoaded(), "Logo sidebar khong hien thi hoac bi vo anh.");
     }
@@ -44,7 +45,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-005: Thu gon sidebar” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 4, description = "CMS-DASH-005: Thu gon sidebar")
+    @Test(priority = 4, description = DashboardTestCases.DASH_010)
     public void sidebarCanBeCollapsed() {
         dashboard.ensureSidebarExpanded();
         double before = dashboard.sidebarWidth();
@@ -55,7 +56,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-006: Mo rong sidebar sau khi thu gon” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 5, description = "CMS-DASH-006: Mo rong sidebar sau khi thu gon")
+    @Test(priority = 5, description = DashboardTestCases.DASH_011)
     public void sidebarCanBeExpanded() {
         dashboard.ensureSidebarExpanded();
         double originalWidth = dashboard.sidebarWidth();
@@ -67,7 +68,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-007: Menu Dashboard dang active” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 6, description = "CMS-DASH-007: Menu Dashboard dang active")
+    @Test(priority = 6, description = DashboardTestCases.DASH_012)
     public void dashboardMenuIsActive() {
         Assert.assertTrue(dashboard.isDashboardMenuActive(), "Menu Dashboard chua duoc highlight.");
     }
@@ -75,7 +76,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-008: Header cong ty hien thi” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 7, description = "CMS-DASH-008: Header cong ty hien thi")
+    @Test(priority = 7, description = DashboardTestCases.DASH_013)
     public void companyHeaderIsDisplayed() {
         Assert.assertTrue(dashboard.hasCompanyHeader(), "Khong hien thi header Cong ty Vua Tho.");
     }
@@ -83,7 +84,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-009: User hien tai va moi truong DEV hien thi” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 8, description = "CMS-DASH-009: User hien tai va moi truong DEV hien thi")
+    @Test(priority = 8, description = DashboardTestCases.DASH_014)
     public void currentUserIsDisplayed() {
         Assert.assertTrue(dashboard.hasCurrentUserAndEnvironment(),
                 "Khong hien thi dung user Hai hoac moi truong DEV.");
@@ -92,7 +93,7 @@ public class DashboardCoreUiTest extends DashboardTestSupport {
     /**
      * Thực thi test “CMS-DASH-012: Session con hieu luc khong can reload” và xác nhận kết quả theo yêu cầu nghiệp vụ.
      */
-    @Test(priority = 9, description = "CMS-DASH-012: Session con hieu luc khong can reload")
+    @Test(priority = 9, description = DashboardTestCases.DASH_015)
     public void sessionRemainsAvailableWithoutReload() {
         Assert.assertTrue(dashboard.hasDashboardMarker(), "Session Dashboard khong con hieu luc.");
     }

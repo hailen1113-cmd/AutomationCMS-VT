@@ -82,6 +82,18 @@ public final class TestConfig {
     }
 
     /**
+     * Trả về địa chỉ Chrome DevTools đã được mở thủ công để Selenium gắn vào.
+     *
+     * @return địa chỉ dạng host:port, hoặc chuỗi rỗng khi Selenium cần tự mở Chrome
+     */
+    public static String chromeDebuggerAddress() {
+        return value(
+                "chrome.debugger.address",
+                "CHROME_DEBUGGER_ADDRESS",
+                "").trim();
+    }
+
+    /**
      * Thực thi logout tests trong luồng kiểm thử.
      * @return kết quả run logout tests sau khi xử lý
      */
@@ -190,7 +202,7 @@ public final class TestConfig {
      * @return kết quả login email sau khi xử lý
      */
     public static String loginEmail() {
-        return value("erp.email", "ERP_EMAIL", "hailen1113@gmail.com");
+        return value("erp.email", "ERP_EMAIL", "hailv@vuatho.com");
     }
 
     /**

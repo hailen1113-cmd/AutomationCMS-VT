@@ -1,5 +1,6 @@
 package com.vuatho.tests.crossmenu;
 
+import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
@@ -50,7 +51,7 @@ public class CrossMenuPageFeatureInventoryTest extends BaseTest {
      * Thu thập visible features trong luồng kiểm thử.
      * @param target giá trị target được truyền vào
      */
-    @Test(dataProvider = "representativePages")
+    @Test(description = CrossMenuTestCases.MENU_010, dataProvider = "representativePages")
     public void inventoryVisibleFeatures(MenuTarget target) {
         new AuthenticationFlow(driver).openApplicationAndLogin();
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);

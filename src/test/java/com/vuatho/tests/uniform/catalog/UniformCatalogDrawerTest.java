@@ -1,7 +1,10 @@
 package com.vuatho.tests.uniform.catalog;
 
+import com.vuatho.testcases.UniformCatalogTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.UniformModuleTestSupport;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog;
+import com.vuatho.testdata.UniformCatalogTestCaseCatalog.Execution;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -14,61 +17,55 @@ public class UniformCatalogDrawerTest extends UniformModuleTestSupport {
     }
 
     /** Form tạo nhóm phải có đủ thông tin, ảnh, trạng thái và packages. */
-    @Test(groups = {"uniform", "catalog", "drawer", "data-interaction"},
-            description = "UNIFORM-CATALOG-004: Form tạo nhóm có đủ trường nghiệp vụ")
-    public void createGroupDrawerContainsRequiredControls() {
+    @Test(dataProvider = "case004",
+            groups = {"uniform", "catalog", "drawer", "data-interaction"},
+            description = UniformCatalogTestCases.UNI_CAT_001)
+    public void createGroupDrawerContainsRequiredControls(Execution testCase) {
         String form = catalogPage.open().openCreateDrawer();
-        for (String field : new String[]{
-                "Tên nhóm", "Giá bán", "Tài khoản thanh toán",
-                "Ảnh đại diện", "Trạng thái hết hàng", "Packages",
-                "Chọn đồng phục"}) {
+        for (String field : testCase.expectedUiLabels()) {
             Assert.assertTrue(form.contains(field), "Form tạo nhóm thiếu " + field);
         }
         String validation = catalogPage.submitEmptyCreateForm();
-        for (String message : new String[]{
-                "Nhập tên nhóm", "Nhập giá bán", "Chọn tài khoản thanh toán"}) {
+        for (String message : testCase.expectedValidation()) {
             Assert.assertTrue(validation.contains(message),
                     "Form tạo nhóm thiếu validation " + message);
         }
     }
 
     /** Form tạo sản phẩm phải hỗ trợ ảnh và khai báo biến thể mới. */
-    @Test(groups = {"uniform", "catalog", "drawer", "variant", "data-interaction"},
-            description = "UNIFORM-CATALOG-005: Form tạo sản phẩm hỗ trợ ảnh và biến thể")
-    public void createProductDrawerSupportsVariants() {
-        String form = catalogPage.open().selectTab("Đồng Phục").openCreateDrawer();
-        Assert.assertTrue(form.contains("Tên đồng phục"));
-        Assert.assertTrue(form.contains("Hình ảnh sản phẩm"));
-        Assert.assertTrue(form.contains("Tối đa 5 ảnh"));
-        Assert.assertTrue(form.contains("Không có biến thể")
-                && form.contains("Có biến thể"));
+    @Test(dataProvider = "case005",
+            groups = {"uniform", "catalog", "drawer", "variant", "data-interaction"},
+            description = UniformCatalogTestCases.UNI_CAT_002)
+    public void createProductDrawerSupportsVariants(Execution testCase) {
+        String form = catalogPage.open().selectTab(testCase.tab()).openCreateDrawer();
+        for (String field : testCase.expectedUiLabels()) {
+            Assert.assertTrue(form.contains(field),
+                    "Form tạo đồng phục thiếu " + field);
+        }
 
         String validation = catalogPage.submitEmptyCreateForm();
-        for (String message : new String[]{
-                "Nhập tên đồng phục", "Nhập giá bán",
-                "Vui lòng chọn loại biến thể"}) {
+        for (String message : testCase.expectedValidation()) {
             Assert.assertTrue(validation.contains(message),
                     "Form tạo đồng phục thiếu validation " + message);
         }
 
         String variant = catalogPage.addVariantDraft();
-        for (String field : new String[]{
-                "Tên biến thể (VI)", "Tên biến thể (EN)",
-                "Màu sắc", "Văn bản"}) {
+        for (String field : testCase.expectedVariantFields()) {
             Assert.assertTrue(variant.contains(field),
                     "Dòng biến thể thiếu " + field);
         }
     }
 
     /** Card có dữ liệu phải mở đúng drawer chi tiết tương ứng. */
-    @Test(dataProvider = "tabs",
+    @Test(dataProvider = "case006",
             groups = {"uniform", "catalog", "detail", "data-interaction"},
-            description = "UNIFORM-CATALOG-006: Card mở drawer chi tiết có dữ liệu")
-    public void itemCardOpensDetail(String tab, String expectedTitle) {
+            description = UniformCatalogTestCases.UNI_CAT_003)
+    public void itemCardOpensDetail(Execution testCase) {
+        String tab = testCase.tab();
         catalogPage.open().selectTab(tab);
         String name = catalogPage.firstItemName();
         String detail = catalogPage.openItemDetail(name);
-        Assert.assertTrue(detail.contains(expectedTitle),
+        Assert.assertTrue(detail.contains(testCase.drawerTitle()),
                 "Drawer mở sai loại: " + detail);
         Assert.assertTrue(detail.contains(name),
                 "Drawer không chứa tên item " + name);
@@ -85,11 +82,18 @@ public class UniformCatalogDrawerTest extends UniformModuleTestSupport {
         }
     }
 
-    @DataProvider(name = "tabs")
-    public Object[][] tabs() {
-        return new Object[][]{
-                {"Nhóm Đồng Phục", "Chi tiết nhóm đồng phục"},
-                {"Đồng Phục", "Chi tiết đồng phục"}
-        };
+    @DataProvider(name = "case004")
+    public Object[][] case004() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-004");
+    }
+
+    @DataProvider(name = "case005")
+    public Object[][] case005() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-005");
+    }
+
+    @DataProvider(name = "case006")
+    public Object[][] case006() {
+        return UniformCatalogTestCaseCatalog.dataProvider("UNIFORM-CATALOG-006");
     }
 }

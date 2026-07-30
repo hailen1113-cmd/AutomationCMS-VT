@@ -1,5 +1,6 @@
 package com.vuatho.tests.uniform.inventory;
 
+import com.vuatho.testcases.UniformInventoryTestCases;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.UniformModuleTestSupport;
 import org.testng.Assert;
@@ -16,7 +17,7 @@ public class UniformInventoryReceiptTest extends UniformModuleTestSupport {
     /** Section Phiếu phải trả đúng cột và dữ liệu mã phiếu. */
     @Test(dataProvider = "warehouseNames",
             groups = {"uniform", "inventory", "receipt", "data-interaction"},
-            description = "UNIFORM-INVENTORY-004: Danh sách phiếu trả dữ liệu hợp lệ")
+            description = UniformInventoryTestCases.UNI_INV_005)
     public void receiptListReturnsData(String warehouse) {
         inventoryPage.open().selectWarehouse(warehouse).selectSection("Phiếu");
         String text = inventoryPage.mainText();
@@ -32,7 +33,7 @@ public class UniformInventoryReceiptTest extends UniformModuleTestSupport {
     /** Mỗi loại phiếu phải lọc mà không làm mất cấu trúc danh sách. */
     @Test(dataProvider = "receiptTypes",
             groups = {"uniform", "inventory", "receipt-filter", "data-interaction"},
-            description = "UNIFORM-INVENTORY-005: Lọc từng loại phiếu của hai kho")
+            description = UniformInventoryTestCases.UNI_INV_006)
     public void eachReceiptTypeCanBeFiltered(String warehouse, String type) {
         inventoryPage.open().selectWarehouse(warehouse).selectSection("Phiếu");
         inventoryPage.selectReceiptType(type);

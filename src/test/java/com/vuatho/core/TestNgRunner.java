@@ -2,7 +2,7 @@ package com.vuatho.core;
 
 import com.vuatho.reporting.ConsoleTestListener;
 import com.vuatho.reporting.ConsoleEncoding;
-import com.vuatho.tests.conditions.LogoutTestsEnabled;
+import com.vuatho.listeners.LogoutTestsEnabled;
 import org.testng.TestNG;
 import org.testng.xml.XmlSuite;
 

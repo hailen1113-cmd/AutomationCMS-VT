@@ -28,6 +28,14 @@ public final class DriverFactory {
      * @return kết quả create chrome driver sau khi xử lý
      */
     public static WebDriver createChromeDriver() {
+        String debuggerAddress = TestConfig.chromeDebuggerAddress();
+        if (!debuggerAddress.isBlank()) {
+            ChromeOptions attachedOptions = new ChromeOptions();
+            attachedOptions.setExperimentalOption("debuggerAddress", debuggerAddress);
+            System.out.println("Gan Selenium vao Chrome da mo thu cong tai: " + debuggerAddress);
+            return createChromeDriver(attachedOptions, false);
+        }
+
         // Dùng profile Chrome riêng cho Selenium để cookie/token ERP được giữ giữa các test.
         Path profileDirectory = Path.of(TestConfig.seleniumProfileDirectory())
                 .toAbsolutePath()
@@ -82,15 +90,19 @@ public final class DriverFactory {
             options.addArguments("--start-maximized");
         }
 
-        // Giới hạn cả thời gian kết nối và đọc response của ChromeDriver. WebDriverWait
-        // không thể ngắt một HTTP command bị treo, nên thiếu timeout này có thể giữ suite vô hạn.
+        return createChromeDriver(options, !TestConfig.headless());
+    }
+
+    /**
+     * Khởi tạo ChromeDriver từ bộ options đã cấu hình.
+     */
+    private static WebDriver createChromeDriver(ChromeOptions options, boolean maximize) {
         ClientConfig clientConfig = ClientConfig.defaultConfig()
                 .connectionTimeout(Duration.ofSeconds(15))
                 .readTimeout(Duration.ofSeconds(30));
         ChromeDriverService service = new ChromeDriverService.Builder().build();
         WebDriver driver = new ChromeDriver(service, options, clientConfig);
-        if (!TestConfig.headless()) {
-            // Maximize thêm lần nữa vì một số máy có thể bỏ qua --start-maximized lúc khởi động.
+        if (maximize) {
             driver.manage().window().maximize();
         }
         return driver;
