@@ -18,8 +18,8 @@ import java.util.List;
 /**
  * Các thao tác Selenium dùng chung của ba màn hình thuộc menu Đồng phục.
  *
- * <p>Mọi thao tác click/nhập đều cuộn element vào giữa màn hình và giữ lại hai
- * giây khi chạy có giao diện để người chạy quan sát được hành động.</p>
+ * <p>Mọi thao tác click/nhập đều cuộn element vào giữa màn hình và giữ lại
+ * 500 ms khi chạy có giao diện để người chạy quan sát được hành động.</p>
  */
 abstract class UniformUiPage {
     protected final WebDriver driver;
@@ -141,13 +141,13 @@ abstract class UniformUiPage {
         }
     }
 
-    /** Giữ màn hình hai giây ở chế độ có giao diện. */
+    /** Giữ màn hình 500 ms ở chế độ có giao diện để quan sát từng thao tác. */
     protected void pause(String step) {
         if (TestConfig.headless()) {
             return;
         }
         try {
-            Thread.sleep(2_000);
+            Thread.sleep(500);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
@@ -155,10 +155,30 @@ abstract class UniformUiPage {
 
     private void observe(WebElement element, String step) {
         ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].scrollIntoView({block:'center', inline:'center'});"
-                        + "arguments[0].style.outline='3px solid #2563eb';",
+                "arguments[0].scrollIntoView({block:'center', inline:'center'});",
                 element);
+        highlight(element);
         pause(step);
+    }
+
+    /** Xóa highlight cũ và chỉ làm nổi bật element hiện tại. */
+    protected void highlight(WebElement element) {
+        highlight(element, "#2563eb");
+    }
+
+    /** Xóa highlight cũ và làm nổi bật element hiện tại bằng màu yêu cầu. */
+    protected void highlight(WebElement element, String color) {
+        ((JavascriptExecutor) driver).executeScript(
+                "document.querySelectorAll('[data-automation-highlight=true]')"
+                        + ".forEach(function(previous){"
+                        + "previous.style.removeProperty('outline');"
+                        + "previous.style.removeProperty('outline-offset');"
+                        + "previous.removeAttribute('data-automation-highlight');"
+                        + "});"
+                        + "arguments[0].setAttribute('data-automation-highlight','true');"
+                        + "arguments[0].style.outline='3px solid '+arguments[1];"
+                        + "arguments[0].style.outlineOffset='2px';",
+                element, color);
     }
 
     protected static String xpathLiteral(String value) {

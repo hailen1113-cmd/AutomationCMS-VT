@@ -1,0 +1,89 @@
+package com.vuatho.tests.ekyc;
+
+import com.vuatho.testcases.EkycTestCases;
+
+import com.vuatho.support.ekyc.EkycApiTestSupport;
+
+import com.vuatho.api.ApiAssertions;
+import com.vuatho.api.ApiResponse;
+import com.vuatho.core.TestNgRunner;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+/**
+ * Kiểm tra hợp đồng các API làm thay đổi hồ sơ eKYC, gồm validation và response.
+ */
+public class MutationApiContractTest extends EkycApiTestSupport {
+    public static void main(String[] args) {
+        TestNgRunner.run(MutationApiContractTest.class,
+                "Bo test API mutation eKYC ERP",
+                "Kiem tra update/rerun eKYC API");
+    }
+
+    /**
+     * Cập nhật rejects invalid review payload trong luồng kiểm thử.
+     */
+    @Test(description = EkycTestCases.EKYC_016, groups = {"ekyc", "api", "contract", "mutation"})
+    public void updateRejectsInvalidReviewPayload() {
+        String applicantId = mutationApplicantId();
+        ApiResponse response = api.put("/ekyc/" + applicantId,
+                "{\"result\":{\"front_status\":9,\"back_status\":2,\"selfie_status\":2},\"note\":{}}");
+        Assert.assertEquals(response.status(), 400,
+                "Invalid review result should be rejected. Body: " + response.preview());
+    }
+
+    /**
+     * Cập nhật can approve all document sides for seed applicant trong luồng kiểm thử.
+     */
+    @Test(description = EkycTestCases.EKYC_017, groups = {"ekyc", "api", "contract", "mutation"})
+    public void updateCanApproveAllDocumentSidesForSeedApplicant() {
+        String applicantId = mutationApplicantId();
+        ApiResponse response = api.put("/ekyc/" + applicantId,
+                "{\"result\":{\"front_status\":2,\"back_status\":2,\"selfie_status\":2},\"note\":{}}");
+        ApiAssertions.assertOkJson(response, "PUT /ekyc approve all sides");
+    }
+
+    /**
+     * Cập nhật can reject with document reason for seed applicant trong luồng kiểm thử.
+     */
+    @Test(description = EkycTestCases.EKYC_018, groups = {"ekyc", "api", "contract", "mutation"})
+    public void updateCanRejectWithDocumentReasonForSeedApplicant() {
+        String applicantId = mutationApplicantId();
+        ApiResponse response = api.put("/ekyc/" + applicantId,
+                "{\"result\":{\"front_status\":3,\"back_status\":2,\"selfie_status\":2},"
+                        + "\"note\":{\"document\":\"BLURRED_IMAGE\",\"other\":\"automation reject check\"}}");
+        ApiAssertions.assertOkJson(response, "PUT /ekyc reject document");
+    }
+
+    /**
+     * Cập nhật info can patch seven editable fields for seed applicant trong luồng kiểm thử.
+     */
+    @Test(description = EkycTestCases.EKYC_019, groups = {"ekyc", "api", "contract", "mutation"})
+    public void updateInfoCanPatchSevenEditableFieldsForSeedApplicant() {
+        String applicantId = mutationApplicantId();
+        String body = "{"
+                + "\"type\":\"UPDATE_INFO\","
+                + "\"full_name\":\"Automation KYC Fixture\","
+                + "\"gender\":1,"
+                + "\"birthDate\":\"1990-01-01\","
+                + "\"nationality\":\"Viá»‡t Nam\","
+                + "\"number_card\":\"000000000001\","
+                + "\"place_of_origin\":\"Automation Origin\","
+                + "\"place_of_residence\":\"Automation Residence\""
+                + "}";
+        ApiResponse response = api.put("/ekyc/" + applicantId, body);
+        ApiAssertions.assertOkJson(response, "PUT /ekyc UPDATE_INFO");
+    }
+
+    /**
+     * Thực hiện xử lý rerun ai dispatches or returns business validation for seed applicant trong luồng kiểm thử.
+     */
+    @Test(description = EkycTestCases.EKYC_020, groups = {"ekyc", "api", "contract", "mutation"})
+    public void rerunAiDispatchesOrReturnsBusinessValidationForSeedApplicant() {
+        String applicantId = mutationApplicantId();
+        ApiResponse response = api.post("/ekyc/" + applicantId + "/rerun-ai", null);
+        Assert.assertTrue(response.status() == 200 || response.status() == 400,
+                "Rerun AI should dispatch or return business validation. Status="
+                        + response.status() + " body=" + response.preview());
+    }
+}

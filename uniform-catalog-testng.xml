@@ -7,18 +7,22 @@
     </listeners>
     <test name="Nhom va san pham Dong phuc">
         <classes>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogOverviewTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogSearchTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogInventoryFilterTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogSearchFilterCombinationTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogDetailTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.create.UniformGroupCreateTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.create.UniformGroupCreateValidationTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.create.UniformItemCreateTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.create.UniformItemCreateValidationTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.update.UniformCatalogUpdateTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.delete.UniformCatalogDeleteTest"/>
-            <class name="com.vuatho.tests.uniform.catalog.read.UniformCatalogPaginationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogOverviewTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogSearchTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogInventoryFilterTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogSearchFilterCombinationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogDetailTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.GroupCreateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.GroupCreateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.ItemCreateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.create.ItemCreateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.update.GroupUpdateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.update.GroupUpdateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.update.ItemUpdateTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.update.ItemUpdateValidationTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.delete.GroupDeleteTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.delete.ItemDeleteTest"/>
+            <class name="com.vuatho.tests.uniform.catalog.read.CatalogPaginationTest"/>
         </classes>
     </test>
 </suite>

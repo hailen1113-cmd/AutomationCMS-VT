@@ -7,7 +7,7 @@
     </listeners>
     <test name="Duyet va tu choi bai test chuyen dung">
         <classes>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementApprovalRejectionTest"/>
+            <class name="com.vuatho.tests.workerpost.ApprovalRejectionTest"/>
         </classes>
     </test>
 </suite>

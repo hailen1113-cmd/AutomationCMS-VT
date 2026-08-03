@@ -237,6 +237,16 @@ public class CustomerWorkerOrderPage {
                         const item = label.closest('.cursor-pointer')
                           || label.parentElement?.parentElement;
                         if (!item) return false;
+                        document.querySelectorAll(
+                          '[data-automation-highlight=true]')
+                          .forEach(previous => {
+                            previous.style.removeProperty('outline');
+                            previous.style.removeProperty('outline-offset');
+                            previous.removeAttribute(
+                              'data-automation-highlight');
+                          });
+                        item.setAttribute(
+                          'data-automation-highlight', 'true');
                         item.style.outline = '3px solid #2563eb';
                         return true;
                         """, service)));
@@ -468,6 +478,14 @@ public class CustomerWorkerOrderPage {
                     behavior: arguments[3] ? 'instant' : 'smooth',
                     block: 'center', inline: 'nearest'
                   });
+                  document.querySelectorAll(
+                    '[data-automation-highlight=true]')
+                    .forEach(previous => {
+                      previous.style.removeProperty('outline');
+                      previous.style.removeProperty('outline-offset');
+                      previous.removeAttribute('data-automation-highlight');
+                    });
+                  option.setAttribute('data-automation-highlight', 'true');
                   option.style.outline = '3px solid #2563eb';
                   if (click) option.click();
                   return true;
@@ -2282,6 +2300,15 @@ public class CustomerWorkerOrderPage {
     /** Vẽ outline quanh control mà không tự cuộn làm thay đổi vị trí quan sát. */
     private void highlightForObservation(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("""
+                document.querySelectorAll(
+                  '[data-automation-highlight=true]')
+                  .forEach(previous => {
+                    previous.style.removeProperty('outline');
+                    previous.style.removeProperty('outline-offset');
+                    previous.removeAttribute('data-automation-highlight');
+                  });
+                arguments[0].setAttribute(
+                  'data-automation-highlight', 'true');
                 arguments[0].style.outline = '3px solid #2563eb';
                 arguments[0].style.outlineOffset = '-3px';
                 """, element);
@@ -2317,6 +2344,17 @@ public class CustomerWorkerOrderPage {
                                   behavior: arguments[2] ? 'instant' : 'smooth',
                                   block: 'center', inline: 'nearest'
                                 });
+                                document.querySelectorAll(
+                                  '[data-automation-highlight=true]')
+                                  .forEach(previous => {
+                                    previous.style.removeProperty('outline');
+                                    previous.style.removeProperty(
+                                      'outline-offset');
+                                    previous.removeAttribute(
+                                      'data-automation-highlight');
+                                  });
+                                day.setAttribute(
+                                  'data-automation-highlight', 'true');
                                 day.style.outline = '3px solid #2563eb';
                                 return true;
                                 """, monthToken, dayClass,

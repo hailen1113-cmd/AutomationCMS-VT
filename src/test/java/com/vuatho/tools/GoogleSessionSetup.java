@@ -38,7 +38,7 @@ public final class GoogleSessionSetup {
         System.out.println("URL dang mo: " + url);
         System.out.println("1. Dang nhap Google thu cong bang hailv@vuatho.com.");
         System.out.println("2. Dong TOAN BO cua so Chrome cua profile nay.");
-        System.out.println("3. Run Java lai LoginDashboardSourceAccessTest.main().");
+        System.out.println("3. Run Java lai LoginSourceAccessTest.main().");
     }
 
     /**

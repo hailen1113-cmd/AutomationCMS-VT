@@ -309,9 +309,9 @@ public final class UniformCatalogPage extends UniformUiPage {
                         .orElse(null);
         if (uploadSurface != null) {
             ((JavascriptExecutor) driver).executeScript(
-                    "arguments[0].scrollIntoView({behavior:'smooth',block:'center'});"
-                            + "arguments[0].style.outline='3px solid #2563eb';",
+                    "arguments[0].scrollIntoView({behavior:'smooth',block:'center'});",
                     uploadSurface);
+            highlight(uploadSurface);
             pause("Quan sát vùng chọn ảnh trước khi tải file");
         }
         String paths = files.stream()
@@ -324,10 +324,12 @@ public final class UniformCatalogPage extends UniformUiPage {
         drawer.findElements(By.cssSelector("img")).stream()
                 .filter(WebElement::isDisplayed)
                 .findFirst()
-                .ifPresent(preview -> ((JavascriptExecutor) driver).executeScript(
-                        "arguments[0].scrollIntoView({behavior:'smooth',block:'center'});"
-                                + "arguments[0].style.outline='3px solid #16a34a';",
-                        preview));
+                .ifPresent(preview -> {
+                    ((JavascriptExecutor) driver).executeScript(
+                            "arguments[0].scrollIntoView({behavior:'smooth',block:'center'});",
+                            preview);
+                    highlight(preview, "#16a34a");
+                });
         pause("Quan sát ảnh thật đã chọn và bản xem trước");
         return uploadedPreviewCount(drawer);
     }
@@ -976,6 +978,366 @@ public final class UniformCatalogPage extends UniformUiPage {
         return changed.equals(persisted);
     }
 
+    /** Đọc cấu trúc điều khiển của drawer cập nhật nhóm đồng phục. */
+    public GroupUpdateFormSnapshot groupUpdateFormSnapshot(String name) {
+        WebElement drawer = openGroupDetail(name);
+        List<WebElement> comboboxes = visibleReactComboboxes(drawer);
+        WebElement upload = drawer.findElement(By.cssSelector("input[type='file']"));
+        return new GroupUpdateFormSnapshot(
+                businessTextInputs(drawer).size(),
+                comboboxes.size(),
+                acceptsImages(upload),
+                upload.getAttribute("multiple") != null,
+                outOfStockToggle(drawer).isDisplayed(),
+                hasVisibleButton(drawer, "Xóa nhóm đồng phục"),
+                hasVisibleButton(drawer, "Hủy"),
+                hasVisibleButton(drawer, "Xác nhận"));
+    }
+
+    /** Cập nhật giá nhóm rồi mở lại để đối chiếu giá trị input đã lưu. */
+    public boolean updateGroupPricePersists(String name, String newPrice) {
+        WebElement drawer = openGroupDetail(name);
+        fill(groupCreateInput(drawer, "Nhập giá bán"),
+                newPrice, "Đổi giá bán nhóm thành " + newPrice);
+        submitDrawer(drawer, "Xác nhận cập nhật giá bán nhóm");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return false;
+        }
+        WebElement reopened = openGroupDetail(name);
+        return digits(groupCreateInput(reopened, "Nhập giá bán")
+                .getAttribute("value")).equals(digits(newPrice));
+    }
+
+    /** Chọn tài khoản khác nếu có và xác minh lựa chọn được lưu khi mở lại. */
+    public SelectionUpdateResult updateGroupPaymentAccountPersists(String name) {
+        WebElement drawer = openGroupDetail(name);
+        List<WebElement> combos = visibleReactComboboxes(drawer);
+        if (combos.isEmpty()) {
+            return new SelectionUpdateResult(false, false, "");
+        }
+        WebElement payment = combos.get(0);
+        String before = reactControlText(payment);
+        String selected = selectDifferentReactOption(
+                payment, before, "Đổi tài khoản thanh toán nhóm");
+        if (selected.isBlank()) {
+            return new SelectionUpdateResult(false, false, "");
+        }
+        submitDrawer(drawer, "Xác nhận đổi tài khoản thanh toán nhóm");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new SelectionUpdateResult(true, false, selected);
+        }
+        WebElement reopened = openGroupDetail(name);
+        String persisted = reactControlText(visibleReactComboboxes(reopened).get(0));
+        return new SelectionUpdateResult(
+                true, persisted.contains(selected), selected);
+    }
+
+    /** Thay ảnh nhóm bằng file thật và xác minh ảnh hợp lệ khi mở lại chi tiết. */
+    public ImageUpdateResult updateGroupImagePersists(
+            String name, Path imageFile) {
+        WebElement drawer = openGroupDetail(name);
+        int previews = uploadImagesInDrawer(drawer, List.of(imageFile));
+        submitDrawer(drawer, "Xác nhận thay ảnh đại diện nhóm");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new ImageUpdateResult(previews, 0, false);
+        }
+        WebElement reopened = openGroupDetail(name);
+        return new ImageUpdateResult(
+                previews, loadedImageCount(reopened), true);
+    }
+
+    /** Thêm một đồng phục vào package và đối chiếu tên khi mở lại chi tiết. */
+    public SelectionUpdateResult updateGroupPackagePersists(String name) {
+        WebElement drawer = openGroupDetail(name);
+        List<WebElement> combos = visibleReactComboboxes(drawer);
+        if (combos.size() < 2) {
+            return new SelectionUpdateResult(false, false, "");
+        }
+        String selected = selectFirstReactOption(
+                combos.get(1), "Chọn đồng phục thêm vào package nhóm");
+        if (selected.isBlank()) {
+            return new SelectionUpdateResult(false, false, "");
+        }
+        submitDrawer(drawer, "Xác nhận cập nhật package nhóm");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new SelectionUpdateResult(true, false, selected);
+        }
+        open().selectTab("Nhóm Đồng Phục");
+        search(name);
+        String detail = openItemDetail(name);
+        return new SelectionUpdateResult(
+                true, detail.contains(selected), selected);
+    }
+
+    /** Thay tên nháp rồi Hủy hoặc bấm X và xác minh thay đổi không được lưu. */
+    public boolean discardGroupNameUpdate(
+            String name, String draftName, boolean byCloseIcon) {
+        WebElement drawer = openGroupDetail(name);
+        fill(groupCreateInput(drawer, "Nhập tên nhóm"),
+                draftName, "Nhập tên nhóm nháp " + draftName);
+        if (byCloseIcon) {
+            WebElement close = drawer.findElements(By.cssSelector(
+                            "button svg.rotate-45"))
+                    .stream()
+                    .filter(WebElement::isDisplayed)
+                    .findFirst()
+                    .map(icon -> icon.findElement(By.xpath("./ancestor::button[1]")))
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Drawer chi tiết nhóm thiếu nút X."));
+            click(close, "Đóng cập nhật nhóm bằng nút X");
+        } else {
+            click(buttonIn(drawer, "Hủy"), "Hủy cập nhật nhóm");
+        }
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return false;
+        }
+        return itemExists("Nhóm Đồng Phục", name)
+                && !itemExists("Nhóm Đồng Phục", draftName);
+    }
+
+    /** Cập nhật đồng thời tên và giá rồi đọc lại cả hai trường. */
+    public GroupMultiUpdateResult updateGroupNameAndPricePersists(
+            String oldName, String newName, String newPrice) {
+        WebElement drawer = openGroupDetail(oldName);
+        fill(groupCreateInput(drawer, "Nhập tên nhóm"),
+                newName, "Đổi tên nhóm thành " + newName);
+        fill(groupCreateInput(drawer, "Nhập giá bán"),
+                newPrice, "Đổi giá nhóm thành " + newPrice);
+        submitDrawer(drawer, "Xác nhận cập nhật đồng thời tên và giá nhóm");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new GroupMultiUpdateResult(false, false);
+        }
+        if (!itemExists("Nhóm Đồng Phục", newName)) {
+            return new GroupMultiUpdateResult(false, false);
+        }
+        WebElement reopened = openGroupDetail(newName);
+        boolean pricePersisted = digits(groupCreateInput(
+                        reopened, "Nhập giá bán").getAttribute("value"))
+                .equals(digits(newPrice));
+        return new GroupMultiUpdateResult(true, pricePersisted);
+    }
+
+    /** Gửi drawer cập nhật nhóm với tên/giá chủ động thay thế hoặc xóa rỗng. */
+    public GroupUpdateSubmissionSnapshot submitGroupUpdateDraft(
+            String existingName, String nameValue, String priceValue) {
+        WebElement drawer = openGroupDetail(existingName);
+        replaceOrClear(groupCreateInput(drawer, "Nhập tên nhóm"),
+                nameValue, "Nhập tên nhóm kiểm tra validation cập nhật");
+        replaceOrClear(groupCreateInput(drawer, "Nhập giá bán"),
+                priceValue, "Nhập giá nhóm kiểm tra validation cập nhật");
+        submitDrawer(drawer, "Xác nhận form cập nhật nhóm không hợp lệ");
+        List<WebElement> opened = driver.findElements(By.cssSelector(
+                        "[aria-label='drawer-Chi tiết nhóm đồng phục']"))
+                .stream().filter(WebElement::isDisplayed).toList();
+        return opened.isEmpty()
+                ? new GroupUpdateSubmissionSnapshot(false, "")
+                : new GroupUpdateSubmissionSnapshot(
+                        true, elementText(opened.get(0)));
+    }
+
+    /** Đọc cấu trúc điều khiển của drawer cập nhật một đồng phục hiện có. */
+    public ItemUpdateFormSnapshot itemUpdateFormSnapshot(String name) {
+        WebElement drawer = openItemDetailDrawer(name);
+        List<WebElement> fields = businessTextInputs(drawer);
+        List<WebElement> variantChoices = drawer.findElements(
+                By.cssSelector("[role='radiogroup'] input[type='radio']"));
+        WebElement upload = drawer.findElement(By.cssSelector("input[type='file']"));
+        return new ItemUpdateFormSnapshot(
+                fields.size(),
+                acceptsImages(upload),
+                upload.getAttribute("multiple") != null,
+                elementText(drawer).contains("Tối đa 5 ảnh"),
+                variantChoices.size(),
+                (int) variantChoices.stream().filter(WebElement::isSelected).count(),
+                variantChoices.stream().noneMatch(WebElement::isEnabled),
+                hasVisibleButton(drawer, "Xóa đồng phục"),
+                hasVisibleButton(drawer, "Hủy"),
+                hasVisibleButton(drawer, "Xác nhận"));
+    }
+
+    /** Cập nhật giá đồng phục rồi mở lại drawer để đối chiếu giá đã lưu. */
+    public boolean updateItemPricePersists(String name, String newPrice) {
+        WebElement drawer = openItemDetailDrawer(name);
+        List<WebElement> fields = itemDetailFields(drawer);
+        fill(fields.get(1), newPrice,
+                "Đổi giá bán đồng phục thành " + newPrice);
+        submitDrawer(drawer, "Xác nhận cập nhật giá bán đồng phục");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return false;
+        }
+        WebElement reopened = openItemDetailDrawer(name);
+        return digits(itemDetailFields(reopened).get(1).getAttribute("value"))
+                .equals(digits(newPrice));
+    }
+
+    /** Chọn ảnh thật, lưu đồng phục và trả số ảnh hợp lệ trước/sau khi mở lại. */
+    public ImageUpdateResult updateItemImagesPersist(
+            String name, List<Path> imageFiles) {
+        WebElement drawer = openItemDetailDrawer(name);
+        int previews = uploadImagesInDrawer(drawer, imageFiles);
+        submitDrawer(drawer, "Xác nhận cập nhật ảnh đồng phục");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new ImageUpdateResult(previews, 0, false);
+        }
+        WebElement reopened = openItemDetailDrawer(name);
+        return new ImageUpdateResult(
+                previews, loadedImageCount(reopened), true);
+    }
+
+    /** Nhập tên nháp rồi Hủy hoặc bấm X và xác minh tên nháp không được lưu. */
+    public boolean discardItemNameUpdate(
+            String name, String draftName, boolean byCloseIcon) {
+        WebElement drawer = openItemDetailDrawer(name);
+        fill(itemDetailFields(drawer).get(0),
+                draftName, "Nhập tên đồng phục nháp " + draftName);
+        if (byCloseIcon) {
+            click(detailCloseButton(drawer),
+                    "Đóng cập nhật đồng phục bằng nút X");
+        } else {
+            click(buttonIn(drawer, "Hủy"), "Hủy cập nhật đồng phục");
+        }
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return false;
+        }
+        return itemExists("Đồng Phục", name)
+                && !itemExists("Đồng Phục", draftName);
+    }
+
+    /** Cập nhật đồng thời tên và giá đồng phục rồi mở lại kiểm tra cả hai. */
+    public ItemMultiUpdateResult updateItemNameAndPricePersists(
+            String oldName, String newName, String newPrice) {
+        WebElement drawer = openItemDetailDrawer(oldName);
+        List<WebElement> fields = itemDetailFields(drawer);
+        fill(fields.get(0), newName,
+                "Đổi tên đồng phục thành " + newName);
+        fill(fields.get(1), newPrice,
+                "Đổi giá đồng phục thành " + newPrice);
+        submitDrawer(drawer,
+                "Xác nhận cập nhật đồng thời tên và giá đồng phục");
+        if (!waitForOverlayToClose(drawer.getAttribute("aria-label"))) {
+            return new ItemMultiUpdateResult(false, false);
+        }
+        if (!itemExists("Đồng Phục", newName)) {
+            return new ItemMultiUpdateResult(false, false);
+        }
+        WebElement reopened = openItemDetailDrawer(newName);
+        boolean pricePersisted = digits(itemDetailFields(reopened).get(1)
+                        .getAttribute("value"))
+                .equals(digits(newPrice));
+        return new ItemMultiUpdateResult(true, pricePersisted);
+    }
+
+    /** Gửi drawer cập nhật đồng phục với tên/giá chủ động thay thế hoặc xóa rỗng. */
+    public ItemUpdateSubmissionSnapshot submitItemUpdateDraft(
+            String existingName, String nameValue, String priceValue) {
+        WebElement drawer = openItemDetailDrawer(existingName);
+        List<WebElement> fields = itemDetailFields(drawer);
+        replaceOrClear(fields.get(0), nameValue,
+                "Nhập tên đồng phục kiểm tra validation cập nhật");
+        replaceOrClear(fields.get(1), priceValue,
+                "Nhập giá đồng phục kiểm tra validation cập nhật");
+        submitDrawer(drawer,
+                "Xác nhận form cập nhật đồng phục không hợp lệ");
+        List<WebElement> opened = driver.findElements(By.cssSelector(
+                        "[aria-label='drawer-Chi tiết đồng phục']"))
+                .stream().filter(WebElement::isDisplayed).toList();
+        return opened.isEmpty()
+                ? new ItemUpdateSubmissionSnapshot(false, "")
+                : new ItemUpdateSubmissionSnapshot(
+                        true, elementText(opened.get(0)));
+    }
+
+    /** Chọn file ảnh nháp nhưng không lưu để kiểm tra giới hạn và định dạng upload. */
+    public ItemImageDraftSnapshot itemImageDraftSnapshot(
+            String name, List<Path> files) {
+        WebElement drawer = openItemDetailDrawer(name);
+        int before = loadedImageCount(drawer);
+        int after = uploadImagesInDrawer(drawer, files);
+        return new ItemImageDraftSnapshot(
+                before, after, elementText(drawer));
+    }
+
+    /** Mở popup xóa, đọc nội dung/nút rồi Hủy để không làm thay đổi dữ liệu. */
+    public DeleteDialogSnapshot inspectDeleteDialogAndCancel(
+            String tab, String name) {
+        open().selectTab(tab);
+        search(name);
+        openItemDetail(name);
+        WebElement drawer = detailDrawer(tab);
+        String deleteLabel = tab.equals("Nhóm Đồng Phục")
+                ? "Xóa nhóm đồng phục" : "Xóa đồng phục";
+        click(buttonIn(drawer, deleteLabel),
+                "Mở popup kiểm tra " + deleteLabel);
+        WebElement dialog = visibleConfirmationDialog();
+        List<WebElement> buttons = dialog.findElements(By.cssSelector("button"))
+                .stream().filter(WebElement::isDisplayed).toList();
+        WebElement cancel = deleteDialogCancelButton(buttons);
+        boolean confirmButton = buttons.stream()
+                .anyMatch(this::isDeleteConfirmButton);
+        boolean closeButton = dialog.findElements(
+                        By.cssSelector("header button svg.rotate-45"))
+                .stream().anyMatch(WebElement::isDisplayed);
+        String content = elementText(dialog);
+        boolean modal = "true".equals(dialog.getAttribute("aria-modal"));
+        boolean dismissable = "true".equals(
+                dialog.getAttribute("data-dismissable"));
+        click(cancel, "Hủy popup sau khi kiểm tra nội dung");
+        wait.until(d -> visibleElements(By.cssSelector("[role='dialog']")).isEmpty());
+        closeOverlay();
+        return new DeleteDialogSnapshot(
+                content,
+                true,
+                confirmButton,
+                closeButton,
+                modal,
+                dismissable,
+                itemExists(tab, name));
+    }
+
+    /** Đóng popup xác nhận xóa bằng nút X ở header và kiểm tra dữ liệu còn nguyên. */
+    public boolean closeDeleteDialogWithHeaderX(String tab, String name) {
+        open().selectTab(tab);
+        search(name);
+        openItemDetail(name);
+        WebElement drawer = detailDrawer(tab);
+        String deleteLabel = tab.equals("Nhóm Đồng Phục")
+                ? "Xóa nhóm đồng phục" : "Xóa đồng phục";
+        click(buttonIn(drawer, deleteLabel),
+                "Mở popup " + deleteLabel);
+        WebElement dialog = visibleConfirmationDialog();
+        WebElement close = dialog.findElements(
+                        By.cssSelector("header button svg.rotate-45"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .map(icon -> icon.findElement(By.xpath("./ancestor::button[1]")))
+                .orElseThrow(() -> new IllegalStateException(
+                        "Popup xóa thiếu nút X ở header."));
+        click(close, "Đóng popup xóa bằng nút X");
+        wait.until(d -> visibleElements(By.cssSelector("[role='dialog']")).isEmpty());
+        closeOverlay();
+        return itemExists(tab, name);
+    }
+
+    /** Xóa thật và đo số kết quả khớp chính xác trước/sau thao tác. */
+    public DeleteCountResult deleteItemAndMeasure(String tab, String name) {
+        open().selectTab(tab);
+        search(name);
+        String expected = TextNormalizer.normalize(name);
+        int before = (int) displayedItemNames().stream()
+                .map(TextNormalizer::normalize)
+                .filter(expected::equals)
+                .count();
+        boolean removed = deleteItem(tab, name);
+        open().selectTab(tab);
+        search(name);
+        int after = (int) displayedItemNames().stream()
+                .map(TextNormalizer::normalize)
+                .filter(expected::equals)
+                .count();
+        return new DeleteCountResult(before, after, removed);
+    }
+
     /** Mở xác nhận xóa rồi bấm Hủy, bảo đảm item vẫn còn. */
     public boolean cancelDeleteItem(String tab, String name) {
         open().selectTab(tab);
@@ -986,15 +1348,9 @@ public final class UniformCatalogPage extends UniformUiPage {
                 ? "Xóa nhóm đồng phục" : "Xóa đồng phục";
         click(buttonIn(drawer, deleteLabel), "Mở xác nhận " + deleteLabel);
         WebElement dialog = visibleConfirmationDialog();
-        WebElement cancel = dialog.findElements(By.cssSelector("button")).stream()
-                .filter(WebElement::isDisplayed)
-                .filter(button -> {
-                    String text = button.getText().trim();
-                    return text.equals("Hủy") || text.equals("Trở về");
-                })
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "Popup xóa thiếu nút Hủy/Trở về."));
+        WebElement cancel = deleteDialogCancelButton(
+                dialog.findElements(By.cssSelector("button")).stream()
+                        .filter(WebElement::isDisplayed).toList());
         click(cancel, "Hủy thao tác xóa");
         wait.until(d -> visibleElements(By.cssSelector("[role='dialog']")).isEmpty());
         closeOverlay();
@@ -1017,11 +1373,7 @@ public final class UniformCatalogPage extends UniformUiPage {
         WebElement dialog = visibleConfirmationDialog();
         WebElement confirm = dialog.findElements(By.cssSelector("button")).stream()
                 .filter(WebElement::isDisplayed)
-                .filter(button -> {
-                    String text = button.getText().trim();
-                    return !text.equals("Hủy")
-                            && (text.contains("Xóa") || text.contains("Xác nhận"));
-                })
+                .filter(this::isDeleteConfirmButton)
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
                         "Popup xóa không có nút xác nhận."));
@@ -1141,6 +1493,147 @@ public final class UniformCatalogPage extends UniformUiPage {
         click(visible(FILTER), "Mở bộ lọc " + selectedTab());
         pause("Hiển thị các tùy chọn bộ lọc");
         return filterPopup();
+    }
+
+    /** Mở đúng drawer chi tiết nhóm từ dữ liệu hiện có. */
+    private WebElement openGroupDetail(String name) {
+        open().selectTab("Nhóm Đồng Phục");
+        search(name);
+        openItemDetail(name);
+        return detailDrawer("Nhóm Đồng Phục");
+    }
+
+    /** Mở đúng drawer chi tiết đồng phục từ dữ liệu hiện có. */
+    private WebElement openItemDetailDrawer(String name) {
+        open().selectTab("Đồng Phục");
+        search(name);
+        openItemDetail(name);
+        return detailDrawer("Đồng Phục");
+    }
+
+    /** Hai input nghiệp vụ đầu drawer lần lượt là Tên đồng phục và Giá bán. */
+    private List<WebElement> itemDetailFields(WebElement drawer) {
+        List<WebElement> fields = businessTextInputs(drawer);
+        if (fields.size() < 2) {
+            throw new IllegalStateException(
+                    "Drawer chi tiết đồng phục thiếu ô Tên hoặc Giá bán.");
+        }
+        return fields;
+    }
+
+    /** Lấy nút X ở phần đầu drawer chi tiết. */
+    private WebElement detailCloseButton(WebElement drawer) {
+        return drawer.findElements(By.cssSelector("button svg.rotate-45"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .map(icon -> icon.findElement(By.xpath("./ancestor::button[1]")))
+                .orElseThrow(() -> new IllegalStateException(
+                        "Drawer chi tiết thiếu nút X."));
+    }
+
+    /** Danh sách combobox React Select đang hiển thị trong drawer. */
+    private List<WebElement> visibleReactComboboxes(WebElement drawer) {
+        return drawer.findElements(By.cssSelector("input[role='combobox']"))
+                .stream()
+                .filter(WebElement::isDisplayed)
+                .toList();
+    }
+
+    /** Nội dung control React Select chứa giá trị đã chọn. */
+    private String reactControlText(WebElement combo) {
+        return combo.findElements(By.xpath(
+                        "./ancestor::div[contains(@class,'control')][1]"))
+                .stream()
+                .map(WebElement::getText)
+                .map(String::trim)
+                .findFirst()
+                .orElse("");
+    }
+
+    /** Chọn option khác giá trị hiện tại; trả rỗng nếu chỉ có một lựa chọn. */
+    private String selectDifferentReactOption(
+            WebElement combo, String currentText, String step) {
+        click(combo, step);
+        List<WebElement> options;
+        try {
+            options = new org.openqa.selenium.support.ui.WebDriverWait(
+                    driver, Duration.ofSeconds(5))
+                    .until(d -> {
+                        List<WebElement> visibleOptions =
+                                d.findElements(By.cssSelector("[role='option']"))
+                                        .stream()
+                                        .filter(WebElement::isDisplayed)
+                                        .toList();
+                        return visibleOptions.isEmpty() ? null : visibleOptions;
+                    });
+        } catch (TimeoutException noOptions) {
+            return "";
+        }
+        WebElement different = options.stream()
+                .filter(option -> !option.getText().isBlank())
+                .filter(option -> !currentText.contains(option.getText().trim()))
+                .findFirst()
+                .orElse(null);
+        if (different == null) {
+            combo.sendKeys(Keys.ESCAPE);
+            return "";
+        }
+        String selected = different.getText().trim();
+        click(different, step + " - " + selected);
+        settle(400);
+        pause("Quan sát giá trị mới " + selected);
+        return selected;
+    }
+
+    /** Upload file vào input ảnh của drawer bất kỳ và trả số preview hợp lệ. */
+    private int uploadImagesInDrawer(WebElement drawer, List<Path> files) {
+        WebElement input = drawer.findElement(By.cssSelector("input[type='file']"));
+        String inputId = input.getAttribute("id");
+        WebElement surface = inputId == null || inputId.isBlank()
+                ? null
+                : drawer.findElements(By.cssSelector(
+                                "label[for='" + inputId + "']"))
+                        .stream()
+                        .filter(WebElement::isDisplayed)
+                        .findFirst()
+                        .orElse(null);
+        if (surface != null) {
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].scrollIntoView({behavior:'smooth',block:'center'});",
+                    surface);
+            highlight(surface);
+            pause("Quan sát vùng chọn ảnh cập nhật");
+        }
+        String paths = files.stream()
+                .map(path -> path.toAbsolutePath().normalize().toString())
+                .reduce((left, right) -> left + "\n" + right)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Danh sách ảnh cập nhật rỗng."));
+        input.sendKeys(paths);
+        settle(800);
+        pause("Quan sát ảnh cập nhật đã chọn");
+        return loadedImageCount(drawer);
+    }
+
+    /** Thay toàn bộ giá trị input hoặc xóa rỗng để kiểm tra validation. */
+    private void replaceOrClear(WebElement input, String value, String step) {
+        if (value != null && !value.isEmpty()) {
+            fill(input, value, step);
+            return;
+        }
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block:'center'});",
+                input);
+        highlight(input);
+        pause(step);
+        input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        pause("Quan sát trường đã được xóa rỗng");
+    }
+
+    /** Chỉ giữ chữ số để so sánh giá có hoặc không có dấu phân cách. */
+    private static String digits(String value) {
+        return value == null ? "" : value.replaceAll("\\D", "");
     }
 
     private WebElement groupCreateDrawer() {
@@ -1407,6 +1900,25 @@ public final class UniformCatalogPage extends UniformUiPage {
                 .orElse(null));
     }
 
+    /** Tìm nút Hủy/Trở về trong popup xác nhận xóa. */
+    private WebElement deleteDialogCancelButton(List<WebElement> buttons) {
+        return buttons.stream()
+                .filter(button -> {
+                    String text = button.getText().trim();
+                    return text.equals("Hủy") || text.equals("Trở về");
+                })
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Popup xóa thiếu nút Hủy/Trở về."));
+    }
+
+    /** Nhận diện nút xác nhận xóa, loại trừ nút Hủy. */
+    private boolean isDeleteConfirmButton(WebElement button) {
+        String text = button.getText().trim();
+        return !text.equals("Hủy") && !text.equals("Trở về")
+                && (text.contains("Xóa") || text.contains("Xác nhận"));
+    }
+
     private WebElement outOfStockToggle(WebElement drawer) {
         return drawer.findElements(By.xpath(
                         ".//*[normalize-space()='Trạng thái hết hàng']"
@@ -1512,5 +2024,94 @@ public final class UniformCatalogPage extends UniformUiPage {
     public record ItemVariantCreationResult(
             boolean created,
             boolean detailContainsExpectedValues) {
+    }
+
+    /** Cấu trúc điều khiển của drawer cập nhật nhóm đồng phục. */
+    public record GroupUpdateFormSnapshot(
+            int businessTextInputCount,
+            int comboboxCount,
+            boolean imageUpload,
+            boolean multipleUpload,
+            boolean outOfStockToggle,
+            boolean deleteButton,
+            boolean cancelButton,
+            boolean confirmButton) {
+    }
+
+    /** Kết quả cập nhật một lựa chọn React Select. */
+    public record SelectionUpdateResult(
+            boolean alternativeAvailable,
+            boolean persisted,
+            String selectedValue) {
+    }
+
+    /** Kết quả thay ảnh và số ảnh hợp lệ trước/sau khi lưu. */
+    public record ImageUpdateResult(
+            int previewCount,
+            int persistedImageCount,
+            boolean submitted) {
+    }
+
+    /** Kết quả cập nhật đồng thời tên và giá nhóm. */
+    public record GroupMultiUpdateResult(
+            boolean namePersisted,
+            boolean pricePersisted) {
+    }
+
+    /** Trạng thái drawer sau khi gửi dữ liệu cập nhật nhóm không hợp lệ. */
+    public record GroupUpdateSubmissionSnapshot(
+            boolean drawerOpen,
+            String content) {
+    }
+
+    /** Cấu trúc điều khiển của drawer cập nhật đồng phục. */
+    public record ItemUpdateFormSnapshot(
+            int businessTextInputCount,
+            boolean imageUpload,
+            boolean multipleUpload,
+            boolean fiveImageHint,
+            int variantChoiceCount,
+            int selectedVariantChoiceCount,
+            boolean allVariantChoicesDisabled,
+            boolean deleteButton,
+            boolean cancelButton,
+            boolean confirmButton) {
+    }
+
+    /** Kết quả cập nhật đồng thời tên và giá đồng phục. */
+    public record ItemMultiUpdateResult(
+            boolean namePersisted,
+            boolean pricePersisted) {
+    }
+
+    /** Trạng thái drawer sau khi gửi dữ liệu cập nhật đồng phục không hợp lệ. */
+    public record ItemUpdateSubmissionSnapshot(
+            boolean drawerOpen,
+            String content) {
+    }
+
+    /** Số ảnh hợp lệ trước và sau khi chọn file nháp trong drawer. */
+    public record ItemImageDraftSnapshot(
+            int beforeLoadedImageCount,
+            int afterLoadedImageCount,
+            String content) {
+    }
+
+    /** Nội dung và điều khiển quan sát được trong popup xác nhận xóa. */
+    public record DeleteDialogSnapshot(
+            String content,
+            boolean cancelButton,
+            boolean confirmButton,
+            boolean closeButton,
+            boolean modal,
+            boolean dismissable,
+            boolean itemStillExists) {
+    }
+
+    /** Số bản ghi khớp tên chính xác trước/sau khi xóa. */
+    public record DeleteCountResult(
+            int beforeCount,
+            int afterCount,
+            boolean removed) {
     }
 }

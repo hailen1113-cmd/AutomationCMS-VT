@@ -10,7 +10,7 @@
     </listeners>
     <test name="Xem anh va video tren tung tab">
         <classes>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementMediaTest">
+            <class name="com.vuatho.tests.workerpost.MediaTest">
                 <methods>
                     <include name="imageCanBeViewedInEveryStatus"/>
                     <include name="videoCanBeViewedInEveryStatus"/>

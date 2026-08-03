@@ -12,10 +12,10 @@
             </run>
         </groups>
         <classes>
-            <class name="com.vuatho.tests.workertestmanagement.WorkerTestManagementOverviewTest"/>
-            <class name="com.vuatho.tests.workertestmanagement.WorkerTestManagementSearchFilterTest"/>
-            <class name="com.vuatho.tests.workertestmanagement.WorkerTestManagementPaginationTest"/>
-            <class name="com.vuatho.tests.workertestmanagement.WorkerTestManagementDetailTest"/>
+            <class name="com.vuatho.tests.workertestmanagement.OverviewTest"/>
+            <class name="com.vuatho.tests.workertestmanagement.SearchFilterTest"/>
+            <class name="com.vuatho.tests.workertestmanagement.PaginationTest"/>
+            <class name="com.vuatho.tests.workertestmanagement.DetailTest"/>
         </classes>
     </test>
 </suite>

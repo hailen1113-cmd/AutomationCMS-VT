@@ -12,12 +12,12 @@
             </run>
         </groups>
         <classes>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementOverviewTest"/>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementNavigationTest"/>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementPaginationTest"/>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementMediaTest"/>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementResponsiveTest"/>
-            <class name="com.vuatho.tests.workerpost.WorkerPostManagementApprovalRejectionTest"/>
+            <class name="com.vuatho.tests.workerpost.OverviewTest"/>
+            <class name="com.vuatho.tests.workerpost.NavigationTest"/>
+            <class name="com.vuatho.tests.workerpost.PaginationTest"/>
+            <class name="com.vuatho.tests.workerpost.MediaTest"/>
+            <class name="com.vuatho.tests.workerpost.ResponsiveTest"/>
+            <class name="com.vuatho.tests.workerpost.ApprovalRejectionTest"/>
         </classes>
     </test>
 </suite>

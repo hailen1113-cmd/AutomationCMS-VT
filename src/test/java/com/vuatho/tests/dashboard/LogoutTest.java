@@ -1,0 +1,42 @@
+package com.vuatho.tests.dashboard;
+
+import com.vuatho.testcases.DashboardTestCases;
+
+import com.vuatho.support.dashboard.DashboardTestSupport;
+
+import com.vuatho.core.TestNgRunner;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+/**
+ * Xác nhận người dùng đăng xuất khỏi Dashboard và phiên xác thực không còn hiệu lực.
+ */
+public class LogoutTest extends DashboardTestSupport {
+    public static void main(String[] args) {
+        TestNgRunner.run(LogoutTest.class,
+                "Bo test logout Dashboard ERP",
+                "Kiem tra logout va chan truy cap sau logout");
+    }
+
+    /**
+     * Thực thi test “CMS-DASH-010: Logout thanh cong” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
+    @Test(priority = 1, description = DashboardTestCases.DASH_016)
+    public void logoutSuccessfully() {
+        skipUnlessLogoutTestsAreEnabled();
+        dashboard.logout();
+        Assert.assertTrue(dashboard.isLoginVisible(), "Logout khong quay ve man hinh login.");
+    }
+
+    /**
+     * Thực thi test “CMS-DASH-011: Khong truy cap duoc Dashboard sau logout” và xác nhận kết quả theo yêu cầu nghiệp vụ.
+     */
+    @Test(priority = 2, dependsOnMethods = "logoutSuccessfully",
+            description = DashboardTestCases.DASH_017)
+    public void dashboardCannotBeAccessedAfterLogout() {
+        skipUnlessLogoutTestsAreEnabled();
+        dashboard.open();
+        Assert.assertFalse(dashboard.hasDashboardMarker(), "Van truy cap duoc Dashboard sau logout.");
+        Assert.assertTrue(dashboard.isLoginVisible(), "Khong chuyen ve man hinh login.");
+    }
+}

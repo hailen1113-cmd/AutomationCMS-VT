@@ -40,18 +40,25 @@ public final class TestConfig {
 
     /**
      * Thực hiện xử lý headless trong luồng kiểm thử.
+     *
+     * <p>Mặc định local phải mở Chrome thật để tester quan sát được thao tác khi
+     * chạy trực tiếp {@code @Test} từ VS Code. CI vẫn có thể ghi đè bằng
+     * {@code -Dheadless=true} hoặc biến môi trường {@code HEADLESS=true}.</p>
      * @return kết quả headless sau khi xử lý
      */
     public static boolean headless() {
-        return Boolean.parseBoolean(value("headless", "HEADLESS", "true"));
+        return Boolean.parseBoolean(value("headless", "HEADLESS", "false"));
     }
 
     /**
      * Thực hiện xử lý interactive trong luồng kiểm thử.
+     *
+     * <p>Mặc định bật cho local để các flow đăng nhập và thao tác giao diện hoạt
+     * động giống khi chạy qua {@link com.vuatho.core.TestNgRunner}.</p>
      * @return kết quả interactive sau khi xử lý
      */
     public static boolean interactive() {
-        return Boolean.parseBoolean(value("interactive", "INTERACTIVE", "false"));
+        return Boolean.parseBoolean(value("interactive", "INTERACTIVE", "true"));
     }
 
     /**

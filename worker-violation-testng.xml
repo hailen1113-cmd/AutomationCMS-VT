@@ -7,11 +7,11 @@
     </listeners>
     <test name="Day du testcase read-only Quan li tho vi pham">
         <classes>
-            <class name="com.vuatho.tests.workerviolation.WorkerViolationOverviewTest"/>
-            <class name="com.vuatho.tests.workerviolation.WorkerViolationStatisticsTest"/>
-            <class name="com.vuatho.tests.workerviolation.WorkerViolationSearchFilterTest"/>
-            <class name="com.vuatho.tests.workerviolation.WorkerViolationTablePaginationTest"/>
-            <class name="com.vuatho.tests.workerviolation.WorkerViolationDetailStateTest"/>
+            <class name="com.vuatho.tests.workerviolation.OverviewTest"/>
+            <class name="com.vuatho.tests.workerviolation.StatisticsTest"/>
+            <class name="com.vuatho.tests.workerviolation.SearchFilterTest"/>
+            <class name="com.vuatho.tests.workerviolation.TablePaginationTest"/>
+            <class name="com.vuatho.tests.workerviolation.DetailStateTest"/>
         </classes>
     </test>
 </suite>

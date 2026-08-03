@@ -12,16 +12,16 @@
             </run>
         </groups>
         <classes>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderOverviewTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderSearchFilterTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderViewModeTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderExportTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderStatusStatisticsTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderWarrantyStatisticsTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderPaginationTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderDetailTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderAdvancePopupTest"/>
-            <class name="com.vuatho.tests.customerworkerorder.CustomerWorkerOrderWorkflowTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.OverviewTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.SearchFilterTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.ViewModeTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.ExportTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.StatusStatisticsTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.WarrantyStatisticsTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.PaginationTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.DetailTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.AdvancePopupTest"/>
+            <class name="com.vuatho.tests.customerworkerorder.WorkflowTest"/>
         </classes>
     </test>
 </suite>
