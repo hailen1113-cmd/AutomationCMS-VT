@@ -50,6 +50,11 @@ abstract class UniformUiPage {
         return TextNormalizer.normalize(mainText());
     }
 
+    /** Chuẩn hóa một chuỗi giao diện bất kỳ theo cùng quy tắc với nội dung vùng main. */
+    protected String normalizeText(String value) {
+        return TextNormalizer.normalize(value);
+    }
+
     /** Tìm element đang hiển thị đầu tiên. */
     protected WebElement visible(By locator) {
         return wait.until(d -> d.findElements(locator).stream()

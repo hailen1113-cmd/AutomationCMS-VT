@@ -60,7 +60,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.vuatho.tests.conditions.TestCaseIdFilter</value>
+                            <value>com.vuatho.tests.conditions.TestCaseIdFilter,com.vuatho.reporting.ConsoleTestListener</value>
                         </property>
                     </properties>
                     <suiteXmlFiles>
