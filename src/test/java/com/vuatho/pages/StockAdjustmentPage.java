@@ -104,6 +104,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public DuplicateLotSnapshot selectedLotIsExcludedFromSuggestions() {
         openForm();
         LotSnapshot selected = addAvailableLot(true);
+        closeLotSuggestions();
         WebElement combo = lotCombo();
         fill(combo, selected.code(), "Tìm lại lô đã thêm " + selected.code());
         settle(800);
@@ -138,7 +139,9 @@ public class StockAdjustmentPage extends UniformUiPage {
         if (!dialogVisible()) {
             openForm();
         }
-        return addAvailableLot(true);
+        LotSnapshot selected = addAvailableLot(true);
+        closeLotSuggestions();
+        return selected;
     }
 
     /** Thêm hai lô khác nhau vào cùng form. */
@@ -146,6 +149,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         openForm();
         LotSnapshot first = addAvailableLot(true);
         LotSnapshot second = addAvailableLot(false);
+        closeLotSuggestions();
         return new MultiLotSnapshot(first, second, lotRows().size(), changedCounter());
     }
 
@@ -179,7 +183,6 @@ public class StockAdjustmentPage extends UniformUiPage {
             wait.until(d -> !rowElementsForCode(code).isEmpty());
             WebElement row = rowForCode(code);
             int renderedCurrent = number(CURRENT_STOCK, elementText(row));
-            observeLotRow(row, "Quan sát lô vừa thêm " + code);
             lots.add(new LotSnapshot(code,
                     renderedCurrent >= 0 ? renderedCurrent : current,
                     actualInput(code).getAttribute("value"), elementText(row)));
@@ -187,6 +190,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         if (lots.isEmpty()) {
             throw new IllegalStateException("Không có lô để kiểm tra danh sách dài.");
         }
+        closeLotSuggestions();
         WebElement lastRow = rowForCode(lots.get(lots.size() - 1).code());
         observeLotRow(lastRow,
                 "Cuộn đến lô cuối danh sách dài " + lots.get(lots.size() - 1).code());
@@ -199,6 +203,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         LotSnapshot first = addAvailableLot(false);
         LotSnapshot middle = addAvailableLot(false);
         LotSnapshot last = addAvailableLot(false);
+        closeLotSuggestions();
         WebElement remove = rowForCode(middle.code()).findElement(
                 By.cssSelector("button[title='Xoá lô này']"));
         click(remove, "Xóa lô giữa danh sách " + middle.code());
@@ -215,6 +220,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public RemoveSnapshot addAndRemoveLot() {
         openForm();
         LotSnapshot selected = addAvailableLot(true);
+        closeLotSuggestions();
         WebElement row = rowForCode(selected.code());
         WebElement remove = row.findElement(By.cssSelector("button[title='Xoá lô này']"));
         click(remove, "Xóa lô " + selected.code() + " khỏi phiếu điều chỉnh");
@@ -228,6 +234,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public QuantitySnapshot enterQuantityDelta(int delta) {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         int actual = lot.currentStock() + delta;
         setActual(lot.code(), Integer.toString(actual));
         return quantitySnapshot(lot.code(), lot.currentStock(), actual);
@@ -237,6 +244,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public QuantitySnapshot enterUnchangedQuantity() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         setActual(lot.code(), Integer.toString(lot.currentStock()));
         return quantitySnapshot(lot.code(), lot.currentStock(), lot.currentStock());
     }
@@ -245,6 +253,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public List<InvalidQuantitySnapshot> invalidQuantityFormats() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         List<InvalidQuantitySnapshot> results = new ArrayList<>();
         for (String value : List.of("", "abc", "-1", "1.5")) {
             setActual(lot.code(), value);
@@ -260,6 +269,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         openForm();
         LotSnapshot changedLot = addAvailableLot(true);
         LotSnapshot unchangedLot = addAvailableLot(false);
+        closeLotSuggestions();
         setActual(changedLot.code(), Integer.toString(changedLot.currentStock() + 1));
         boolean enabledWithMissingLot = confirmButton().isEnabled();
         Counter counterBeforeCompletion = changedCounter();
@@ -274,6 +284,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         openForm();
         LotSnapshot zeroLot = addLotWithExactStock(0);
         LotSnapshot changedLot = addAvailableLot(true);
+        closeLotSuggestions();
         setActual(zeroLot.code(), "0");
         boolean enabledBeforeAllLots = confirmButton().isEnabled();
         setActual(changedLot.code(), Integer.toString(changedLot.currentStock() + 1));
@@ -286,14 +297,66 @@ public class StockAdjustmentPage extends UniformUiPage {
     public QuantitySnapshot reducePositiveStockToZero() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         setActual(lot.code(), "0");
         return quantitySnapshot(lot.code(), lot.currentStock(), 0);
+    }
+
+    /** Nhập số tồn thực tế có dấu phân tách hàng nghìn và đọc chênh lệch hiển thị. */
+    public FormattedQuantitySnapshot acceptsThousandsSeparatedActualQuantity() {
+        openForm();
+        LotSnapshot lot = addAvailableLot(false);
+        closeLotSuggestions();
+        String value = "32,123";
+        setActual(lot.code(), value);
+        return new FormattedQuantitySnapshot(lot.code(), lot.currentStock(), value,
+                actualInput(lot.code()).getAttribute("value"), elementText(rowForCode(lot.code())));
+    }
+
+    /** Xóa số thực tế ở một lô đã hoàn tất rồi nhập lại để kiểm tra khóa/mở xác nhận. */
+    public CompletionRecoverySnapshot clearingAndRestoringActualQuantity() {
+        openForm();
+        LotSnapshot changedLot = addAvailableLot(true);
+        LotSnapshot unchangedLot = addAvailableLot(false);
+        closeLotSuggestions();
+        setActual(changedLot.code(), Integer.toString(changedLot.currentStock() + 1));
+        setActual(unchangedLot.code(), Integer.toString(unchangedLot.currentStock()));
+        boolean enabledWhenComplete = confirmButton().isEnabled();
+        setActual(unchangedLot.code(), "");
+        boolean disabledAfterClear = !confirmButton().isEnabled();
+        setActual(unchangedLot.code(), Integer.toString(unchangedLot.currentStock()));
+        return new CompletionRecoverySnapshot(changedLot.code(), unchangedLot.code(),
+                enabledWhenComplete, disabledAfterClear, confirmButton().isEnabled());
+    }
+
+    /** Nhập lần lượt ngày quá khứ và tương lai, không submit dữ liệu. */
+    public DateRangeSnapshot acceptsPastAndFutureDates() {
+        openForm();
+        WebElement date = dialog().findElement(By.cssSelector("input[aria-label='Ngày điều chỉnh']"));
+        LocalDate past = LocalDate.now().minusDays(1);
+        LocalDate future = LocalDate.now().plusDays(1);
+        setDateValue(date, past);
+        settle(300);
+        String actualPast = date.getAttribute("value");
+        setDateValue(date, future);
+        settle(300);
+        return new DateRangeSnapshot(past.toString(), actualPast, future.toString(), date.getAttribute("value"));
+    }
+
+    /** Kiểm tra lý do dài có Unicode và ký tự đặc biệt không bị mất dữ liệu. */
+    public LongReasonSnapshot acceptsLongUnicodeReason() {
+        openForm();
+        String reason = "Kiểm kê thực tế — tiếng Việt, 中文, !@#$%^&*() ".repeat(40);
+        WebElement input = dialog().findElement(By.cssSelector("input[aria-label='Lý do điều chỉnh']"));
+        fill(input, reason, "Nhập lý do điều chỉnh dài có Unicode");
+        return new LongReasonSnapshot(reason, input.getAttribute("value"));
     }
 
     /** Xóa ngày sau khi đã tạo một thay đổi hợp lệ. */
     public RequiredDateSnapshot clearRequiredDateAndSubmit() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         setActual(lot.code(), Integer.toString(lot.currentStock() + 1));
         WebElement date = dialog().findElement(By.cssSelector(
                 "input[aria-label='Ngày điều chỉnh']"));
@@ -326,6 +389,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public OptionalReasonSnapshot leaveReasonBlank() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         setActual(lot.code(), Integer.toString(lot.currentStock() + 1));
         String reason = dialog().findElement(By.cssSelector(
                 "input[aria-label='Lý do điều chỉnh']")).getAttribute("value");
@@ -337,6 +401,7 @@ public class StockAdjustmentPage extends UniformUiPage {
     public SubmissionSnapshot submitIncreaseAndRestore() {
         openForm();
         LotSnapshot lot = addAvailableLot(true);
+        closeLotSuggestions();
         int increased = lot.currentStock() + 1;
         submitCurrentForm(lot.code(), increased,
                 "Automation kiểm tra điều chỉnh tăng tồn");
@@ -344,6 +409,7 @@ public class StockAdjustmentPage extends UniformUiPage {
 
         openForm();
         LotSnapshot restoreLot = addLotByCode(lot.code());
+        closeLotSuggestions();
         submitCurrentForm(restoreLot.code(), lot.currentStock(),
                 "Automation khôi phục tồn sau kiểm tra");
         int stockAfterRestore = currentStock(lot.code());
@@ -359,6 +425,7 @@ public class StockAdjustmentPage extends UniformUiPage {
         openForm();
         LotSnapshot increasedLot = addAvailableLot(true);
         LotSnapshot decreasedLot = addAvailableLot(true);
+        closeLotSuggestions();
         int increasedTarget = increasedLot.currentStock() + 1;
         int decreasedTarget = decreasedLot.currentStock() - 1;
         setActual(increasedLot.code(), Integer.toString(increasedTarget));
@@ -425,12 +492,16 @@ public class StockAdjustmentPage extends UniformUiPage {
                 "input[aria-label='Ngày điều chỉnh']"));
         highlight(date);
         pause("Chọn ngày điều chỉnh thủ công " + targetDate);
-        date.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
-        date.sendKeys(targetDate.format(DateTimeFormatter.ofPattern("MMddyyyy")));
+        setDateValue(date, targetDate);
         settle(300);
         if (!targetDate.toString().equals(date.getAttribute("value"))) {
             throw new IllegalStateException("Không nhập được ngày điều chỉnh thủ công.");
         }
+    }
+
+    private void setDateValue(WebElement date, LocalDate targetDate) {
+        date.clear();
+        date.sendKeys(targetDate.format(DateTimeFormatter.ofPattern("MMddyyyy")));
     }
 
     private String adjustmentVoucherText(String firstCode, String secondCode) {
@@ -554,6 +625,21 @@ public class StockAdjustmentPage extends UniformUiPage {
                         return false;
                     }
                 }).orElse(false));
+    }
+
+    /**
+     * Đóng listbox sau khi đã chọn xong một lô để phần danh sách lô đã chọn
+     * không bị che trước thao tác tiếp theo (nhập số, xóa hoặc cuộn). Lần thêm
+     * kế tiếp sẽ tự mở lại listbox khi nhập vào ô tìm kiếm.
+     */
+    private void closeLotSuggestions() {
+        WebElement combo = lotCombo();
+        if (!"true".equals(combo.getAttribute("aria-expanded"))) {
+            return;
+        }
+        combo.sendKeys(Keys.ESCAPE);
+        wait.until(d -> !"true".equals(lotCombo().getAttribute("aria-expanded")));
+        pause("Đóng danh sách gợi ý lô trước thao tác tiếp theo");
     }
 
     /** Cuộn dòng lô vào giữa popup, bỏ highlight cũ và giữ màn hình 500 ms. */
@@ -683,8 +769,21 @@ public class StockAdjustmentPage extends UniformUiPage {
 
     public record QuantitySnapshot(String code, int currentStock, int expectedActual,
                                    String actualValue, String rowText, Counter counter,
-                                   boolean confirmEnabled) {
+                               boolean confirmEnabled) {
     }
+
+    public record FormattedQuantitySnapshot(String code, int currentStock, String expectedValue,
+                                            String actualValue, String rowText) { }
+
+    public record CompletionRecoverySnapshot(String changedCode, String unchangedCode,
+                                             boolean enabledWhenComplete,
+                                             boolean disabledAfterClear,
+                                             boolean enabledAfterRestore) { }
+
+    public record DateRangeSnapshot(String expectedPast, String actualPast,
+                                    String expectedFuture, String actualFuture) { }
+
+    public record LongReasonSnapshot(String expectedReason, String actualReason) { }
 
     public record InvalidQuantitySnapshot(String attemptedValue, String actualValue,
                                           boolean confirmEnabled) {

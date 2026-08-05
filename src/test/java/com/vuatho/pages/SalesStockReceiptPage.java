@@ -433,7 +433,7 @@ public final class SalesStockReceiptPage extends UniformUiPage {
     public record ReceiptRow(String code, String type, String normalizedType,
             List<String> lotCodes, List<Integer> quantities, String date, String time,
             String operator, String text) {
-        static ReceiptRow empty() {
+        public static ReceiptRow empty() {
             return new ReceiptRow("", "", "", List.of(), List.of(), "", "", "", "");
         }
     }
