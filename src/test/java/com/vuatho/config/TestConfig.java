@@ -77,6 +77,18 @@ public final class TestConfig {
         return Boolean.parseBoolean(value("capture.screenshots", "CAPTURE_SCREENSHOTS", "false"));
     }
 
+    /** Thời gian giữ highlight mỗi thao tác khi chạy Chrome có giao diện. */
+    public static long observationDelayMillis() {
+        String configured = value("observation.delay.ms", "OBSERVATION_DELAY_MS", "250");
+        try {
+            return Math.max(0L, Long.parseLong(configured));
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(
+                    "observation.delay.ms must be a whole number of milliseconds, but was: " + configured,
+                    exception);
+        }
+    }
+
     /**
      * Thực hiện xử lý keep browser open trong luồng kiểm thử.
      * @return kết quả keep browser open sau khi xử lý

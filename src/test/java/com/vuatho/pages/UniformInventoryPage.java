@@ -10,7 +10,9 @@ import org.openqa.selenium.WebElement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,6 +131,21 @@ public class UniformInventoryPage extends UniformUiPage {
         openStock();
         observeGridTable("Quan sát toàn bộ dữ liệu tồn kho để đối chiếu");
         return readAllStockRows();
+    }
+
+    /** Đọc tồn nhiều lô Kho tổng trong một lần tải trang, không chạy bước quan sát bảng. */
+    public Map<String, Integer> stockValues(List<String> codes) {
+        openStock();
+        Map<String, Integer> values = new LinkedHashMap<>();
+        for (String code : codes) {
+            values.put(code, -1);
+        }
+        for (FullStockRow row : readAllStockRows()) {
+            if (values.containsKey(row.code())) {
+                values.put(row.code(), row.stock());
+            }
+        }
+        return values;
     }
 
     private List<FullStockRow> readAllStockRows() {

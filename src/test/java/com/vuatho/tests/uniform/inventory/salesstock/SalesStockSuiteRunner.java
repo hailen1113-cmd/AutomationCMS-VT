@@ -21,6 +21,9 @@ public final class SalesStockSuiteRunner {
                 com.vuatho.tests.uniform.inventory.salesstock.receipts.list.SalesReceiptPaginationTest.class,
                 com.vuatho.tests.uniform.inventory.salesstock.receipts.staffexport.StaffExportFormTest.class,
                 com.vuatho.tests.uniform.inventory.salesstock.receipts.staffexport.StaffExportValidationTest.class,
-                com.vuatho.tests.uniform.inventory.salesstock.receipts.staffexport.StaffExportSubmissionTest.class);
+                com.vuatho.tests.uniform.inventory.salesstock.receipts.staffexport.StaffExportSubmissionTest.class,
+                com.vuatho.tests.uniform.inventory.salesstock.receipts.stockimport.SalesStockImportFormTest.class,
+                com.vuatho.tests.uniform.inventory.salesstock.receipts.stockimport.SalesStockImportValidationTest.class,
+                com.vuatho.tests.uniform.inventory.salesstock.receipts.stockimport.SalesStockImportSubmissionTest.class);
     }
 }

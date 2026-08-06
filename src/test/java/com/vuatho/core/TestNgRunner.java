@@ -53,6 +53,8 @@ public final class TestNgRunner {
         // Mặc định mở Chrome thật để dễ quan sát, nhưng vẫn quit sau test cuối cùng.
         // Có thể ghi đè từ Maven/IDE bằng -Dheadless, -Dinteractive hoặc -Dkeep.browser.open.
         ConsoleEncoding.showOnlyTestReport();
+        System.out.println("STARTING: " + suiteName + " - " + testName
+                + " (" + testClasses.length + " class)");
         System.setProperty("headless", System.getProperty("headless", "false"));
         System.setProperty("interactive", System.getProperty("interactive", "true"));
         System.setProperty("pause.on.failure", System.getProperty("pause.on.failure", "false"));

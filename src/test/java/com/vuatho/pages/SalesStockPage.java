@@ -8,7 +8,9 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,6 +88,22 @@ public final class SalesStockPage extends UniformInventoryPage {
         openStock();
         observeGridTable("Quan sát các dòng dữ liệu dùng để đối chiếu");
         return readSalesGridRows();
+    }
+
+    /** Đọc tồn nhiều lô trong một lần tải trang, không scroll/highlight phục vụ đối chiếu kỹ thuật. */
+    public Map<String, Integer> salesStockValues(List<String> codes) {
+        openStock();
+        Map<String, Integer> values = new LinkedHashMap<>();
+        boolean includeAll = codes.isEmpty();
+        for (String code : codes) {
+            values.put(code, 0);
+        }
+        for (SalesGridRow row : readSalesGridRows()) {
+            if (includeAll || values.containsKey(row.code())) {
+                values.put(row.code(), row.stock());
+            }
+        }
+        return values;
     }
 
     private List<SalesGridRow> readSalesGridRows() {

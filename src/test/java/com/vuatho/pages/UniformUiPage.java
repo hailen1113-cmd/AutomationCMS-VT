@@ -19,7 +19,7 @@ import java.util.List;
  * Các thao tác Selenium dùng chung của ba màn hình thuộc menu Đồng phục.
  *
  * <p>Mọi thao tác click/nhập đều cuộn element vào giữa màn hình và giữ lại
- * 500 ms khi chạy có giao diện để người chạy quan sát được hành động.</p>
+ * một khoảng ngắn có cấu hình khi chạy có giao diện để người chạy quan sát được hành động.</p>
  */
 abstract class UniformUiPage {
     protected final WebDriver driver;
@@ -146,13 +146,13 @@ abstract class UniformUiPage {
         }
     }
 
-    /** Giữ màn hình 500 ms ở chế độ có giao diện để quan sát từng thao tác. */
+    /** Giữ màn hình theo observation.delay.ms ở chế độ có giao diện để quan sát từng thao tác. */
     protected void pause(String step) {
         if (TestConfig.headless()) {
             return;
         }
         try {
-            Thread.sleep(500);
+            Thread.sleep(TestConfig.observationDelayMillis());
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }

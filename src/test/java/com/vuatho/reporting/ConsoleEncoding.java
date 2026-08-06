@@ -106,6 +106,7 @@ public final class ConsoleEncoding {
 
         private boolean isReportLine(String text) {
             return text.startsWith("=")
+                    || text.startsWith("STARTING:")
                     || text.startsWith("RUNNING:")
                     || text.startsWith("Scenario:")
                     || text.startsWith("Class   :")

@@ -2,6 +2,7 @@ package com.vuatho.core;
 
 import com.vuatho.config.TestConfig;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -44,6 +45,9 @@ public final class DriverFactory {
         }
 
         ChromeOptions options = new ChromeOptions();
+        // ERP là SPA và mọi Page Object đều có explicit wait cho main/dữ liệu.
+        // Không chờ toàn bộ ảnh/font/tài nguyên phụ sau mỗi lần chuyển route.
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
         System.out.println("Su dung Chrome profile luu session: " + profileDirectory);
         options.addArguments("--user-data-dir=" + profileDirectory);
         options.addArguments("--profile-directory=Default");

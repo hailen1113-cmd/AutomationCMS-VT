@@ -156,6 +156,18 @@ public final class SalesStockReceiptPage extends UniformUiPage {
         return activateFilter(name);
     }
 
+    /** Lọc và trả dữ liệu phục vụ đối chiếu kỹ thuật, không cuộn toàn bộ danh sách để quan sát. */
+    public List<ReceiptRow> filteredRowsFast(String name) {
+        openReceipts();
+        WebElement button = filterButton(name);
+        if (!selected(button)) {
+            click(button, "Lọc nhanh phiếu theo " + name);
+            waitForResult();
+            wait.until(d -> selected(filterButton(name)));
+        }
+        return rows();
+    }
+
     /** Chuyển qua tất cả bộ lọc rồi quay lại Tất cả. */
     public FilterSequenceSnapshot cycleFiltersAndRestoreAll() {
         openReceipts();

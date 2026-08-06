@@ -1,0 +1,82 @@
+package com.vuatho.testcases;
+
+/** Danh mục testcase cố định của màn hình Lịch sử giao dịch. */
+public final class TransactionHistoryTestCases {
+    public static final String TRANSACTION_ALL_001 = "TRANSACTION-ALL-001 - Mở đúng tab Tất cả";
+    public static final String TRANSACTION_ALL_002 = "TRANSACTION-ALL-002 - Hiển thị đầy đủ các nhóm giao dịch";
+    public static final String TRANSACTION_ALL_003 = "TRANSACTION-ALL-003 - Hiển thị đầy đủ bộ lọc và xuất Excel";
+    public static final String TRANSACTION_ALL_004 = "TRANSACTION-ALL-004 - Bảng Tất cả hiển thị đúng các cột";
+    public static final String TRANSACTION_ALL_005 = "TRANSACTION-ALL-005 - Dòng giao dịch có định dạng hợp lệ";
+    public static final String TRANSACTION_ALL_006 = "TRANSACTION-ALL-006 - Mỗi trang hiển thị tối đa hai mươi giao dịch";
+    public static final String TRANSACTION_ALL_007 = "TRANSACTION-ALL-007 - Hiển thị tổng số giao dịch và phân trang";
+    public static final String TRANSACTION_ALL_008 = "TRANSACTION-ALL-008 - Bộ lọc loại giao dịch có đầy đủ lựa chọn";
+    public static final String TRANSACTION_ALL_009 = "TRANSACTION-ALL-009 - Bộ lọc trạng thái có đầy đủ lựa chọn";
+    public static final String TRANSACTION_ALL_010 = "TRANSACTION-ALL-010 - Bộ lọc cổng thanh toán có đầy đủ lựa chọn";
+    public static final String TRANSACTION_ALL_011 = "TRANSACTION-ALL-011 - Lọc theo loại giao dịch lấy từ dữ liệu thật";
+    public static final String TRANSACTION_ALL_012 = "TRANSACTION-ALL-012 - Lọc theo trạng thái lấy từ dữ liệu thật";
+    public static final String TRANSACTION_ALL_013 = "TRANSACTION-ALL-013 - Lọc theo cổng thanh toán lấy từ dữ liệu thật";
+    public static final String TRANSACTION_ALL_014 = "TRANSACTION-ALL-014 - Kết hợp nhiều bộ lọc trả đúng giao dịch";
+    public static final String TRANSACTION_ALL_015 = "TRANSACTION-ALL-015 - Không cho chọn ngày giao dịch tương lai";
+    public static final String TRANSACTION_ALL_016 = "TRANSACTION-ALL-016 - Lọc khoảng ngày bao gồm hai đầu mút";
+    public static final String TRANSACTION_ALL_017 = "TRANSACTION-ALL-017 - Tổ hợp không khớp hiển thị trạng thái chưa có dữ liệu";
+    public static final String TRANSACTION_ALL_018 = "TRANSACTION-ALL-018 - Reset xóa bộ lọc nhưng giữ tab Tất cả";
+    public static final String TRANSACTION_ALL_019 = "TRANSACTION-ALL-019 - Reset trạng thái rỗng khôi phục dữ liệu";
+    public static final String TRANSACTION_ALL_020 = "TRANSACTION-ALL-020 - Sắp xếp số tiền tăng dần";
+    public static final String TRANSACTION_ALL_021 = "TRANSACTION-ALL-021 - Sắp xếp số tiền giảm dần";
+    public static final String TRANSACTION_ALL_022 = "TRANSACTION-ALL-022 - Sắp xếp ngày tạo tăng và giảm dần";
+    public static final String TRANSACTION_ALL_023 = "TRANSACTION-ALL-023 - Cột không hỗ trợ sắp xếp không đổi dữ liệu";
+    public static final String TRANSACTION_ALL_024 = "TRANSACTION-ALL-024 - Chuyển trang làm thay đổi tập dữ liệu";
+    public static final String TRANSACTION_ALL_025 = "TRANSACTION-ALL-025 - Quay lại trang một khôi phục tập dữ liệu";
+    public static final String TRANSACTION_ALL_026 = "TRANSACTION-ALL-026 - Bộ lọc được giữ nguyên khi chuyển trang";
+    public static final String TRANSACTION_ALL_027 = "TRANSACTION-ALL-027 - Reset từ trang sau quay về trang một";
+    public static final String TRANSACTION_ALL_028 = "TRANSACTION-ALL-028 - Mở chi tiết từ một dòng giao dịch";
+    public static final String TRANSACTION_ALL_029 = "TRANSACTION-ALL-029 - Chi tiết hiển thị đủ thông tin giao dịch";
+    public static final String TRANSACTION_ALL_030 = "TRANSACTION-ALL-030 - Chi tiết hiển thị tổng dòng tiền";
+    public static final String TRANSACTION_ALL_031 = "TRANSACTION-ALL-031 - Giao dịch đang xem được đánh dấu trong lịch sử liên quan";
+    public static final String TRANSACTION_ALL_032 = "TRANSACTION-ALL-032 - Đóng chi tiết xóa mã giao dịch khỏi URL";
+    public static final String TRANSACTION_ALL_033 = "TRANSACTION-ALL-033 - Deep link mở lại đúng chi tiết giao dịch";
+    public static final String TRANSACTION_ALL_034 = "TRANSACTION-ALL-034 - Xuất Excel toàn bộ tab Tất cả";
+    public static final String TRANSACTION_ALL_035 = "TRANSACTION-ALL-035 - File Excel có tiêu đề và dữ liệu giao dịch";
+    public static final String TRANSACTION_ALL_036 = "TRANSACTION-ALL-036 - Excel xuất toàn bộ dữ liệu phù hợp bộ lọc";
+    public static final String TRANSACTION_ALL_037 = "TRANSACTION-ALL-037 - Chi tiết khớp loại giao dịch của dòng được chọn";
+    public static final String TRANSACTION_ALL_038 = "TRANSACTION-ALL-038 - Chi tiết khớp trạng thái của dòng được chọn";
+    public static final String TRANSACTION_ALL_039 = "TRANSACTION-ALL-039 - Chi tiết khớp số tiền của dòng được chọn";
+    public static final String TRANSACTION_ALL_040 = "TRANSACTION-ALL-040 - Chi tiết khớp cổng thanh toán và thời gian";
+    public static final String TRANSACTION_ALL_041 = "TRANSACTION-ALL-041 - URL chi tiết chứa đúng một mã giao dịch";
+    public static final String TRANSACTION_ALL_042 = "TRANSACTION-ALL-042 - Tải lại trang giữ nguyên chi tiết đang mở";
+    public static final String TRANSACTION_ALL_043 = "TRANSACTION-ALL-043 - Back và Forward đóng mở lại đúng chi tiết";
+    public static final String TRANSACTION_ALL_044 = "TRANSACTION-ALL-044 - Lịch sử dòng tiền tải xong không còn trạng thái chờ";
+    public static final String TRANSACTION_ALL_045 = "TRANSACTION-ALL-045 - Giao dịch hiện tại trong dòng tiền khớp dữ liệu nguồn";
+    public static final String TRANSACTION_ALL_046 = "TRANSACTION-ALL-046 - Mở giao dịch khác cập nhật mã và nội dung chi tiết";
+    public static final String TRANSACTION_ALL_047 = "TRANSACTION-ALL-047 - Đổi trạng thái cập nhật bộ lọc và dữ liệu";
+    public static final String TRANSACTION_ALL_048 = "TRANSACTION-ALL-048 - Lần lượt lọc được theo mọi trạng thái";
+    public static final String TRANSACTION_ALL_049 = "TRANSACTION-ALL-049 - Lần lượt lọc được theo mọi cổng thanh toán";
+    public static final String TRANSACTION_ALL_050 = "TRANSACTION-ALL-050 - Đóng bộ lọc không chọn giữ nguyên dữ liệu";
+    public static final String TRANSACTION_ALL_051 = "TRANSACTION-ALL-051 - Bộ chọn ngày có giờ mặc định cả ngày";
+    public static final String TRANSACTION_ALL_052 = "TRANSACTION-ALL-052 - Chưa chọn ngày không cho áp dụng bộ lọc";
+    public static final String TRANSACTION_ALL_053 = "TRANSACTION-ALL-053 - Lọc giao dịch trong cùng một ngày";
+    public static final String TRANSACTION_ALL_054 = "TRANSACTION-ALL-054 - Lọc theo khoảng giờ trong ngày";
+    public static final String TRANSACTION_ALL_055 = "TRANSACTION-ALL-055 - Đóng bộ chọn ngày chưa áp dụng giữ nguyên dữ liệu";
+    public static final String TRANSACTION_ALL_056 = "TRANSACTION-ALL-056 - Kết hợp ngày loại trạng thái và cổng thanh toán";
+    public static final String TRANSACTION_ALL_057 = "TRANSACTION-ALL-057 - Tổng số và phân trang cập nhật theo bộ lọc";
+    public static final String TRANSACTION_ALL_058 = "TRANSACTION-ALL-058 - Bộ lọc được giữ khi mở và đóng chi tiết";
+    public static final String TRANSACTION_ALL_059 = "TRANSACTION-ALL-059 - Reset xóa toàn bộ bộ lọc kết hợp và ngày";
+    public static final String TRANSACTION_ALL_060 = "TRANSACTION-ALL-060 - Xóa riêng khoảng ngày khôi phục toàn bộ dữ liệu";
+    public static final String TRANSACTION_ALL_061 = "TRANSACTION-ALL-061 - Bộ lọc không thuộc tab Tất cả được giữ ẩn";
+    public static final String TRANSACTION_ALL_062 = "TRANSACTION-ALL-062 - Previous bị khóa tại trang đầu";
+    public static final String TRANSACTION_ALL_063 = "TRANSACTION-ALL-063 - Next chuyển đúng sang trang kế tiếp";
+    public static final String TRANSACTION_ALL_064 = "TRANSACTION-ALL-064 - Previous quay đúng về trang trước";
+    public static final String TRANSACTION_ALL_065 = "TRANSACTION-ALL-065 - Trang hiện tại được đánh dấu active";
+    public static final String TRANSACTION_ALL_066 = "TRANSACTION-ALL-066 - Đi được đến trang cuối và Next bị khóa";
+    public static final String TRANSACTION_ALL_067 = "TRANSACTION-ALL-067 - Trang cuối không vượt quá giới hạn số dòng";
+    public static final String TRANSACTION_ALL_068 = "TRANSACTION-ALL-068 - Hai trang liên tiếp không trùng giao dịch";
+    public static final String TRANSACTION_ALL_069 = "TRANSACTION-ALL-069 - Thứ tự số tiền được giữ khi chuyển trang";
+    public static final String TRANSACTION_ALL_070 = "TRANSACTION-ALL-070 - Quay lại trang đầu giữ nguyên chiều sắp xếp";
+    public static final String TRANSACTION_ALL_071 = "TRANSACTION-ALL-071 - Đổi bộ lọc từ trang sau quay về trang đầu";
+    public static final String TRANSACTION_ALL_072 = "TRANSACTION-ALL-072 - Đóng chi tiết từ trang sau giữ nguyên trang";
+    public static final String TRANSACTION_ALL_073 = "TRANSACTION-ALL-073 - Reset sau sắp xếp khôi phục thứ tự mặc định";
+    public static final String TRANSACTION_ALL_074 = "TRANSACTION-ALL-074 - Nút dấu ba chấm nhảy đến nhóm trang sau";
+
+    private TransactionHistoryTestCases() {
+    }
+}
