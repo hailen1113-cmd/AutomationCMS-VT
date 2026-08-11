@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 /** Page Object riêng cho tab Tất cả của màn hình Lịch sử giao dịch. */
@@ -72,6 +74,13 @@ public class TransactionHistoryPage extends UniformUiPage {
 
     public List<TransactionRow> rows() {
         waitForTable();
+        return currentRows();
+    }
+
+    private List<TransactionRow> currentRows() {
+        if (isEmptyState()) {
+            return List.of();
+        }
         return grid().findElements(DATA_ROWS).stream()
                 .filter(WebElement::isDisplayed)
                 .map(this::toRow)
@@ -110,6 +119,92 @@ public class TransactionHistoryPage extends UniformUiPage {
         return new CombinedFilterSnapshot(source, rows(),
                 selectedFilterText(Filter.TYPE), selectedFilterText(Filter.STATUS),
                 selectedFilterText(Filter.GATEWAY));
+    }
+
+    public SpecializedCombinedFilterSnapshot combineStatusAndFirstGateway() {
+        TransactionRow source = firstRowWithValue(Filter.STATUS);
+        String gateway = filterOptions(Filter.GATEWAY).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Bộ lọc không có cổng thanh toán."));
+        selectFilter(Filter.STATUS, source.status());
+        selectFilter(Filter.GATEWAY, gateway);
+        List<TransactionRow> filtered = rows();
+        return new SpecializedCombinedFilterSnapshot(source.status(), gateway, filtered,
+                selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                isEmptyState(), mainText());
+    }
+
+    public SpecializedCombinedFilterSnapshot combineStatusAndGateway(String status, String gateway) {
+        selectFilter(Filter.STATUS, status);
+        selectFilter(Filter.GATEWAY, gateway);
+        List<TransactionRow> filtered = rows();
+        return new SpecializedCombinedFilterSnapshot(status, gateway, filtered,
+                selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                isEmptyState(), mainText());
+    }
+
+    public CombinedFilterMatrixSnapshot applyEveryStatusGatewayCombination() {
+        List<String> statuses = filterOptions(Filter.STATUS);
+        List<String> gateways = filterOptions(Filter.GATEWAY);
+        List<CombinedFilterOptionResult> results = new ArrayList<>();
+        for (String status : statuses) {
+            selectFilter(Filter.STATUS, status);
+            for (String gateway : gateways) {
+                selectFilter(Filter.GATEWAY, gateway);
+                // selectFilter() đã chờ bảng ổn định; đọc ngay dữ liệu hiện tại để
+                // tránh lặp thêm một chu kỳ wait cho từng tổ hợp.
+                List<TransactionRow> filtered = currentRows();
+                results.add(new CombinedFilterOptionResult(status, gateway,
+                        selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                        filtered, isEmptyState(), mainText()));
+            }
+            resetFilters();
+        }
+        return new CombinedFilterMatrixSnapshot(statuses, gateways, results,
+                driver.getCurrentUrl());
+    }
+
+    public SpecializedCombinedDateFilterSnapshot combineStatusGatewayAndDate(
+            String status, String gateway) {
+        TransactionRow source = rows().stream()
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        "Không có dòng để lấy ngày kết hợp bộ lọc."));
+        LocalDate date = source.createdAt().toLocalDate();
+        try {
+            applyDateTimeRange(date, date, null, null);
+        } catch (TimeoutException exception) {
+            throw new IllegalStateException("Bảng không ổn định sau khi lọc ngày " + date, exception);
+        }
+        try {
+            selectFilter(Filter.STATUS, status);
+        } catch (TimeoutException exception) {
+            throw new IllegalStateException(
+                    "Bảng không ổn định sau khi lọc trạng thái " + status, exception);
+        }
+        try {
+            selectFilter(Filter.GATEWAY, gateway);
+        } catch (TimeoutException exception) {
+            throw new IllegalStateException(
+                    "Bảng không ổn định sau khi lọc cổng thanh toán " + gateway, exception);
+        }
+        List<TransactionRow> filtered = rows();
+        return new SpecializedCombinedDateFilterSnapshot(source, status, gateway, date, filtered,
+                selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                dateButton().getText().trim(), isEmptyState(), mainText(), driver.getCurrentUrl());
+    }
+
+    public SpecializedResetSnapshot resetStatusGatewayAndDate(String status, String gateway) {
+        combineStatusGatewayAndDate(status, gateway);
+        resetFilters();
+        return new SpecializedResetSnapshot(selectedFilterText(Filter.STATUS),
+                selectedFilterText(Filter.GATEWAY), dateButton().getText().trim(),
+                activePage(), rows().size(), driver.getCurrentUrl());
+    }
+
+    public SpecializedHiddenFilterSnapshot specializedIrrelevantFiltersAreHidden() {
+        return new SpecializedHiddenFilterSnapshot(
+                visibleElements(By.cssSelector("button[aria-label='loại giao dịch-filter']")).isEmpty(),
+                visibleElements(By.cssSelector("button[aria-label='xuất hoá đơn-filter']")).isEmpty(),
+                visibleElements(By.cssSelector("button[aria-label='thời hạn BH-filter']")).isEmpty());
     }
 
     public FutureDateSnapshot futureDatesAreDisabled() {
@@ -276,21 +371,28 @@ public class TransactionHistoryPage extends UniformUiPage {
 
     public FilterTotalSnapshot totalAndPaginationAfterStatusFilter() {
         int beforeTotal = totalDisplayed();
-        boolean beforePagination = paginationVisible();
+        boolean beforePagination = hasPage(2);
         selectFilter(Filter.STATUS, "Thành công");
         return new FilterTotalSnapshot(beforeTotal, totalDisplayed(), beforePagination,
-                paginationVisible(), rows(), selectedFilterText(Filter.STATUS));
+                hasPage(2), rows(), selectedFilterText(Filter.STATUS));
     }
 
     public DetailFilterPersistenceSnapshot filterPersistsAfterDetail() {
         TransactionRow source = firstRowWithValue(Filter.STATUS);
-        selectFilter(Filter.STATUS, source.status());
+        return filterPersistsAfterDetail(source.status());
+    }
+
+    public DetailFilterPersistenceSnapshot filterPersistsAfterDetail(String status) {
+        selectFilter(Filter.STATUS, status);
         List<String> before = rows().stream().map(TransactionRow::signature).toList();
-        closeFirstDetail();
-        return new DetailFilterPersistenceSnapshot(source.status(),
+        String listUrlBefore = driver.getCurrentUrl();
+        CloseDetailSnapshot detail = closeFirstDetail();
+        String browserLocationAfterClose = String.valueOf(
+                ((JavascriptExecutor) driver).executeScript("return window.location.href"));
+        return new DetailFilterPersistenceSnapshot(status,
                 selectedFilterText(Filter.STATUS), before,
                 rows().stream().map(TransactionRow::signature).toList(),
-                driver.getCurrentUrl());
+                listUrlBefore, detail.openedUrl(), detail.closedUrl(), browserLocationAfterClose);
     }
 
     public ResetSnapshot resetAllCombinedFiltersAndDate() {
@@ -330,8 +432,12 @@ public class TransactionHistoryPage extends UniformUiPage {
                 return new SortSnapshot(header, currentRows);
             }
         }
+        List<TransactionRow> observedRows = rows();
+        String observed = normalizeText(header).contains("ngay tao")
+                ? observedRows.stream().map(TransactionRow::createdAt).toList().toString()
+                : observedRows.stream().map(TransactionRow::amountValue).toList().toString();
         throw new AssertionError("Không thể đưa cột " + header + " về chiều "
-                + (descending ? "giảm dần" : "tăng dần"));
+                + (descending ? "giảm dần" : "tăng dần") + ". Thứ tự hiện tại: " + observed);
     }
 
     private boolean rowsAreSorted(List<TransactionRow> currentRows, String header, boolean descending) {
@@ -519,6 +625,41 @@ public class TransactionHistoryPage extends UniformUiPage {
                 relatedSections, lowerDrawerText.contains("đang xem"));
     }
 
+    private DetailSnapshot openDetailMatching(BiPredicate<WebElement, String> condition,
+                                              String expectedContent) {
+        String listUrl = driver.getCurrentUrl();
+        int rowCount = dataRowElements().size();
+        for (int index = 0; index < rowCount; index++) {
+            List<WebElement> elements = dataRowElements();
+            if (index >= elements.size()) {
+                break;
+            }
+            TransactionRow source = toRow(elements.get(index));
+            if (source == null) {
+                continue;
+            }
+            click(elements.get(index), "Mo chi tiet de tim " + expectedContent);
+            detailDrawer();
+            String openedUrl = driver.getCurrentUrl();
+            try {
+                WebElement matched = new WebDriverWait(driver, Duration.ofSeconds(4)).until(d -> {
+                    WebElement current = detailDrawer();
+                    return condition.test(current, openedUrl) ? current : null;
+                });
+                String text = elementText(matched);
+                String lowerText = text.toLowerCase(Locale.ROOT);
+                int relatedSections = lowerText.contains("d\u00f2ng ti\u1ec1n c\u1ee7a") ? 1 : 0;
+                return new DetailSnapshot(source, openedUrl, text, relatedSections,
+                        lowerText.contains("\u0111ang xem"));
+            } catch (TimeoutException ignored) {
+                driver.get(listUrl);
+                waitForTable();
+            }
+        }
+        throw new AssertionError("Khong tim thay giao dich co " + expectedContent
+                + " trong " + rowCount + " dong dang hien thi.");
+    }
+
     public CloseDetailSnapshot closeFirstDetail() {
         DetailSnapshot opened = openFirstDetail();
         WebElement close = detailCloseButton();
@@ -578,6 +719,342 @@ public class TransactionHistoryPage extends UniformUiPage {
         }
     }
 
+    public RelatedHistorySnapshot waitForCashFlowTotals() {
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> {
+            String text = elementText(drawer);
+            return text.contains("T\u1ed5ng v\u00e0o")
+                    && text.contains("T\u1ed5ng ra")
+                    && text.contains("D\u00f2ng ti\u1ec1n r\u00f2ng");
+        }, "cac tong dong tien");
+        return new RelatedHistorySnapshot(opened.source(), opened.drawerText(), true,
+                opened.currentMarked());
+    }
+
+    public RelatedHistorySnapshot loadRelatedHistoryUntilCurrent() {
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> {
+            String text = elementText(drawer).toLowerCase(Locale.ROOT);
+            boolean hasCurrent = text.contains("\u0111ang xem");
+            boolean canLoadMore = drawer.findElements(
+                            By.xpath(".//button[normalize-space()='Xem th\u00eam']"))
+                    .stream().anyMatch(button -> button.isDisplayed() && button.isEnabled());
+            return hasCurrent || canLoadMore;
+        }, "lich su dong tien co giao dich dang xem");
+        WebElement drawer = detailDrawer();
+        for (int attempt = 0; attempt < 20; attempt++) {
+            String text = elementText(drawer);
+            if (text.toLowerCase(Locale.ROOT).contains("đang xem")) {
+                return new RelatedHistorySnapshot(opened.source(), text, true, true);
+            }
+            WebElement more = drawer.findElements(By.xpath(".//button[normalize-space()='Xem thêm']"))
+                    .stream().filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
+                    .findFirst().orElse(null);
+            if (more == null) {
+                return new RelatedHistorySnapshot(opened.source(), text,
+                        text.contains("Dòng tiền"), false);
+            }
+            int beforeLength = text.length();
+            click(more, "Tải thêm lịch sử dòng tiền");
+            wait.until(d -> elementText(detailDrawer()).length() > beforeLength);
+            drawer = detailDrawer();
+        }
+        String text = elementText(drawer);
+        return new RelatedHistorySnapshot(opened.source(), text, true,
+                text.toLowerCase(Locale.ROOT).contains("đang xem"));
+    }
+
+    public RelatedExpansionSnapshot expandRelatedHistoryOnce() {
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> drawer.findElements(
+                        By.xpath(".//button[normalize-space()='Xem thêm']"))
+                .stream().anyMatch(button -> button.isDisplayed() && button.isEnabled()),
+                "nut Xem them lich su dong tien");
+        WebElement drawer = detailDrawer();
+        By relatedLinks = By.cssSelector("a[href*='/vuatho/transaction?']");
+        int before = (int) drawer.findElements(relatedLinks).stream()
+                .filter(WebElement::isDisplayed).count();
+        WebElement more = drawer.findElements(By.xpath(".//button[normalize-space()='Xem thêm']"))
+                .stream().filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
+                .findFirst().orElseThrow(() -> new IllegalStateException("Không thấy nút Xem thêm."));
+        click(more, "Tải thêm một trang lịch sử dòng tiền");
+        int after = wait.until(d -> {
+            WebElement current = detailDrawer();
+            int count = (int) current.findElements(relatedLinks).stream()
+                    .filter(WebElement::isDisplayed).count();
+            return count > before ? count : null;
+        });
+        return new RelatedExpansionSnapshot(opened.url(), before, after,
+                elementText(detailDrawer()));
+    }
+
+    public DetailAuditSnapshot auditFirstDetailInOneFlow() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement drawer = detailDrawer();
+        By relatedLinks = By.cssSelector("a[href*='/vuatho/transaction?']");
+        String userHref = drawer.findElements(By.cssSelector("a[href*='/vuatho/user?id=']"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(link -> link.getAttribute("href")).findFirst().orElse("");
+        int before = (int) drawer.findElements(relatedLinks).stream()
+                .filter(WebElement::isDisplayed).count();
+        int after = before;
+        WebElement more = drawer.findElements(By.xpath(".//button[normalize-space()='Xem thêm']"))
+                .stream().filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
+                .findFirst().orElse(null);
+        if (more != null) {
+            click(more, "Tải thêm lịch sử trong lần kiểm tra chi tiết tổng hợp");
+            after = wait.until(d -> {
+                int count = (int) detailDrawer().findElements(relatedLinks).stream()
+                        .filter(WebElement::isDisplayed).count();
+                return count > before ? count : null;
+            });
+            drawer = detailDrawer();
+        }
+        String text = wait.until(d -> {
+            String current = elementText(detailDrawer());
+            return current.contains("Dòng tiền") && !current.contains("Đang tải") ? current : null;
+        });
+        List<String> transactionHrefs = drawer.findElements(relatedLinks).stream()
+                .filter(WebElement::isDisplayed)
+                .map(link -> link.getAttribute("href"))
+                .filter(value -> value != null && !value.isBlank()).toList();
+        boolean currentMarked = text.toLowerCase(Locale.ROOT).contains("đang xem");
+        WebElement close = detailCloseButton();
+        click(close, "Đóng chi tiết sau lần kiểm tra tổng hợp");
+        boolean closed = wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new DetailAuditSnapshot(opened.source(), opened.url(), text, userHref,
+                transactionHrefs, before, after, currentMarked, closed);
+    }
+
+    public DetailLinksSnapshot detailLinks() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement drawer = detailDrawer();
+        String userHref = drawer.findElements(By.cssSelector("a[href*='/vuatho/user?id=']"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(link -> link.getAttribute("href")).findFirst().orElse("");
+        List<String> transactionHrefs = drawer.findElements(
+                        By.cssSelector("a[href*='/vuatho/transaction?']"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(link -> link.getAttribute("href")).filter(value -> value != null).toList();
+        return new DetailLinksSnapshot(opened.url(), userHref, transactionHrefs,
+                elementText(drawer));
+    }
+
+    public StatusDetailSnapshot openAndCloseFirstDetailForStatus(String expectedStatus) {
+        selectStatusForDetail(expectedStatus);
+        String selectedStatus = selectedFilterText(Filter.STATUS);
+        if (detailEmptyStateVisible()) {
+            return new StatusDetailSnapshot(expectedStatus, selectedStatus, null,
+                    "", mainText(), true, false, driver.getCurrentUrl());
+        }
+        List<WebElement> elements = dataRowElementsWithoutWaiting();
+        if (elements.isEmpty()) {
+            return new StatusDetailSnapshot(expectedStatus, selectedStatus, null,
+                    "", mainText(), true, false, driver.getCurrentUrl());
+        }
+        TransactionRow source = toRow(elements.get(0));
+        if (source == null) {
+            throw new IllegalStateException("Không đọc được dòng trạng thái " + expectedStatus);
+        }
+        click(elements.get(0), "Mở chi tiết giao dịch trạng thái " + expectedStatus);
+        WebElement drawer = detailDrawer();
+        String openedUrl = driver.getCurrentUrl();
+        String text = elementText(drawer);
+        click(detailCloseButton(), "Đóng chi tiết trạng thái " + expectedStatus);
+        boolean closed = wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new StatusDetailSnapshot(expectedStatus, selectedStatus, source,
+                openedUrl, text, false, closed, driver.getCurrentUrl());
+    }
+
+    private void selectStatusForDetail(String value) {
+        var detailWait = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .pollingEvery(Duration.ofMillis(250));
+        detailWait.withMessage("Không mở được bộ lọc trạng thái chi tiết").until(d -> {
+            try {
+                boolean alreadyOpen = d.findElements(By.cssSelector("li[role='option']"))
+                        .stream().anyMatch(WebElement::isDisplayed);
+                if (!alreadyOpen) {
+                    WebElement trigger = d.findElements(By.cssSelector(
+                                    "button[aria-label='" + Filter.STATUS.ariaLabel + "']"))
+                            .stream().filter(WebElement::isDisplayed).findFirst().orElse(null);
+                    if (trigger == null) {
+                        return false;
+                    }
+                    trigger.click();
+                }
+                return d.findElements(By.cssSelector("li[role='option']"))
+                        .stream().anyMatch(WebElement::isDisplayed);
+            } catch (StaleElementReferenceException ignored) {
+                return false;
+            }
+        });
+        detailWait.withMessage("Không chọn được trạng thái chi tiết: " + value).until(d -> {
+            try {
+                WebElement current = d.findElements(By.cssSelector("li[role='option']"))
+                        .stream().filter(WebElement::isDisplayed)
+                        .filter(element -> elementText(element).trim().equals(value))
+                        .findFirst().orElse(null);
+                if (current == null) {
+                    return false;
+                }
+                current.click();
+                return true;
+            } catch (StaleElementReferenceException ignored) {
+                // React có thể dựng lại option trong lúc menu đang mở; tìm lại ở lần poll kế tiếp.
+                return false;
+            }
+        });
+        pause("Lọc trạng thái detail: " + value);
+        detailWait.withMessage("Dữ liệu không ổn định sau khi lọc trạng thái: " + value).until(d -> {
+            try {
+                String bodyText = normalizeText(d.findElement(By.tagName("body")).getText());
+                String selected = elementText(filterButton(Filter.STATUS));
+                if (bodyText.contains("dang tai du lieu") || !selected.contains(value)) {
+                    return false;
+                }
+                if (bodyText.contains("chua co du lieu")
+                        || bodyText.contains("khong co du lieu")
+                        || bodyText.contains("khong tim thay")) {
+                    return true;
+                }
+                List<WebElement> visibleRows = d.findElements(DATA_ROWS).stream()
+                        .filter(WebElement::isDisplayed).toList();
+                if (visibleRows.isEmpty()) {
+                    return true;
+                }
+                String expected = normalizeText(value);
+                return visibleRows.stream()
+                        .allMatch(row -> normalizeText(elementText(row)).contains(expected));
+            } catch (StaleElementReferenceException ignored) {
+                return false;
+            }
+        });
+    }
+
+    private boolean detailEmptyStateVisible() {
+        String text = normalizeText(mainText());
+        return text.contains("chua co du lieu")
+                || text.contains("khong co du lieu")
+                || text.contains("khong tim thay");
+    }
+
+    private List<WebElement> dataRowElementsWithoutWaiting() {
+        List<WebElement> grids = driver.findElements(GRID).stream()
+                .filter(WebElement::isDisplayed).toList();
+        if (grids.isEmpty()) {
+            return List.of();
+        }
+        return grids.get(0).findElements(DATA_ROWS).stream()
+                .filter(WebElement::isDisplayed)
+                .filter(row -> row.findElements(By.cssSelector("th,td")).size() >= 5).toList();
+    }
+
+    public CloseDetailSnapshot closeDetailWithHeaderIcon() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement drawer = detailDrawer();
+        WebElement icon = wait.until(d -> drawer.findElements(By.cssSelector("button svg.rotate-45"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(svg -> svg.findElement(By.xpath("..")))
+                .filter(WebElement::isEnabled).findFirst().orElse(null));
+        click(icon, "Đóng chi tiết bằng icon X");
+        boolean closed = wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new CloseDetailSnapshot(opened.url(), driver.getCurrentUrl(), closed);
+    }
+
+    public CloseDetailSnapshot closeDetailWithEscape() {
+        DetailSnapshot opened = openFirstDetail();
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        boolean closed = wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new CloseDetailSnapshot(opened.url(), driver.getCurrentUrl(), closed);
+    }
+
+    public ProfileNavigationSnapshot openFirstDetailPartyProfile() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement profile = wait.until(d -> detailDrawer().findElements(By.cssSelector(
+                        "a[href*='/vuatho/user?id='],a[href*='/vuatho/worker?id=']"))
+                .stream().filter(WebElement::isDisplayed).findFirst().orElse(null));
+        String expectedUrl = profile.getAttribute("href");
+        String sourceText = elementText(profile);
+        Set<String> handlesBefore = new HashSet<>(driver.getWindowHandles());
+        click(profile, "Mở hồ sơ chủ thể từ chi tiết giao dịch");
+        wait.until(d -> !driver.getCurrentUrl().equals(opened.url())
+                || d.getWindowHandles().stream().anyMatch(handle -> !handlesBefore.contains(handle)));
+        driver.getWindowHandles().stream()
+                .filter(handle -> !handlesBefore.contains(handle))
+                .findFirst().ifPresent(handle -> driver.switchTo().window(handle));
+        wait.until(d -> driver.getCurrentUrl().contains("/vuatho/user?id=")
+                || driver.getCurrentUrl().contains("/vuatho/worker?id="));
+        return new ProfileNavigationSnapshot(opened.url(), expectedUrl,
+                driver.getCurrentUrl(), sourceText);
+    }
+
+    public RelatedNavigationSnapshot openFirstRelatedTransaction() {
+        DetailSnapshot opened = openDetailMatching((drawer, openedUrl) -> drawer
+                .findElements(By.cssSelector("a[href*='/vuatho/transaction?']"))
+                .stream().filter(WebElement::isDisplayed)
+                .map(link -> link.getAttribute("href"))
+                .anyMatch(href -> hasDifferentTransactionId(href, openedUrl)),
+                "lien ket toi giao dich lien quan");
+        WebElement drawer = detailDrawer();
+        WebElement related = wait.until(d -> detailDrawer()
+                .findElements(By.cssSelector("a[href*='/vuatho/transaction?']"))
+                .stream().filter(WebElement::isDisplayed)
+                .filter(link -> {
+                    String href = link.getAttribute("href");
+                    return hasDifferentTransactionId(href, opened.url());
+                }).findFirst().orElse(null));
+        String targetHref = related.getAttribute("href");
+        String targetText = elementText(related);
+        Set<String> handlesBefore = new HashSet<>(driver.getWindowHandles());
+        click(related, "Mở giao dịch dòng tiền liên quan");
+        wait.until(d -> !driver.getCurrentUrl().equals(opened.url())
+                || d.getWindowHandles().stream().anyMatch(handle -> !handlesBefore.contains(handle)));
+        driver.getWindowHandles().stream()
+                .filter(handle -> !handlesBefore.contains(handle))
+                .findFirst().ifPresent(handle -> driver.switchTo().window(handle));
+        wait.until(d -> hasDifferentTransactionId(driver.getCurrentUrl(), opened.url()));
+        String drawerText = elementText(detailDrawer());
+        return new RelatedNavigationSnapshot(opened.url(), targetHref, driver.getCurrentUrl(),
+                targetText, drawerText);
+    }
+
+    private boolean hasDifferentTransactionId(String candidateUrl, String sourceUrl) {
+        String candidateId = queryParameter(candidateUrl, "id");
+        String sourceId = queryParameter(sourceUrl, "id");
+        return !candidateId.isBlank() && !candidateId.equals(sourceId);
+    }
+
+    private String queryParameter(String url, String name) {
+        if (url == null) {
+            return "";
+        }
+        int question = url.indexOf('?');
+        if (question < 0 || question == url.length() - 1) {
+            return "";
+        }
+        for (String parameter : url.substring(question + 1).split("&")) {
+            String[] pair = parameter.split("=", 2);
+            if (pair.length == 2 && pair[0].equals(name)) {
+                return pair[1];
+            }
+        }
+        return "";
+    }
+
+    public CloseDetailSnapshot closeDetailWithIcon() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement drawer = detailDrawer();
+        WebElement icon = drawer.findElements(By.tagName("button")).stream()
+                .filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
+                .filter(button -> elementText(button).isBlank()).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Không thấy icon đóng drawer."));
+        click(icon, "Đóng drawer bằng icon");
+        boolean closed = wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new CloseDetailSnapshot(opened.url(), driver.getCurrentUrl(), closed);
+    }
+
     public ChangedDetailSnapshot openAnotherTransactionDetail() {
         DetailSnapshot first = openFirstDetail();
         click(detailCloseButton(), "Đóng giao dịch đầu tiên");
@@ -587,8 +1064,7 @@ public class TransactionHistoryPage extends UniformUiPage {
         List<WebElement> elements = dataRowElements();
         for (WebElement element : elements) {
             TransactionRow candidate = toRow(element);
-            if (candidate == null || candidate.gateway().isBlank()
-                    || candidate.signature().equals(first.source().signature())) {
+            if (candidate == null || candidate.signature().equals(first.source().signature())) {
                 continue;
             }
             click(element, "Mở một giao dịch khác");
@@ -690,11 +1166,27 @@ public class TransactionHistoryPage extends UniformUiPage {
             return null;
         }
         try {
-            return new TransactionRow(cells.get(0), cells.get(1), cells.get(2), cells.get(3),
-                    LocalDateTimeParser.parse(cells.get(4), ROW_DATE), cells);
+            List<String> currentHeaders = headers();
+            return new TransactionRow(
+                    cell(cells, currentHeaders, "Loại giao dịch"),
+                    cell(cells, currentHeaders, "Trạng thái"),
+                    cell(cells, currentHeaders, "Số tiền"),
+                    gatewayCell(cells, currentHeaders),
+                    LocalDateTimeParser.parse(cell(cells, currentHeaders, "Ngày tạo"), ROW_DATE),
+                    cells);
         } catch (RuntimeException exception) {
             return null;
         }
+    }
+
+    private String gatewayCell(List<String> cells, List<String> currentHeaders) {
+        String gateway = cell(cells, currentHeaders, "Cổng thanh toán");
+        return gateway.isBlank() ? cell(cells, currentHeaders, "Ngân hàng") : gateway;
+    }
+
+    private String cell(List<String> cells, List<String> currentHeaders, String header) {
+        int index = currentHeaders.indexOf(header);
+        return index >= 0 && index < cells.size() ? cells.get(index) : "";
     }
 
     private List<WebElement> dataRowElements() {
@@ -741,6 +1233,7 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     private void clickCalendarDate(LocalDate date, String step) {
+        navigateCalendarTo(date);
         String full = calendarAria(date, true);
         String stableDate = full.substring(full.indexOf(',') + 2);
         By locator = By.xpath("//*[@role='option' and contains(@aria-label,"
@@ -759,6 +1252,21 @@ public class TransactionHistoryPage extends UniformUiPage {
             }
         });
         pause(step);
+    }
+
+    private void navigateCalendarTo(LocalDate date) {
+        String full = calendarAria(date, true);
+        String stableDate = full.substring(full.indexOf(',') + 2);
+        By target = By.xpath("//*[@role='option' and contains(@aria-label,"
+                + xpathLiteral(stableDate) + ") and @aria-disabled='false']");
+        for (int attempt = 0; attempt < 60; attempt++) {
+            if (driver.findElements(target).stream().anyMatch(WebElement::isDisplayed)) {
+                return;
+            }
+            clickStable(By.cssSelector("button[aria-label='Previous Month']"),
+                    "Chuyển lịch đến tháng của giao dịch");
+        }
+        throw new IllegalStateException("Không chuyển được lịch đến tháng " + YearMonth.from(date));
     }
 
     private void clickStable(By locator, String step) {
@@ -829,6 +1337,9 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     private void goToPage(int page) {
+        if (activePage() == page) {
+            return;
+        }
         WebElement button = visible(By.cssSelector(
                 "nav[aria-label='pagination navigation'] [role='button'][aria-label='pagination item "
                         + page + "']"));
@@ -881,7 +1392,8 @@ public class TransactionHistoryPage extends UniformUiPage {
     private boolean isEmptyState() {
         String normalized = normalizeText(mainText());
         return normalized.contains("chua co du lieu")
-                && normalized.contains("thu thay doi bo loc hoac tu khoa tim kiem");
+                || normalized.contains("khong co du lieu")
+                || normalized.contains("khong tim thay");
     }
 
     private boolean paginationVisible() {
@@ -911,7 +1423,7 @@ public class TransactionHistoryPage extends UniformUiPage {
         wait.until(d -> {
             List<WebElement> grids = d.findElements(GRID).stream().filter(WebElement::isDisplayed).toList();
             if (grids.isEmpty()) {
-                return false;
+                return isEmptyState();
             }
             String text = elementText(grids.get(0));
             return !text.contains("Đang tải dữ liệu")
@@ -1005,7 +1517,31 @@ public class TransactionHistoryPage extends UniformUiPage {
     public record FilterSnapshot(Filter filter, String value, List<TransactionRow> rows,
                                  String selectedText, String url) {}
     public record CombinedFilterSnapshot(TransactionRow source, List<TransactionRow> rows,
-                                         String type, String status, String gateway) {}
+                                          String type, String status, String gateway) {}
+    public record SpecializedCombinedFilterSnapshot(String status, String gateway,
+                                                     List<TransactionRow> rows,
+                                                     String selectedStatus,
+                                                     String selectedGateway,
+                                                      boolean empty, String pageText) {}
+    public record CombinedFilterOptionResult(String status, String gateway,
+                                             String selectedStatus, String selectedGateway,
+                                             List<TransactionRow> rows,
+                                             boolean empty, String pageText) {}
+    public record CombinedFilterMatrixSnapshot(List<String> statuses, List<String> gateways,
+                                               List<CombinedFilterOptionResult> results,
+                                               String url) {}
+    public record SpecializedCombinedDateFilterSnapshot(TransactionRow source, String status,
+                                                         String gateway,
+                                                         LocalDate date,
+                                                         List<TransactionRow> rows,
+                                                         String selectedStatus,
+                                                         String selectedGateway,
+                                                         String selectedDate, boolean empty,
+                                                         String pageText, String url) {}
+    public record SpecializedResetSnapshot(String status, String gateway, String date,
+                                           int page, int rows, String url) {}
+    public record SpecializedHiddenFilterSnapshot(boolean typeHidden, boolean invoiceHidden,
+                                                   boolean warrantyHidden) {}
     public record FutureDateSnapshot(String ariaLabel, boolean disabled, int disabledCount) {}
     public record DateFilterSnapshot(LocalDate start, LocalDate end, List<TransactionRow> rows,
                                      String selectedText) {}
@@ -1035,7 +1571,15 @@ public class TransactionHistoryPage extends UniformUiPage {
                                       List<TransactionRow> rows, String selectedStatus) {}
     public record DetailFilterPersistenceSnapshot(String expectedStatus, String selectedStatus,
                                                   List<String> rowsBefore, List<String> rowsAfter,
-                                                  String url) {}
+                                                  String listUrlBefore, String openedUrl,
+                                                  String closedUrl, String browserLocationAfterClose) {
+        /**
+         * Giữ tương thích với các testcase cũ vốn đọc URL sau khi đóng chi tiết qua url().
+         */
+        public String url() {
+            return closedUrl;
+        }
+    }
     public record DateClearSnapshot(int originalTotal, int filteredTotal, int restoredTotal,
                                     String selectedDate, int rows, boolean clearControlGone) {}
     public record HiddenFilterSnapshot(boolean searchHidden, boolean invoiceHidden,
@@ -1080,6 +1624,22 @@ public class TransactionHistoryPage extends UniformUiPage {
                                             boolean closedAfterBack, String drawerText) {}
     public record RelatedHistorySnapshot(TransactionRow source, String drawerText,
                                          boolean loaded, boolean currentMarked) {}
+    public record RelatedExpansionSnapshot(String openedUrl, int beforeCount, int afterCount,
+                                           String drawerText) {}
+    public record DetailAuditSnapshot(TransactionRow source, String openedUrl, String drawerText,
+                                      String userHref, List<String> transactionHrefs,
+                                      int beforeRelatedCount, int afterRelatedCount,
+                                      boolean currentMarked, boolean closed) {}
+    public record DetailLinksSnapshot(String openedUrl, String userHref,
+                                      List<String> transactionHrefs, String drawerText) {}
+    public record StatusDetailSnapshot(String expectedStatus, String selectedStatus,
+                                       TransactionRow source, String openedUrl, String drawerText,
+                                       boolean empty, boolean closed, String closedUrl) {}
+    public record ProfileNavigationSnapshot(String sourceUrl, String expectedUrl,
+                                            String actualUrl, String sourceText) {}
+    public record RelatedNavigationSnapshot(String sourceUrl, String expectedUrl,
+                                            String actualUrl, String sourceText,
+                                            String drawerText) {}
     public record ChangedDetailSnapshot(String firstUrl, String secondUrl,
                                         TransactionRow firstSource, TransactionRow secondSource,
                                         String secondDrawerText) {}
