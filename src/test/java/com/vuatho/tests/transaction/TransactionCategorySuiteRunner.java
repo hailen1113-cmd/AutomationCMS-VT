@@ -19,8 +19,18 @@ import com.vuatho.tests.transaction.deposit.TransactionDepositExportTest;
 import com.vuatho.tests.transaction.deposit.TransactionDepositFilterTest;
 import com.vuatho.tests.transaction.deposit.TransactionDepositNavigationTest;
 import com.vuatho.tests.transaction.deposit.TransactionDepositOverviewTest;
-import com.vuatho.tests.transaction.fee.TransactionFeeTest;
-import com.vuatho.tests.transaction.insurance.TransactionInsuranceTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeDetailTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeDropdownTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeExportTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeFilterTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeNavigationTest;
+import com.vuatho.tests.transaction.fee.TransactionFeeOverviewTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceDetailTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceDropdownTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceExportTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceFilterTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceNavigationTest;
+import com.vuatho.tests.transaction.insurance.TransactionInsuranceOverviewTest;
 import com.vuatho.tests.transaction.order.TransactionOrderTest;
 import com.vuatho.tests.transaction.reward.TransactionRewardTest;
 import com.vuatho.tests.transaction.system.TransactionSystemTest;
@@ -41,8 +51,18 @@ public final class TransactionCategorySuiteRunner {
                 TransactionWithdrawTest.class,
                 TransactionOrderTest.class,
                 TransactionRewardTest.class,
-                TransactionFeeTest.class,
-                TransactionInsuranceTest.class,
+                TransactionFeeDropdownTest.class,
+                TransactionFeeOverviewTest.class,
+                TransactionFeeFilterTest.class,
+                TransactionFeeNavigationTest.class,
+                TransactionFeeDetailTest.class,
+                TransactionFeeExportTest.class,
+                TransactionInsuranceDropdownTest.class,
+                TransactionInsuranceOverviewTest.class,
+                TransactionInsuranceFilterTest.class,
+                TransactionInsuranceNavigationTest.class,
+                TransactionInsuranceDetailTest.class,
+                TransactionInsuranceExportTest.class,
                 TransactionAssistantDropdownTest.class,
                 TransactionAssistantSubtypeContractTest.class,
                 TransactionAssistantPlatformFeeOverviewTest.class,

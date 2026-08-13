@@ -154,7 +154,13 @@ public abstract class TransactionCategoryTestSupport extends BaseTest {
         boolean defaultDepositRoute = category() == TransactionCategoryPage.Category.DEPOSIT
                 && subtype.type() == 0
                 && !result.closedUrl().contains("type=");
-        Assert.assertTrue(defaultDepositRoute
+        boolean feeRouteKeepsSubtypeInUiState = category() == TransactionCategoryPage.Category.FEE
+                && !result.closedUrl().contains("type=");
+        boolean insuranceRouteKeepsSubtypeInUiState =
+                category() == TransactionCategoryPage.Category.INSURANCE
+                        && !result.closedUrl().contains("type=");
+        Assert.assertTrue(defaultDepositRoute || feeRouteKeepsSubtypeInUiState
+                        || insuranceRouteKeepsSubtypeInUiState
                         || result.closedUrl().contains("type=" + subtype.type()),
                 "Đóng chi tiết làm mất loại giao dịch: " + result.closedUrl());
         Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),

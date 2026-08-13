@@ -27,6 +27,14 @@ public abstract class TransactionDepositTestSupport extends TransactionCategoryT
                 .toArray(Object[][]::new);
     }
 
+    @DataProvider(name = "costWalletGatewaySubtypes")
+    public final Object[][] costWalletGatewaySubtypes() {
+        return category().subtypes().stream()
+                .filter(subtype -> subtype.type() == 0 || subtype.type() == 10)
+                .map(subtype -> new Object[]{subtype})
+                .toArray(Object[][]::new);
+    }
+
     protected final void openDepositSubtype(TransactionCategoryPage.Subtype subtype) {
         String url = transactionPage.currentUrl();
         if (!url.contains("tab=" + subtype.tab()) || !url.contains("type=" + subtype.type())) {
