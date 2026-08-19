@@ -1,8 +1,6 @@
 package com.vuatho.support;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.TransactionCategoryPage;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -10,7 +8,6 @@ import org.testng.annotations.BeforeMethod;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,20 +28,41 @@ public abstract class TransactionCategoryTestSupport extends BaseTest {
         return category().subtypes().get(0);
     }
 
+    /** Trả về subtype theo mã type và báo lỗi rõ ràng nếu catalog cấu hình thiếu. */
+    protected final TransactionCategoryPage.Subtype subtypeByType(int type) {
+        return category().subtypes().stream()
+                .filter(candidate -> candidate.type() == type)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Thiếu subtype type=" + type + " trong nhóm " + category().label()));
+    }
+
+    /** Chỉ điều hướng khi route hoặc subtype hiện tại chưa đúng, tránh reload trang dư thừa. */
+    protected final void openSubtype(TransactionCategoryPage.Subtype subtype) {
+        String url = transactionPage.currentUrl();
+        boolean correctRoute = url.contains("tab=" + subtype.tab());
+        boolean defaultDepositRoute = category() == TransactionCategoryPage.Category.DEPOSIT
+                && subtype.type() == 0 && !url.contains("type=");
+        boolean correctType = url.contains("type=" + subtype.type()) || defaultDepositRoute;
+        boolean correctActiveLabel = category() != TransactionCategoryPage.Category.ORDER
+                || transactionPage.activeGroupText().contains(subtype.label());
+        if (!correctRoute || !correctType || !correctActiveLabel) {
+            transactionPage.open(subtype);
+        }
+    }
+
+    /** Page object cho các thao tác nâng cao dùng chung của lịch sử giao dịch. */
+    protected final com.vuatho.pages.TransactionHistoryPage advancedPage() {
+        return new com.vuatho.pages.TransactionHistoryPage(driver);
+    }
+
     protected boolean openInitialSubtypeBeforeEachTest() {
         return true;
     }
 
     @BeforeMethod(alwaysRun = true)
     public void prepareTransactionCategory() {
-        if (driver == null) {
-            throw new SkipException("WebDriver không khởi tạo được.");
-        }
-        if (!driver.getCurrentUrl().contains("/vuatho/")) {
-            LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-            Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                    "Không đăng nhập được trước khi kiểm tra Lịch sử giao dịch.");
-        }
+        requireAuthenticatedSession("Lịch sử giao dịch");
         transactionPage = new TransactionCategoryPage(driver, category());
         if (openInitialSubtypeBeforeEachTest()) {
             transactionPage.open(initialSubtype());

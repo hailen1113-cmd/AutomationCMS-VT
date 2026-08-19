@@ -16,7 +16,8 @@ import java.time.Duration;
 import java.util.List;
 
 /**
- * Các thao tác Selenium dùng chung của ba màn hình thuộc menu Đồng phục.
+ * Lớp Page Object nền cho các màn hình ERP dùng chung cơ chế chờ, click, nhập liệu,
+ * đóng overlay và chuẩn hóa nội dung.
  *
  * <p>Mọi thao tác click/nhập đều cuộn element vào giữa màn hình và giữ lại
  * một khoảng ngắn có cấu hình khi chạy có giao diện để người chạy quan sát được hành động.</p>
@@ -27,7 +28,7 @@ abstract class UniformUiPage {
 
     protected UniformUiPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(45));
+        this.wait = new WebDriverWait(driver, TestConfig.longWaitTimeout());
         this.wait.pollingEvery(Duration.ofMillis(300));
         this.wait.ignoring(StaleElementReferenceException.class);
     }

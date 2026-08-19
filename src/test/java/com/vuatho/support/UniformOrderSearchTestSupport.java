@@ -1,14 +1,10 @@
 package com.vuatho.support;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.UniformOrderPage;
-import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 
 /** Setup và assertion dùng chung cho testcase tìm kiếm Đơn hàng Đồng phục. */
 public abstract class UniformOrderSearchTestSupport extends BaseTest {
@@ -17,16 +13,7 @@ public abstract class UniformOrderSearchTestSupport extends BaseTest {
     /** Đảm bảo có session đăng nhập và mở đúng Page Object của module. */
     @BeforeMethod(alwaysRun = true)
     public void prepareUniformOrderSearch() {
-        if (driver == null) {
-            throw new SkipException("WebDriver không khởi tạo được.");
-        }
-        if (!driver.getCurrentUrl().contains("/vuatho/")) {
-            LoginPage loginPage = new AuthenticationFlow(driver)
-                    .openApplicationAndLogin();
-            Assert.assertTrue(
-                    loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                    "Không đăng nhập được trước khi kiểm tra tìm kiếm Đơn hàng Đồng phục.");
-        }
+        requireAuthenticatedSession("tìm kiếm Đơn hàng Đồng phục");
         orderPage = new UniformOrderPage(driver);
     }
 

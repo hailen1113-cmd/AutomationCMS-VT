@@ -1,15 +1,10 @@
 package com.vuatho.support.workerprofile;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.WorkerProfilePage;
-import org.testng.Assert;
-import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 
 /**
  * Cung cấp thiết lập, dữ liệu và thao tác dùng chung cho các test hồ sơ nhân sự.
@@ -31,12 +26,7 @@ public abstract class WorkerProfileTestSupport extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareWorkerProfilePage() {
-        if (driver == null) {
-            throw new SkipException("WebDriver khong khoi tao duoc; bo qua setup trang ho so tho.");
-        }
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Khong dang nhap duoc truoc khi kiem tra ho so tho.");
+        requireAuthenticatedSession("hồ sơ thợ");
         if (preserveWorkerProfileStateBetweenMethods()
                 && workerProfilePage != null
                 && driver.getCurrentUrl().contains("/vuatho/worker")) {

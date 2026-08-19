@@ -1,14 +1,10 @@
 package com.vuatho.support.userprofile;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.UserProfilePage;
 import com.vuatho.testdata.UserProfileCase;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 
 /**
  * Cung cấp thiết lập, dữ liệu và thao tác dùng chung cho các test hồ sơ người dùng.
@@ -30,9 +26,7 @@ public abstract class UserProfileTestSupport extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareAuthenticatedSession() {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Khong dang nhap duoc truoc khi kiem tra ho so nguoi dung.");
+        requireAuthenticatedSession("hồ sơ người dùng");
         userProfilePage = new UserProfilePage(driver);
     }
 

@@ -1,10 +1,8 @@
 package com.vuatho.support.ekyc;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.EkycPage;
 import com.vuatho.pages.EkycPage.KycSide;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.testdata.EkycInformationCase;
 import com.vuatho.testdata.EkycWorkbookCase;
 import com.vuatho.utils.TextNormalizer;
@@ -12,7 +10,6 @@ import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -72,9 +69,7 @@ public abstract class EkycWorkflowTestSupport extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareAuthenticatedSession() {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Khong dang nhap duoc truoc khi kiem tra eKYC.");
+        requireAuthenticatedSession("eKYC");
         ekycPage = new EkycPage(driver);
         System.out.println("[eKYC] Dang nhap xong, san sang mo menu eKYC.");
     }

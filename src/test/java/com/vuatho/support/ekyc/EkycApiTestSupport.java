@@ -6,13 +6,10 @@ import com.vuatho.api.BrowserApiClient;
 import com.vuatho.api.JsonChecks;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,9 +33,7 @@ public abstract class EkycApiTestSupport extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareAuthenticatedSession() {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Khong the dang nhap truoc khi kiem tra eKYC API.");
+        requireAuthenticatedSession("eKYC API");
         api = new BrowserApiClient(driver);
     }
 

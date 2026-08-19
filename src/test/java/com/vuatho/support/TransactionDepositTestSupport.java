@@ -1,7 +1,6 @@
 package com.vuatho.support;
 
 import com.vuatho.pages.TransactionCategoryPage;
-import com.vuatho.pages.TransactionHistoryPage;
 import org.testng.Assert;
 
 import java.time.Duration;
@@ -17,10 +16,7 @@ public abstract class TransactionDepositTestSupport extends TransactionCategoryT
     }
 
     protected final void openDepositSubtype(TransactionCategoryPage.Subtype subtype) {
-        String url = transactionPage.currentUrl();
-        if (!url.contains("tab=" + subtype.tab()) || !url.contains("type=" + subtype.type())) {
-            transactionPage.open(subtype);
-        }
+        openSubtype(subtype);
     }
 
     protected final void assertDepositRows() {
@@ -28,10 +24,6 @@ public abstract class TransactionDepositTestSupport extends TransactionCategoryT
         Assert.assertFalse(rows.isEmpty(), "Không có dữ liệu Tiền nạp để kiểm tra");
         rows.forEach(row -> Assert.assertFalse(row.value("Loại giao dịch").isBlank(),
                 "Dòng thiếu loại giao dịch: " + row.signature()));
-    }
-
-    protected final TransactionHistoryPage advancedPage() {
-        return new TransactionHistoryPage(driver);
     }
 
     protected final List<String> waitForRowsToChange(List<String> before) {

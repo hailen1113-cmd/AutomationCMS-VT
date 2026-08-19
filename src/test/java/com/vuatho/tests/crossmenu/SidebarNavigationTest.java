@@ -5,8 +5,6 @@ import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.quality.PageHealthChecker;
@@ -17,7 +15,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.asserts.SoftAssert;
 
-import java.time.Duration;
 
 /**
  * Xác nhận mỗi mục sidebar điều hướng đến đúng route và trang đích tải thành công.
@@ -53,9 +50,7 @@ public class SidebarNavigationTest extends BaseTest {
             groups = {"smoke", "navigation", "loadpage"},
             description = CrossMenuTestCases.CROSS_MENU_015)
     public void menuDestinationLoadsSuccessfully(MenuTarget target) {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Không thể đăng nhập trước khi kiểm tra menu.");
+        requireAuthenticatedSession("điều hướng menu");
 
         PageHealthChecker healthChecker = new PageHealthChecker(driver);
         healthChecker.startObservation();

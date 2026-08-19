@@ -4,7 +4,6 @@ import com.vuatho.testcases.CrossMenuTestCases;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.pages.ReadOnlyFeaturesPage;
 import com.vuatho.testdata.FilterCatalog;
@@ -53,7 +52,7 @@ public class SearchFilterResetTest extends BaseTest {
     @Test(dataProvider = "searchFilters",
             description = CrossMenuTestCases.CROSS_MENU_014)
     public void searchFilterCanBeAppliedAndReset(FilterTarget target) {
-        new AuthenticationFlow(driver).openApplicationAndLogin();
+        requireAuthenticatedSession("bộ lọc liên menu");
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target.page(), false);
 
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);

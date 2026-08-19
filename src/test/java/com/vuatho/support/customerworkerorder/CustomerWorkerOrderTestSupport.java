@@ -1,15 +1,10 @@
 package com.vuatho.support.customerworkerorder;
 
 import com.vuatho.core.BaseTest;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.CustomerWorkerOrderPage;
-import com.vuatho.pages.LoginPage;
-import org.testng.Assert;
-import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
-import java.time.Duration;
 
 /**
  * Lớp nền dùng chung cho các testcase Đơn Khách - Thợ.
@@ -25,12 +20,7 @@ public abstract class CustomerWorkerOrderTestSupport extends BaseTest {
     /** Đăng nhập nếu cần, mở route đơn và tạo Page Object trước mỗi testcase. */
     @BeforeMethod(alwaysRun = true)
     public void prepareOrderPage() {
-        if (driver == null) throw new SkipException("WebDriver không khởi tạo được.");
-        if (!driver.getCurrentUrl().contains("/vuatho/")) {
-            LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-            Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                    "Không đăng nhập được trước khi kiểm tra Đơn Khách - Thợ.");
-        }
+        requireAuthenticatedSession("Đơn Khách - Thợ");
         orderPage = new CustomerWorkerOrderPage(driver).open();
     }
 

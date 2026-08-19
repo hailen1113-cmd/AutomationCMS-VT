@@ -4,7 +4,6 @@ import com.vuatho.testcases.CrossMenuTestCases;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.pages.ReadOnlyFeaturesPage;
@@ -78,7 +77,7 @@ public class ReadOnlyInteractionTest extends BaseTest {
      * @param target giá trị target được truyền vào
      */
     private void open(MenuTarget target) {
-        new AuthenticationFlow(driver).openApplicationAndLogin();
+        requireAuthenticatedSession("tương tác chỉ đọc liên menu");
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
     }
 }

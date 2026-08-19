@@ -1,7 +1,6 @@
 package com.vuatho.support;
 
 import com.vuatho.pages.TransactionCategoryPage;
-import com.vuatho.pages.TransactionHistoryPage;
 
 import java.util.List;
 
@@ -10,10 +9,6 @@ public abstract class TransactionAssistantTestSupport extends TransactionCategor
     @Override
     protected final TransactionCategoryPage.Category category() {
         return TransactionCategoryPage.Category.ASSISTANT;
-    }
-
-    protected final TransactionHistoryPage advancedPage() {
-        return new TransactionHistoryPage(driver);
     }
 
     protected final List<String> signatures(List<TransactionCategoryPage.TransactionRow> rows) {

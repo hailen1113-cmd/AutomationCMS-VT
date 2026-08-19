@@ -5,7 +5,6 @@ import com.vuatho.testcases.WorkerMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.PartnerWorkerCase;
 import com.vuatho.testdata.PartnerWorkerTestData;
@@ -52,7 +51,7 @@ public class ControlInventoryTest extends BaseTest {
             description = WorkerMenuTestCases.WORKER_MENU_001)
     public void inventoryWorkerMenuControls(PartnerWorkerCase testCase) {
         // Mỗi case chủ động khôi phục điểm bắt đầu hợp lệ trước khi điều hướng.
-        new AuthenticationFlow(driver).openApplicationAndLogin();
+        requireAuthenticatedSession("inventory menu Đối Tác - Thợ");
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(testCase.page(), false);
         // Kết quả inventory được in với tên case để dễ đối chiếu trong log TestNG.
         new UiFeatureExplorer(driver).printInventory(testCase.toString());

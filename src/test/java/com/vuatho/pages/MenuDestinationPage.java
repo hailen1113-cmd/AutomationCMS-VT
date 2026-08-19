@@ -20,6 +20,7 @@ public class MenuDestinationPage {
             "[role='progressbar'], .ant-spin-spinning, .ant-skeleton, .skeleton");
     private static final By DASHBOARD_MENU = By.cssSelector("a[href='/vuatho/dashboard']");
     private static final By SUPPLY_PERFORMANCE_MENU = By.cssSelector("a[href='/vuatho/supply-performance']");
+    private static final By STRATEGIC_GIS_MENU = By.cssSelector("a[href='/vuatho/strategic-gis']");
     private static final By FINANCE_MENU = By.cssSelector("a[href='/vuatho/finance']");
     private static final By USER_MANAGEMENT_MENU = By.cssSelector("a[href='/vuatho/user']");
     private static final By EKYC_MENU = By.cssSelector("a[href='/vuatho/ekyc']");
@@ -34,10 +35,17 @@ public class MenuDestinationPage {
     private static final By CUSTOMER_WORKER_ORDER_MENU = By.cssSelector("a[href='/vuatho/order']");
     private static final By ASSISTANT_WORKER_ORDER_MENU = By.cssSelector(
             "a[href='/vuatho/assistant-worker-order']");
+    private static final By ORDER_CONFIG_MENU = By.cssSelector("a[href='/vuatho/order-config']");
+    private static final By ORDER_ACQUISITION_MENU = By.cssSelector(
+            "a[href='/vuatho/order-acquisition']");
     private static final By UNIFORM_MENU = By.cssSelector("a[href='/vuatho/uniform']");
     private static final By ORDER_UNIFORM_MENU = By.cssSelector("a[href='/vuatho/order-uniform']");
     private static final By INVENTORY_UNIFORM_MENU = By.cssSelector("a[href='/vuatho/inventory-uniform']");
     private static final By TRANSACTION_MENU = By.cssSelector("a[href='/vuatho/transaction']");
+    private static final By DEPOSIT_QR_REQUEST_MENU = By.cssSelector(
+            "a[href='/vuatho/deposit-qr-request']");
+    private static final By WITHDRAW_QR_REQUEST_MENU = By.cssSelector(
+            "a[href='/vuatho/withdraw-qr-request']");
     private static final By WEBSITE_CATEGORY_MENU = By.cssSelector("a[href='/vuatho/category']");
     private static final By WEBSITE_BLOG_MENU = By.cssSelector("a[href='/vuatho/blog']");
     private static final By WEBSITE_MEDIA_BLOG_MENU = By.cssSelector("a[href='/vuatho/media-blog']");
@@ -68,6 +76,9 @@ public class MenuDestinationPage {
     private static final By MARKETING_CAMPAIGNS_MENU = By.cssSelector("a[href='/vuatho/campaigns']");
     private static final By MARKETING_COMPETITION_MENU = By.cssSelector("a[href='/vuatho/competition']");
     private static final By MARKETING_TOA_SANG_MENU = By.cssSelector("a[href='/vuatho/toasangvuatho']");
+    private static final By MARKETING_LOTTERY_MENU = By.cssSelector("a[href='/vuatho/lottery']");
+    private static final By MARKETING_ACHIEVEMENT_HONOR_MENU = By.cssSelector(
+            "a[href='/vuatho/achievement-honor']");
     private static final By MARKETING_INSURANCE_MENU = By.cssSelector("a[href='/vuatho/insurance']");
     private static final By MARKETING_SOS_MENU = By.cssSelector("a[href='/vuatho/sos-request']");
     private static final By COLLAPSIBLE_PARENT_MENUS = By.cssSelector(
@@ -234,6 +245,27 @@ public class MenuDestinationPage {
         if ("Quản Lí eKYC".equals(targetLabel)) {
             return currentRouteIs("/vuatho/ekyc");
         }
+        if ("Bản Đồ Chiến Lược".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/strategic-gis");
+        }
+        if ("Cấu Hình Đơn".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/order-config");
+        }
+        if ("Thống kê tháng".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/order-acquisition");
+        }
+        if ("Yêu cầu nạp QR".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/deposit-qr-request");
+        }
+        if ("Yêu cầu rút qua ngân hàng".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/withdraw-qr-request");
+        }
+        if ("Dãy Số May Mắn".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/lottery");
+        }
+        if ("Chương Trình Thi Đua & Vinh Danh Thợ".equals(targetLabel)) {
+            return currentRouteIs("/vuatho/achievement-honor");
+        }
         return false;
     }
 
@@ -300,6 +332,13 @@ public class MenuDestinationPage {
         }
         if ("Hiệu Quả Nguồn Thợ & Chi Phí".equals(label)) {
             return driver.findElements(SUPPLY_PERFORMANCE_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Bản Đồ Chiến Lược".equals(label)) {
+            return driver.findElements(STRATEGIC_GIS_MENU).stream()
                     .filter(WebElement::isDisplayed)
                     .filter(element -> element.getRect().getX() < 500)
                     .findFirst()
@@ -382,6 +421,20 @@ public class MenuDestinationPage {
                     .findFirst()
                     .orElse(null);
         }
+        if ("Cấu Hình Đơn".equals(label)) {
+            return driver.findElements(ORDER_CONFIG_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Thống kê tháng".equals(label)) {
+            return driver.findElements(ORDER_ACQUISITION_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
         if ("Quản Lí Đồng Phục".equals(label)) {
             return driver.findElements(UNIFORM_MENU).stream()
                     .filter(WebElement::isDisplayed)
@@ -405,6 +458,20 @@ public class MenuDestinationPage {
         }
         if ("Lịch Sử Giao Dịch".equals(label)) {
             return driver.findElements(TRANSACTION_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Yêu cầu nạp QR".equals(label)) {
+            return driver.findElements(DEPOSIT_QR_REQUEST_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Yêu cầu rút qua ngân hàng".equals(label)) {
+            return driver.findElements(WITHDRAW_QR_REQUEST_MENU).stream()
                     .filter(WebElement::isDisplayed)
                     .filter(element -> element.getRect().getX() < 500)
                     .findFirst()
@@ -538,6 +605,20 @@ public class MenuDestinationPage {
         }
         if ("Tỏa Sáng Vua Thợ".equals(label)) {
             return driver.findElements(MARKETING_TOA_SANG_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Dãy Số May Mắn".equals(label)) {
+            return driver.findElements(MARKETING_LOTTERY_MENU).stream()
+                    .filter(WebElement::isDisplayed)
+                    .filter(element -> element.getRect().getX() < 500)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if ("Chương Trình Thi Đua & Vinh Danh Thợ".equals(label)) {
+            return driver.findElements(MARKETING_ACHIEVEMENT_HONOR_MENU).stream()
                     .filter(WebElement::isDisplayed)
                     .filter(element -> element.getRect().getX() < 500)
                     .findFirst()

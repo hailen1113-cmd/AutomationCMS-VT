@@ -4,8 +4,6 @@ import com.vuatho.testcases.UserProfileTestCases;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.UserProfilePage;
 import com.vuatho.utils.TextNormalizer;
 import org.testng.Assert;
@@ -14,7 +12,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -49,9 +46,7 @@ public class SearchTest extends BaseTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void prepareUserProfilePage() {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Khong dang nhap duoc truoc khi kiem tra tim kiem nguoi dung.");
+        requireAuthenticatedSession("tìm kiếm người dùng");
         userProfilePage = new UserProfilePage(driver).openFromMenu();
     }
 

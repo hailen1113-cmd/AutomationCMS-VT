@@ -1,16 +1,21 @@
 package com.vuatho.core;
 
 import com.vuatho.config.TestConfig;
+import com.vuatho.flows.AuthenticationFlow;
+import com.vuatho.pages.LoginPage;
 import com.vuatho.reporting.ConsoleEncoding;
 import com.vuatho.reporting.ScreenshotManager;
 import com.vuatho.utils.OverlayCleaner;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.testng.ITestResult;
+import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 
 import java.io.IOException;
+import java.time.Duration;
 
 public abstract class BaseTest {
     protected WebDriver driver;
@@ -55,6 +60,23 @@ public abstract class BaseTest {
      */
     protected boolean reuseDriverBetweenTestMethods() {
         return true;
+    }
+
+    /** Bảo đảm testcase có phiên ERP hợp lệ trước khi khởi tạo Page Object. */
+    protected final void requireAuthenticatedSession(String featureName) {
+        if (driver == null) {
+            throw new SkipException("WebDriver không khởi tạo được.");
+        }
+        String currentUrl = driver.getCurrentUrl().toLowerCase(java.util.Locale.ROOT);
+        boolean authenticatedErpRoute = currentUrl.contains(TestConfig.baseHost().toLowerCase(java.util.Locale.ROOT))
+                && currentUrl.contains("/vuatho/")
+                && !currentUrl.contains("/login");
+        if (authenticatedErpRoute) {
+            return;
+        }
+        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
+        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
+                "Không đăng nhập được trước khi kiểm tra " + featureName + ".");
     }
 
     // Không đặt driver.quit() trong BaseTest.

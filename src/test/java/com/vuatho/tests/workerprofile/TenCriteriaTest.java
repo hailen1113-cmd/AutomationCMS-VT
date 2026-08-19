@@ -4,15 +4,12 @@ import com.vuatho.testcases.WorkerProfileTestCases;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.WorkerProfilePage;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 /**
  * Kiểm tra tuần tự mười tiêu chí lọc nghiệp vụ của danh sách hồ sơ thợ.
  */
@@ -43,9 +40,7 @@ public class TenCriteriaTest extends BaseTest {
      */
         @BeforeMethod(alwaysRun = true)
         public void prepareWorkerCriteriaTab() {
-                LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-                Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                                "Không thể đăng nhập trước khi kiểm tra tab 10 Tiêu chí.");
+                requireAuthenticatedSession("tab 10 Tiêu chí");
                 workerProfilePage = new WorkerProfilePage(driver).openFromMenu();
                 workerProfilePage.openFirstWorkerInformation();
                 workerProfilePage.openTenCriteriaTab();

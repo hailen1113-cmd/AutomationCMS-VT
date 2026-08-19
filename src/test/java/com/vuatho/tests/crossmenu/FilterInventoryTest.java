@@ -6,7 +6,6 @@ import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiControl;
 import com.vuatho.exploration.UiFeatureExplorer;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.MenuCatalog;
@@ -40,7 +39,7 @@ public class FilterInventoryTest extends BaseTest {
      */
     @Test(description = CrossMenuTestCases.CROSS_MENU_001, dataProvider = "allMenus")
     public void inventoryFiltersAcrossAllMenus(MenuTarget target) {
-        new AuthenticationFlow(driver).openApplicationAndLogin();
+        requireAuthenticatedSession("inventory bộ lọc");
         UiFeatureExplorer explorer = new UiFeatureExplorer(driver);
 
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);

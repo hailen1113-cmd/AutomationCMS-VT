@@ -1,5 +1,6 @@
 package com.vuatho.testdata;
 
+import com.vuatho.config.TestConfig;
 import com.vuatho.navigation.MenuTarget;
 
 import java.util.List;
@@ -13,9 +14,12 @@ import static com.vuatho.navigation.MenuTarget.topLevel;
  * Khai báo tập trung các menu ERP được dùng bởi test điều hướng và kiểm tra chéo.
  */
 public final class MenuCatalog {
+    private static final MenuTarget PRIVATE_ORDER_ACQUISITION =
+            childOf("Đơn Dịch Vụ", "Thống kê tháng");
     private static final List<MenuTarget> GENERAL = List.of(
             topLevel("Dashboard"),
             topLevel("Hiệu Quả Nguồn Thợ & Chi Phí"),
+            topLevel("Bản Đồ Chiến Lược"),
             topLevel("Tài chính"),
             childOf("Người Dùng", "Quản Lí Người Dùng"),
             childOf("Người Dùng", "Quản Lí eKYC"),
@@ -23,10 +27,13 @@ public final class MenuCatalog {
             topLevel("Nghiệp Vụ"),
             childOf("Đơn Dịch Vụ", "Đơn Khách - Thợ"),
             childOf("Đơn Dịch Vụ", "Đơn Thợ Phụ"),
+            childOf("Đơn Dịch Vụ", "Cấu Hình Đơn"),
             childOf("Đồng Phục", "Quản Lí Đồng Phục"),
             childOf("Đồng Phục", "Quản Lí Đơn Hàng Đồng Phục"),
             childOf("Đồng Phục", "Quản Lí Kho Đồng Phục"),
             childOf("Giao Dịch", "Lịch Sử Giao Dịch"),
+            childOf("Giao Dịch", "Yêu cầu nạp QR"),
+            childOf("Giao Dịch", "Yêu cầu rút qua ngân hàng"),
             childOf("Website", "Quản Lí Danh Mục"),
             childOf("Website", "Quản Lí Bài Viết Nội Bộ"),
             childOf("Website", "Quản Lí Bài Viết Truyền Thông"),
@@ -46,12 +53,20 @@ public final class MenuCatalog {
             childOf("Marketing", "Quản Lí Chiến Dịch"),
             childOf("Marketing", "Quản Lí Cuộc Thi"),
             childOf("Marketing", "Tỏa Sáng Vua Thợ"),
+            childOf("Marketing", "Dãy Số May Mắn"),
+            childOf("Marketing", "Chương Trình Thi Đua & Vinh Danh Thợ"),
             childOf("Marketing", "Quản Lí Vua Thợ Care"),
             childOf("Marketing", "Yêu Cầu Hỗ Trợ (SOS)"));
     private static final List<MenuTarget> ALL = Stream.concat(
-                    GENERAL.stream(),
-                    PartnerWorkerTestData.menuPages().stream())
+                    Stream.concat(GENERAL.stream(), PartnerWorkerTestData.menuPages().stream()),
+                    privateEnvironmentMenus())
             .toList();
+
+    private static Stream<MenuTarget> privateEnvironmentMenus() {
+        return "private-erp.vuatho.com".equalsIgnoreCase(TestConfig.baseHost())
+                ? Stream.of(PRIVATE_ORDER_ACQUISITION)
+                : Stream.empty();
+    }
 
     /**
      * Khởi tạo MenuCatalog với các phụ thuộc cần thiết.

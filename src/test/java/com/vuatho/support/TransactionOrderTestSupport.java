@@ -1,7 +1,6 @@
 package com.vuatho.support;
 
 import com.vuatho.pages.TransactionCategoryPage;
-import com.vuatho.pages.TransactionHistoryPage;
 import org.testng.annotations.DataProvider;
 
 import java.util.List;
@@ -22,14 +21,6 @@ public abstract class TransactionOrderTestSupport extends TransactionCategoryTes
     }
 
     protected final void openOrderSubtype(TransactionCategoryPage.Subtype subtype) {
-        String url = transactionPage.currentUrl();
-        if (!url.contains("tab=order") || !url.contains("type=" + subtype.type())
-                || !transactionPage.activeGroupText().contains(subtype.label())) {
-            transactionPage.open(subtype);
-        }
-    }
-
-    protected final TransactionHistoryPage advancedPage() {
-        return new TransactionHistoryPage(driver);
+        openSubtype(subtype);
     }
 }

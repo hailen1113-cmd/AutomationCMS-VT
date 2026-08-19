@@ -4,8 +4,6 @@ import com.vuatho.testcases.WorkerMenuTestCases;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.flows.AuthenticationFlow;
-import com.vuatho.pages.LoginPage;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.PartnerWorkerCase;
 import com.vuatho.testdata.PartnerWorkerTestData;
@@ -13,7 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.time.Duration;
 
 /**
  * Xác nhận catalog menu Đối tác - Thợ đầy đủ và từng menu điều hướng đúng trang.
@@ -51,9 +48,7 @@ public class NavigationCatalogTest extends BaseTest {
             groups = {"partner-worker"},
             description = WorkerMenuTestCases.WORKER_MENU_002)
     public void runWorkerMenuNavigationCase(PartnerWorkerCase testCase) {
-        LoginPage loginPage = new AuthenticationFlow(driver).openApplicationAndLogin();
-        Assert.assertTrue(loginPage.isDashboardVisible(Duration.ofSeconds(20)),
-                "Không thể đăng nhập trước khi kiểm tra Đối Tác - Thợ.");
+        requireAuthenticatedSession("Đối Tác - Thợ");
 
         MenuDestinationPage page = new MenuDestinationPage(driver)
                 .openAndWaitUntilLoaded(testCase.page(), false);

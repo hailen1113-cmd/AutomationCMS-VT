@@ -5,7 +5,6 @@ import com.vuatho.testcases.CrossMenuTestCases;
 import com.vuatho.core.BaseTest;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
-import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.pages.ReadOnlyFeaturesPage;
@@ -55,7 +54,7 @@ public class OverlayFeatureInventoryTest extends BaseTest {
      */
     @Test(description = CrossMenuTestCases.CROSS_MENU_009, dataProvider = "overlays")
     public void inventoryOverlayFeatures(MenuTarget target, String controlLabel) {
-        new AuthenticationFlow(driver).openApplicationAndLogin();
+        requireAuthenticatedSession("inventory overlay");
         new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
 
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
