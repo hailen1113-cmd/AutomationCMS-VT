@@ -11,33 +11,12 @@ public abstract class TransactionInsuranceTestSupport extends TransactionCategor
         return TransactionCategoryPage.Category.INSURANCE;
     }
 
-    @DataProvider(name = "insuranceSubtypes")
-    public final Object[][] insuranceSubtypes() {
-        return subtypeRows();
-    }
-
     @DataProvider(name = "insuranceSelectFilters")
     public final Object[][] insuranceSelectFilters() {
         return new Object[][]{
                 {"trạng thái-filter", java.util.List.of("Đang chờ", "Thành công", "Thất bại")},
                 {"cổng thanh toán-filter", java.util.List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX")}
         };
-    }
-
-    @DataProvider(name = "insuranceFilterSelections")
-    public final Object[][] insuranceFilterSelections() {
-        java.util.List<Object[]> rows = new java.util.ArrayList<>();
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
-            for (Object[] filter : insuranceSelectFilters()) {
-                String aria = String.valueOf(filter[0]);
-                @SuppressWarnings("unchecked")
-                java.util.List<String> options = (java.util.List<String>) filter[1];
-                for (String option : options) {
-                    rows.add(new Object[]{subtype, aria, option});
-                }
-            }
-        }
-        return rows.toArray(Object[][]::new);
     }
 
     protected final void openInsuranceSubtype(TransactionCategoryPage.Subtype subtype) {

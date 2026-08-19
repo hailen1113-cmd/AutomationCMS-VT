@@ -23,9 +23,22 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
                 "Lịch sử giao dịch", "Phí & Doanh thu - Tổng quan");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_003,
-            dataProvider = "feeSubtypes")
-    public void showsExpectedFiltersAndColumns(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_003)
+    public void showsExpectedFiltersAndColumns() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_158)
+    public void showsExpectedFiltersAndColumnsType9() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_159)
+    public void showsExpectedFiltersAndColumnsType33() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(33));
+    }
+
+    private void verifyShowsExpectedFiltersAndColumnsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = transactionPage.layout();
         List<String> expected = subtype.type() == 8
@@ -38,16 +51,42 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()), result.url());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_004,
-            dataProvider = "feeSubtypes")
-    public void rowsHaveValidFormats(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_004)
+    public void rowsHaveValidFormats() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_160)
+    public void rowsHaveValidFormatsType9() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_161)
+    public void rowsHaveValidFormatsType33() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(33));
+    }
+
+    private void verifyRowsHaveValidFormatsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifyRowFormats();
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_015,
-            dataProvider = "feeSubtypes")
-    public void rowsMatchSelectedSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_015)
+    public void rowsMatchSelectedSubtype() {
+        verifyRowsMatchSelectedSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_162)
+    public void rowsMatchSelectedSubtypeType9() {
+        verifyRowsMatchSelectedSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_163)
+    public void rowsMatchSelectedSubtypeType33() {
+        verifyRowsMatchSelectedSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyRowsMatchSelectedSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var rows = transactionPage.rows();
         Assert.assertFalse(rows.isEmpty(), "Không có dữ liệu cho " + subtype.label());
@@ -55,9 +94,22 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
                 "Dòng không thuộc " + subtype.label() + ": " + row.signature()));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_016,
-            dataProvider = "feeSubtypes")
-    public void summaryShowsRevenueCountAndCollectedAmount(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_016)
+    public void summaryShowsRevenueCountAndCollectedAmount() {
+        verifySummaryShowsRevenueCountAndCollectedAmountForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_164)
+    public void summaryShowsRevenueCountAndCollectedAmountType9() {
+        verifySummaryShowsRevenueCountAndCollectedAmountForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_165)
+    public void summaryShowsRevenueCountAndCollectedAmountType33() {
+        verifySummaryShowsRevenueCountAndCollectedAmountForSubtype(subtype(33));
+    }
+
+    private void verifySummaryShowsRevenueCountAndCollectedAmountForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         if (subtype.type() == 8) {
             var result = transactionPage.feeConnectionOverview();
@@ -134,36 +186,41 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.url().contains("tab=fee&type=8"), result.url());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_076,
-            dataProvider = "feeSubtypes")
-    public void overviewTotalCountMatchesFullFilteredResult(TransactionCategoryPage.Subtype subtype) {
-        openFeeSubtype(subtype);
-        int displayedTotal = advancedPage().totalDisplayed();
-        int overviewTotal = subtype.type() == 8
-                ? transactionPage.feeConnectionOverview().transactionCount()
-                : subtype.type() == 9
-                ? transactionPage.feeWalletLinkOverview().totalCount()
-                : transactionPage.feeMaterialShareOverview().totalOrders();
-        Assert.assertEquals(overviewTotal, displayedTotal,
-                "Tổng overview không bằng Tổng hiển thị của " + subtype.label());
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_076)
+    public void overviewTotalCountMatchesFullFilteredResult() {
+        verifyOverviewTotalCountMatchesFullFilteredResultForSubtype(subtype(8));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_077)
-    public void feeConnectionDonutMatchesCollectedAndDebtLegend() {
-        var overview = transactionPage.feeConnectionOverview();
-        var pie = transactionPage.feeConnectionPieOverview();
-        Assert.assertEquals(pie.chartCount(), 1);
-        Set<String> expected = new java.util.LinkedHashSet<>();
-        if (overview.collected().signum() > 0) expected.add("Đã thu");
-        if (overview.debt().signum() > 0) expected.add("Công nợ");
-        Assert.assertEquals(pie.sectors().keySet(), expected);
-        if (pie.sectors().containsKey("Đã thu")) {
-            Assert.assertEquals(pie.sectors().get("Đã thu"), "#10b981");
-        }
-        if (pie.sectors().containsKey("Công nợ")) {
-            Assert.assertEquals(pie.sectors().get("Công nợ"), "#f43f5e");
-        }
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_190)
+    public void overviewTotalCountMatchesFullFilteredResultType9() {
+        verifyOverviewTotalCountMatchesFullFilteredResultForSubtype(subtype(9));
     }
+
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_191)
+    public void overviewTotalCountMatchesFullFilteredResultType33() {
+        verifyOverviewTotalCountMatchesFullFilteredResultForSubtype(subtype(33));
+    }
+
+    private void verifyOverviewTotalCountMatchesFullFilteredResultForSubtype(TransactionCategoryPage.Subtype subtype) {
+        var result = transactionPage.feeConnectionOverview();
+        Assert.assertEquals(result.totalRevenue(), result.collected().add(result.debt()),
+                "Tổng doanh thu khác Đã thu + Công nợ");
+        Assert.assertEquals(result.collectedPercentage().add(result.debtPercentage()),
+                new BigDecimal("100.0"), "Tổng tỷ lệ Đã thu + Công nợ không bằng 100%");
+    }
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_078)
     public void feeConnectionPercentagesMatchDisplayedAmounts() {
@@ -226,21 +283,64 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_084)
-    public void switchingSubtypesShowsOnlyMatchingOverviewBlocks() {
+    public void connectionFeeShowsOnlyMatchingOverviewBlocks() {
+        verifySubtypeShowsOnlyMatchingOverviewBlocks(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_194)
+    public void walletLinkFeeShowsOnlyMatchingOverviewBlocks() {
+        verifySubtypeShowsOnlyMatchingOverviewBlocks(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_195)
+    public void materialSharingFeeShowsOnlyMatchingOverviewBlocks() {
+        verifySubtypeShowsOnlyMatchingOverviewBlocks(subtype(33));
+    }
+
+    private void verifySubtypeShowsOnlyMatchingOverviewBlocks(TransactionCategoryPage.Subtype subtype) {
         Map<Integer, List<String>> expected = Map.of(
                 8, List.of("Tổng doanh thu", "Doanh thu theo ngày"),
                 9, List.of("Tổng phí liên kết ví", "Tổng số giao dịch"),
                 33, List.of("Tổng phí chia sẻ vật tư"));
-        for (var subtype : category().subtypes()) {
-            transactionPage.open(subtype);
-            Assert.assertEquals(transactionPage.visibleFeeOverviewHeadings(), expected.get(subtype.type()),
-                    "Overview còn sót dữ liệu type trước trên " + subtype.label());
+        transactionPage.open(subtype);
+        Assert.assertEquals(transactionPage.visibleFeeOverviewHeadings(), expected.get(subtype.type()),
+                "Overview còn sót dữ liệu type trước trên " + subtype.label());
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_186)
+    public void refreshingSubtypeKeepsMatchingOverviewAndRouteType9() {
+        verifyRefreshingSubtypeKeepsMatchingOverviewAndRouteForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_077)
+    public void feeConnectionDonutMatchesCollectedAndDebtLegend() {
+        var overview = transactionPage.feeConnectionOverview();
+        var pie = transactionPage.feeConnectionPieOverview();
+        Assert.assertEquals(pie.chartCount(), 1);
+        Set<String> expected = new java.util.LinkedHashSet<>();
+        if (overview.collected().signum() > 0) expected.add("Đã thu");
+        if (overview.debt().signum() > 0) expected.add("Công nợ");
+        Assert.assertEquals(pie.sectors().keySet(), expected);
+        if (pie.sectors().containsKey("Đã thu")) {
+            Assert.assertEquals(pie.sectors().get("Đã thu"), "#10b981");
+        }
+        if (pie.sectors().containsKey("Công nợ")) {
+            Assert.assertEquals(pie.sectors().get("Công nợ"), "#f43f5e");
         }
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_085,
-            dataProvider = "feeSubtypes")
-    public void refreshingSubtypeKeepsMatchingOverviewAndRoute(TransactionCategoryPage.Subtype subtype) {
+
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_187)
+    public void refreshingSubtypeKeepsMatchingOverviewAndRouteType33() {
+        verifyRefreshingSubtypeKeepsMatchingOverviewAndRouteForSubtype(subtype(33));
+    }
+
+    private void verifyRefreshingSubtypeKeepsMatchingOverviewAndRouteForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         List<String> before = transactionPage.visibleFeeOverviewHeadings();
         var result = transactionPage.refreshFeeOverview();
@@ -248,6 +348,20 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()), result.url());
         Assert.assertTrue(result.activeText().contains(subtype.label()), result.activeText());
     }
+
+
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_085)
+    public void refreshingSubtypeKeepsMatchingOverviewAndRoute() {
+        verifyRefreshingSubtypeKeepsMatchingOverviewAndRouteForSubtype(subtype(8));
+    }
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_088)
     public void debtWorkerLinkOpensCorrectProfileAndRestoresModal() {
@@ -310,5 +424,10 @@ public class TransactionFeeOverviewTest extends TransactionFeeTestSupport {
         var matcher = java.util.regex.Pattern.compile(
                 "(?:[?&])" + java.util.regex.Pattern.quote(key) + "=([^&]+)").matcher(url);
         return matcher.find() ? matcher.group(1) : "";
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

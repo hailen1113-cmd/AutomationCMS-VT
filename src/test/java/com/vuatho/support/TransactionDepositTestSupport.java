@@ -3,7 +3,6 @@ package com.vuatho.support;
 import com.vuatho.pages.TransactionCategoryPage;
 import com.vuatho.pages.TransactionHistoryPage;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 
 import java.time.Duration;
 import java.util.List;
@@ -15,24 +14,6 @@ public abstract class TransactionDepositTestSupport extends TransactionCategoryT
     @Override
     protected final TransactionCategoryPage.Category category() {
         return TransactionCategoryPage.Category.DEPOSIT;
-    }
-
-    @DataProvider(name = "depositSubtypes")
-    public final Object[][] depositSubtypes() {
-        String requestedType = System.getProperty("deposit.type", "").trim();
-        return category().subtypes().stream()
-                .filter(subtype -> requestedType.isBlank()
-                        || requestedType.equals(String.valueOf(subtype.type())))
-                .map(subtype -> new Object[]{subtype})
-                .toArray(Object[][]::new);
-    }
-
-    @DataProvider(name = "costWalletGatewaySubtypes")
-    public final Object[][] costWalletGatewaySubtypes() {
-        return category().subtypes().stream()
-                .filter(subtype -> subtype.type() == 0 || subtype.type() == 10)
-                .map(subtype -> new Object[]{subtype})
-                .toArray(Object[][]::new);
     }
 
     protected final void openDepositSubtype(TransactionCategoryPage.Subtype subtype) {

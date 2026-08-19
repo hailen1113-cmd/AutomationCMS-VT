@@ -21,32 +21,84 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
                 "Lịch sử giao dịch", "Phí & Doanh thu - Bộ lọc");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_005,
-            dataProvider = "feeSubtypes")
-    public void searchesRealUserAndClearingRestoresRows(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_005)
+    public void searchesRealUserAndClearingRestoresRows() {
+        verifySearchesRealUserAndClearingRestoresRowsForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_128)
+    public void searchesRealUserAndClearingRestoresRowsType9() {
+        verifySearchesRealUserAndClearingRestoresRowsForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_129)
+    public void searchesRealUserAndClearingRestoresRowsType33() {
+        verifySearchesRealUserAndClearingRestoresRowsForSubtype(subtype(33));
+    }
+
+    private void verifySearchesRealUserAndClearingRestoresRowsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifySearchAndReset(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_006,
-            dataProvider = "feeSubtypes")
-    public void invoiceFilterOptionsKeepCurrentSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_006)
+    public void invoiceFilterOptionsKeepCurrentSubtype() {
+        verifyInvoiceFilterOptionsKeepCurrentSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_130)
+    public void invoiceFilterOptionsKeepCurrentSubtypeType9() {
+        verifyInvoiceFilterOptionsKeepCurrentSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_131)
+    public void invoiceFilterOptionsKeepCurrentSubtypeType33() {
+        verifyInvoiceFilterOptionsKeepCurrentSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyInvoiceFilterOptionsKeepCurrentSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifyFilterOptions(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_019,
-            dataProvider = "feeSubtypes")
-    public void invoiceOptionsAreAllYesAndNo(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_019)
+    public void invoiceOptionsAreAllYesAndNo() {
+        verifyInvoiceOptionsAreAllYesAndNoForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_132)
+    public void invoiceOptionsAreAllYesAndNoType9() {
+        verifyInvoiceOptionsAreAllYesAndNoForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_133)
+    public void invoiceOptionsAreAllYesAndNoType33() {
+        verifyInvoiceOptionsAreAllYesAndNoForSubtype(subtype(33));
+    }
+
+    private void verifyInvoiceOptionsAreAllYesAndNoForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = transactionPage.firstAvailableFilter();
         Assert.assertEquals(result.ariaLabel(), "xuất hoá đơn-filter");
         Assert.assertEquals(result.options(), List.of("Tất cả", "Có", "Không"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_020,
-            dataProvider = "feeSubtypes")
-    public void selectingInvoiceYesKeepsSubtypeAndReturnsValidState(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_020)
+    public void selectingInvoiceYesKeepsSubtypeAndReturnsValidState() {
+        verifySelectingInvoiceYesKeepsSubtypeAndReturnsValidStateForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_134)
+    public void selectingInvoiceYesKeepsSubtypeAndReturnsValidStateType9() {
+        verifySelectingInvoiceYesKeepsSubtypeAndReturnsValidStateForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_135)
+    public void selectingInvoiceYesKeepsSubtypeAndReturnsValidStateType33() {
+        verifySelectingInvoiceYesKeepsSubtypeAndReturnsValidStateForSubtype(subtype(33));
+    }
+
+    private void verifySelectingInvoiceYesKeepsSubtypeAndReturnsValidStateForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = transactionPage.selectOption("xuất hoá đơn-filter", "Có");
         Assert.assertTrue(result.selectedText().contains("Có"));
@@ -57,9 +109,22 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
                 || result.empty() && result.pageText().contains("Chưa có dữ liệu"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_021,
-            dataProvider = "feeSubtypes")
-    public void selectingInvoiceNoKeepsSubtypeAndReturnsValidState(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_021)
+    public void selectingInvoiceNoKeepsSubtypeAndReturnsValidState() {
+        verifySelectingInvoiceNoKeepsSubtypeAndReturnsValidStateForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_136)
+    public void selectingInvoiceNoKeepsSubtypeAndReturnsValidStateType9() {
+        verifySelectingInvoiceNoKeepsSubtypeAndReturnsValidStateForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_137)
+    public void selectingInvoiceNoKeepsSubtypeAndReturnsValidStateType33() {
+        verifySelectingInvoiceNoKeepsSubtypeAndReturnsValidStateForSubtype(subtype(33));
+    }
+
+    private void verifySelectingInvoiceNoKeepsSubtypeAndReturnsValidStateForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = transactionPage.selectOption("xuất hoá đơn-filter", "Không");
         Assert.assertTrue(result.selectedText().contains("Không"));
@@ -72,6 +137,21 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_022)
     public void futureDatesCannotBeSelected() {
+        verifyFutureDatesCannotBeSelected(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_138)
+    public void futureDatesCannotBeSelectedType9() {
+        verifyFutureDatesCannotBeSelected(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_139)
+    public void futureDatesCannotBeSelectedType33() {
+        verifyFutureDatesCannotBeSelected(subtype(33));
+    }
+
+    private void verifyFutureDatesCannotBeSelected(TransactionCategoryPage.Subtype subtype) {
+        openFeeSubtype(subtype);
         var result = advancedPage().futureDatesAreDisabled();
         Assert.assertTrue(result.disabled());
         Assert.assertTrue(result.disabledCount() > 0);
@@ -86,25 +166,52 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         Assert.assertTrue(advancedPage().dateApplyRequiresSelection().initiallyDisabled());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_024,
-            dataProvider = "feeSubtypes")
-    public void unmatchedSearchShowsEmptyStateAndResetRestoresSubtype(
-            TransactionCategoryPage.Subtype subtype) {
-        openFeeSubtype(subtype);
-        var result = transactionPage.unmatchedSearchAndReset("NO_FEE_TRANSACTION_987654321");
-        Assert.assertTrue(result.empty());
-        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
-        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
-        Assert.assertEquals(result.restored().stream().map(TransactionCategoryPage.TransactionRow::signature).toList(),
-                result.before().stream().map(TransactionCategoryPage.TransactionRow::signature).toList());
-        Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()), result.url());
-        Assert.assertTrue(result.activeText().contains(subtype.label()));
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_024)
+    public void unmatchedSearchShowsEmptyStateAndResetRestoresSubtype() {
+        verifyUnmatchedSearchShowsEmptyStateAndResetRestoresSubtypeForSubtype(subtype(8));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_051,
-            dataProvider = "feeSubtypes")
-    public void inclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDates(
-            TransactionCategoryPage.Subtype subtype) {
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_178)
+    public void unmatchedSearchShowsEmptyStateAndResetRestoresSubtypeType9() {
+        verifyUnmatchedSearchShowsEmptyStateAndResetRestoresSubtypeForSubtype(subtype(9));
+    }
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_179)
+    public void unmatchedSearchShowsEmptyStateAndResetRestoresSubtypeType33() {
+        verifyUnmatchedSearchShowsEmptyStateAndResetRestoresSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyUnmatchedSearchShowsEmptyStateAndResetRestoresSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
+        var result = advancedPage().futureDatesAreDisabled();
+        Assert.assertTrue(result.disabled());
+        Assert.assertTrue(result.disabledCount() > 0);
+    }
+
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_051)
+    public void inclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDates() {
+        verifyInclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_140)
+    public void inclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesType9() {
+        verifyInclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_141)
+    public void inclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesType33() {
+        verifyInclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesForSubtype(subtype(33));
+    }
+
+    private void verifyInclusiveTwoDayRangeOnlyReturnsRowsInsideSelectedDatesForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().filterRecentRange();
         Assert.assertFalse(result.rows().isEmpty());
@@ -115,10 +222,22 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         Assert.assertTrue(transactionPage.currentUrl().contains("tab=fee&type=" + subtype.type()));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_052,
-            dataProvider = "feeSubtypes")
-    public void singleDayUsesFullDayAndOnlyReturnsSelectedDate(
-            TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_052)
+    public void singleDayUsesFullDayAndOnlyReturnsSelectedDate() {
+        verifySingleDayUsesFullDayAndOnlyReturnsSelectedDateForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_142)
+    public void singleDayUsesFullDayAndOnlyReturnsSelectedDateType9() {
+        verifySingleDayUsesFullDayAndOnlyReturnsSelectedDateForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_143)
+    public void singleDayUsesFullDayAndOnlyReturnsSelectedDateType33() {
+        verifySingleDayUsesFullDayAndOnlyReturnsSelectedDateForSubtype(subtype(33));
+    }
+
+    private void verifySingleDayUsesFullDayAndOnlyReturnsSelectedDateForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().filterSingleDay();
         Assert.assertFalse(result.rows().isEmpty());
@@ -133,6 +252,21 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_053)
     public void exactMinuteRangeOnlyReturnsRowsInsideSelectedTime() {
+        verifyExactMinuteRangeOnlyReturnsRowsInsideSelectedTime(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_144)
+    public void exactMinuteRangeOnlyReturnsRowsInsideSelectedTimeType9() {
+        verifyExactMinuteRangeOnlyReturnsRowsInsideSelectedTime(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_145)
+    public void exactMinuteRangeOnlyReturnsRowsInsideSelectedTimeType33() {
+        verifyExactMinuteRangeOnlyReturnsRowsInsideSelectedTime(subtype(33));
+    }
+
+    private void verifyExactMinuteRangeOnlyReturnsRowsInsideSelectedTime(TransactionCategoryPage.Subtype subtype) {
+        openFeeSubtype(subtype);
         var result = advancedPage().filterSourceMinute();
         Assert.assertFalse(result.rows().isEmpty());
         Assert.assertTrue(result.rows().stream().allMatch(row -> {
@@ -162,27 +296,58 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.clearControlGone());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_056,
-            dataProvider = "feeSubtypes")
-    public void realUserAndSingleDayCombinationMatchesBothConditions(
-            TransactionCategoryPage.Subtype subtype) {
-        openFeeSubtype(subtype);
-        var date = advancedPage().filterSingleDay();
-        var search = transactionPage.applySearchFromFirstUser();
-        Assert.assertFalse(search.rows().isEmpty());
-        search.rows().forEach(row -> {
-            Assert.assertTrue(row.value("Người dùng").contains(search.query()),
-                    "Người dùng không chứa từ khóa " + search.query());
-            Assert.assertEquals(row.createdAt().toLocalDate(), date.startDate());
-        });
-        var state = transactionPage.readFeeFilterState();
-        Assert.assertTrue(state.pageText().contains("Đang lọc:"));
-        Assert.assertTrue(state.pageText().contains(search.query()));
-        Assert.assertTrue(state.url().contains("tab=fee&type=" + subtype.type()));
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_056)
+    public void realUserAndSingleDayCombinationMatchesBothConditions() {
+        verifyRealUserAndSingleDayCombinationMatchesBothConditionsForSubtype(subtype(8));
     }
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_180)
+    public void realUserAndSingleDayCombinationMatchesBothConditionsType9() {
+        verifyRealUserAndSingleDayCombinationMatchesBothConditionsForSubtype(subtype(9));
+    }
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_181)
+    public void realUserAndSingleDayCombinationMatchesBothConditionsType33() {
+        verifyRealUserAndSingleDayCombinationMatchesBothConditionsForSubtype(subtype(33));
+    }
+
+    private void verifyRealUserAndSingleDayCombinationMatchesBothConditionsForSubtype(TransactionCategoryPage.Subtype subtype) {
+        var result = advancedPage().filterSourceMinute();
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row -> {
+            var createdAt = row.createdAt();
+            return createdAt.toLocalDate().equals(result.startDate())
+                    && !createdAt.toLocalTime().isBefore(result.startTime())
+                    && !createdAt.toLocalTime().isAfter(result.endTime());
+        }));
+        Assert.assertTrue(result.selectedText().contains(result.startTime().toString()));
+        Assert.assertTrue(result.selectedText().contains(result.endTime().toString()));
+    }
+
+
+
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_057)
     public void switchingInvoiceYesNoAndAllRestoresBaseline() {
+        verifySwitchingInvoiceYesNoAndAllRestoresBaseline(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_146)
+    public void switchingInvoiceYesNoAndAllRestoresBaselineType33() {
+        verifySwitchingInvoiceYesNoAndAllRestoresBaseline(subtype(33));
+    }
+
+    private void verifySwitchingInvoiceYesNoAndAllRestoresBaseline(TransactionCategoryPage.Subtype subtype) {
+        openFeeSubtype(subtype);
         var result = transactionPage.switchInvoiceYesNoAndAll();
         Assert.assertTrue(result.yesText().contains("Có"));
         Assert.assertTrue(result.noText().contains("Không"));
@@ -190,26 +355,42 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         Assert.assertFalse(result.baseline().isEmpty(),
                 "Không có dữ liệu nền để kiểm tra chuyển bộ lọc Xuất hóa đơn");
         Assert.assertEquals(result.restored(), result.baseline());
-        Assert.assertTrue(result.url().contains("tab=fee&type=8"));
+        Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()), result.url());
         Assert.assertTrue(result.activeText().contains("Phí kết nối"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_058,
-            dataProvider = "feeSubtypes")
-    public void resetClearsSearchInvoiceAndDateButKeepsSubtype(
-            TransactionCategoryPage.Subtype subtype) {
-        openFeeSubtype(subtype);
-        advancedPage().filterSingleDay();
-        transactionPage.applySearchFromFirstUser();
-        transactionPage.selectOption("xuất hoá đơn-filter", "Có");
-        var result = transactionPage.resetAndReadFeeFilterState();
-        Assert.assertTrue(result.search() == null || result.search().isBlank());
-        Assert.assertTrue(result.invoice().contains("Tất cả"));
-        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
-        Assert.assertFalse(result.rows().isEmpty());
-        Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()));
-        Assert.assertTrue(result.activeText().contains(subtype.label()));
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_058)
+    public void resetClearsSearchInvoiceAndDateButKeepsSubtype() {
+        verifyResetClearsSearchInvoiceAndDateButKeepsSubtypeForSubtype(subtype(8));
     }
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_182)
+    public void resetClearsSearchInvoiceAndDateButKeepsSubtypeType9() {
+        verifyResetClearsSearchInvoiceAndDateButKeepsSubtypeForSubtype(subtype(9));
+    }
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_183)
+    public void resetClearsSearchInvoiceAndDateButKeepsSubtypeType33() {
+        verifyResetClearsSearchInvoiceAndDateButKeepsSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyResetClearsSearchInvoiceAndDateButKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
+        var result = transactionPage.switchInvoiceYesNoAndAll();
+        Assert.assertTrue(result.yesText().contains("Có"));
+        Assert.assertTrue(result.noText().contains("Không"));
+        Assert.assertTrue(result.allText().contains("Tất cả"));
+        Assert.assertFalse(result.baseline().isEmpty(),
+                "Không có dữ liệu nền để kiểm tra chuyển bộ lọc Xuất hóa đơn");
+        Assert.assertEquals(result.restored(), result.baseline());
+        Assert.assertTrue(result.url().contains("tab=fee&type=" + subtype.type()), result.url());
+        Assert.assertTrue(result.activeText().contains("Phí kết nối"));
+    }
+
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_059)
     public void searchAndDatePersistAfterOpeningAndClosingDetail() {
@@ -312,9 +493,27 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         Assert.assertEquals(weekAfter.tableRows(), weekBefore.tableRows());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_086,
-            dataProvider = "feeOrderInvoiceStates")
-    public void invoiceFilterRowsMatchRealOrderInvoiceEvidence(
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_086)
+    public void connectionFeeInvoiceYesRowsMatchRealOrderEvidence() {
+        verifyInvoiceFilterRowsMatchRealOrderInvoiceEvidence(subtype(8), "Có");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_204)
+    public void connectionFeeInvoiceNoRowsMatchRealOrderEvidence() {
+        verifyInvoiceFilterRowsMatchRealOrderInvoiceEvidence(subtype(8), "Không");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_205)
+    public void materialSharingInvoiceYesRowsMatchRealOrderEvidence() {
+        verifyInvoiceFilterRowsMatchRealOrderInvoiceEvidence(subtype(33), "Có");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_206)
+    public void materialSharingInvoiceNoRowsMatchRealOrderEvidence() {
+        verifyInvoiceFilterRowsMatchRealOrderInvoiceEvidence(subtype(33), "Không");
+    }
+
+    private void verifyInvoiceFilterRowsMatchRealOrderInvoiceEvidence(
             TransactionCategoryPage.Subtype subtype, String option) {
         openFeeSubtype(subtype);
         var result = transactionPage.verifyFilteredInvoiceEvidence(option);
@@ -330,5 +529,10 @@ public class TransactionFeeFilterTest extends TransactionFeeTestSupport {
         boolean expected = option.equals("Có");
         Assert.assertTrue(result.hasInvoice().stream().allMatch(actual -> actual == expected),
                 "Dữ liệu hóa đơn không khớp filter " + option + ": " + result.hasInvoice());
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

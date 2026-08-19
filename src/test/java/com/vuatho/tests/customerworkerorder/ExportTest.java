@@ -5,18 +5,19 @@ import com.vuatho.testcases.CustomerWorkerOrderTestCases;
 import com.vuatho.config.TestConfig;
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.customerworkerorder.CustomerWorkerOrderTestSupport;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipFile;
 
 /**
  * Kiểm tra toàn bộ chức năng xuất file của Đơn Khách - Thợ.
@@ -63,9 +64,11 @@ public class ExportTest
             "data-interaction"},
             description = CustomerWorkerOrderTestCases.CWO_017)
     public void detailedOrderExportDownloadsRealFile() {
-        assertExcelDownloaded(
+        Path file = assertExcelDownloaded(
                 orderPage.exportExcel("Xuất chi tiết đơn hàng"),
                 "Xuất chi tiết đơn hàng");
+        Assert.assertFalse(normalize(workbookText(file)).isBlank(),
+                "File Xuất chi tiết đơn hàng không có nội dung.");
     }
 
     /** Tải báo cáo tổng hợp theo ngày thật rồi kiểm tra file Excel. */
@@ -73,9 +76,11 @@ public class ExportTest
             "data-interaction"},
             description = CustomerWorkerOrderTestCases.CWO_018)
     public void dailySummaryExportDownloadsRealFile() {
-        assertExcelDownloaded(
+        Path file = assertExcelDownloaded(
                 orderPage.exportExcel("Xuất tổng hợp theo ngày"),
                 "Xuất tổng hợp theo ngày");
+        Assert.assertFalse(normalize(workbookText(file)).isBlank(),
+                "File Xuất tổng hợp theo ngày không có nội dung.");
     }
 
     /** Xuất tab Hoàn thành với khoảng ngày tùy chỉnh đang được áp dụng. */
@@ -93,6 +98,162 @@ public class ExportTest
             description = CustomerWorkerOrderTestCases.CWO_020)
     public void cancelledStatusStatisticsExportUsesActiveRange() {
         assertStatusStatisticsExport("ĐƠN HỦY", "hủy");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_079)
+    public void detailedExportUsesFirstOrderIdSearch() {
+        String id = orderPage.rows().get(0).id();
+        orderPage.search(id);
+        assertFilteredDetailedExport("mã đơn #" + id, id);
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_080)
+    public void detailedExportUsesCompletedOrderStatus() {
+        orderPage.selectOrderStatus("Hoàn thành đơn");
+        assertFilteredDetailedExport("trạng thái Hoàn thành đơn", "Hoàn thành đơn");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_081)
+    public void detailedExportUsesAcceptedAgreementStatus() {
+        orderPage.selectAgreementStatus("Chấp nhận");
+        assertFilteredDetailedExport("thỏa thuận Chấp nhận", "Chấp nhận");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_082)
+    public void detailedExportUsesAirConditionerService() {
+        orderPage.selectService("Sửa máy lạnh");
+        assertFilteredDetailedExport("dịch vụ Sửa máy lạnh", "Sửa máy lạnh");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_083)
+    public void detailedExportUsesFirstOrderRequestDate() {
+        LocalDate date = requestedDate(orderPage.rows().get(0).info());
+        orderPage.selectRequestDateRange(date, date);
+        assertFilteredDetailedExport("ngày yêu cầu " + date.format(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_084)
+    public void detailedExportUsesInvoiceRequested() {
+        orderPage.selectDirectFilter("Xuất hoá đơn", "Có yêu cầu");
+        assertFilteredDetailedExport("Xuất hoá đơn Có yêu cầu", "Có yêu cầu");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-filter"},
+            description = CustomerWorkerOrderTestCases.CWO_085)
+    public void detailedExportCombinesCompletedAndAccepted() {
+        orderPage.selectOrderStatus("Hoàn thành đơn");
+        orderPage.selectAgreementStatus("Chấp nhận");
+        if (orderPage.totalDisplayed() == 0) {
+            throw new SkipException("Không có dữ liệu thật cho trạng thái=Hoàn thành đơn, "
+                    + "thỏa thuận=Chấp nhận; không thể chọn mã đơn để kiểm tra export.");
+        }
+        String id = orderPage.rows().get(0).id();
+        orderPage.search(id);
+        assertFilteredDetailedExport("trạng thái=Hoàn thành đơn, thỏa thuận=Chấp nhận, "
+                + "mã đơn đầu tiên #" + id, id, "Hoàn thành đơn", "Chấp nhận");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_086)
+    public void exportsSearchingWorkerWithoutAgreement() {
+        assertOrderAgreementExport("Tìm kiếm thợ", "Chưa có");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_087)
+    public void exportsPriceRequestWaitingAgreement() {
+        assertOrderAgreementExport("Yêu cầu giá", "Chờ đợi");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_088)
+    public void exportsCompletedAcceptedAgreement() {
+        assertOrderAgreementExport("Hoàn thành đơn", "Chấp nhận");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "export-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_089)
+    public void exportsCancelledRejectedAgreement() {
+        assertOrderAgreementExport("Hủy đơn", "Từ chối");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "statistics-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_090)
+    public void exportsCompletedWeekStatistics() {
+        assertStatisticsPeriodExport("ĐƠN HOÀN THÀNH", "Tuần", "hoàn thành");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "statistics-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_091)
+    public void exportsCompletedMonthStatistics() {
+        assertStatisticsPeriodExport("ĐƠN HOÀN THÀNH", "Tháng", "hoàn thành");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "statistics-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_092)
+    public void exportsCancelledWeekStatistics() {
+        assertStatisticsPeriodExport("ĐƠN HỦY", "Tuần", "hủy");
+    }
+
+    @Test(groups = {"customer-worker-order", "export", "statistics-matrix"},
+            description = CustomerWorkerOrderTestCases.CWO_093)
+    public void exportsCancelledMonthStatistics() {
+        assertStatisticsPeriodExport("ĐƠN HỦY", "Tháng", "hủy");
+    }
+
+    private void assertOrderAgreementExport(String orderStatus, String agreement) {
+        orderPage.selectOrderStatus(orderStatus);
+        orderPage.selectAgreementStatus(agreement);
+        assertFilteredDetailedExport("trạng thái=" + orderStatus
+                + ", thỏa thuận=" + agreement, orderStatus, agreement);
+    }
+
+    private void assertFilteredDetailedExport(String context, String... expectedValues) {
+        int expectedRows = orderPage.totalDisplayed();
+        if (expectedRows == 0) {
+            throw new SkipException("Không có dữ liệu thật cho " + context
+                    + "; không thể xác minh file export.");
+        }
+        Path file = assertExcelDownloaded(
+                orderPage.exportExcel("Xuất chi tiết đơn hàng"), context);
+        String workbook = normalize(workbookText(file));
+        for (String expected : expectedValues) {
+            Assert.assertTrue(workbook.contains(normalize(expected)),
+                    "File không chứa " + expected + " sau khi lọc " + context);
+        }
+    }
+
+    private void assertStatisticsPeriodExport(String tab, String period,
+                                              String statusKeyword) {
+        orderPage.openStatistic("Trạng thái đơn");
+        orderPage.clickStatisticsButton(tab);
+        orderPage.clickStatisticsButton(period);
+        List<String> range = orderPage.statisticsInputValues();
+        if (range.isEmpty()) {
+            throw new AssertionError("Không đọc được khoảng ngày của kỳ " + period);
+        }
+        String[] boundaries = range.get(0).split("\\s+-\\s+", 2);
+        if (boundaries.length != 2) {
+            throw new AssertionError("Khoảng ngày thống kê sai định dạng: " + range.get(0));
+        }
+        String downloaded = orderPage.exportCurrentStatisticsExcel();
+        Path file = assertExcelDownloaded(downloaded,
+                "Xuất thống kê " + tab + " kỳ " + period);
+        String workbook = normalize(workbookText(file));
+        Assert.assertTrue(workbook.contains(normalize(statusKeyword)),
+                "File không đúng tab " + tab);
+        for (String date : boundaries) {
+            Assert.assertTrue(workbook.contains(normalize(date)),
+                    "File không chứa ngày biên " + date + " của kỳ " + period);
+        }
     }
 
     /** Thiết lập tab/ngày, tải file thống kê và đối chiếu dấu vết nội dung. */
@@ -148,25 +309,32 @@ public class ExportTest
                         "Không đọc được CSV " + file, exception);
             }
         }
-        try (ZipFile zip = new ZipFile(file.toFile())) {
+        try (var input = Files.newInputStream(file);
+             var workbook = WorkbookFactory.create(input)) {
+            DataFormatter formatter = new DataFormatter();
             StringBuilder text = new StringBuilder();
-            zip.stream().filter(entry -> entry.getName().matches(
-                            "xl/(sharedStrings|workbook)\\.xml"))
-                    .forEach(entry -> {
-                        try (var input = zip.getInputStream(entry)) {
-                            text.append(new String(
-                                    input.readAllBytes(),
-                                    StandardCharsets.UTF_8));
-                        } catch (IOException exception) {
-                            throw new IllegalStateException(exception);
-                        }
-                    });
-            Assert.assertFalse(text.isEmpty(),
-                    "Workbook không có metadata hoặc shared strings.");
+            workbook.forEach(sheet -> sheet.forEach(row -> row.forEach(cell ->
+                    text.append(formatter.formatCellValue(cell)).append(' '))));
+            Assert.assertFalse(text.toString().isBlank(), "Workbook không có dữ liệu.");
             return text.toString();
         } catch (IOException exception) {
             throw new AssertionError(
                     "File Excel không mở được: " + file, exception);
         }
+    }
+
+    private LocalDate requestedDate(String info) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(\\d{2})[-/](\\d{2})[-/](\\d{4})")
+                .matcher(info);
+        if (!matcher.find()) {
+            throw new SkipException("Dòng đầu không có ngày yêu cầu để kiểm tra export.");
+        }
+        return LocalDate.parse(matcher.group().replace('/', '-'),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
+
+    private String normalize(String value) {
+        return com.vuatho.utils.TextNormalizer.normalize(value == null ? "" : value);
     }
 }

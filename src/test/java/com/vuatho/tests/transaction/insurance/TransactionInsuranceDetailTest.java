@@ -21,29 +21,60 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_008)
     public void opensAndClosesBothSubtypeDetails() {
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
-            openInsuranceSubtype(subtype);
-            verifyDetail(subtype);
-        }
+        verifyOpensAndClosesBothSubtypeDetailsForSubtype(subtype(25));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_023,
-            dataProvider = "insuranceSubtypes")
-    public void detailMatchesSourceRow(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_104)
+    public void opensAndClosesBothSubtypeDetailsType26() {
+        verifyOpensAndClosesBothSubtypeDetailsForSubtype(subtype(26));
+    }
+
+    private void verifyOpensAndClosesBothSubtypeDetailsForSubtype(TransactionCategoryPage.Subtype subtype) {
+        openInsuranceSubtype(subtype);
+        verifyDetail(subtype);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_023)
+    public void detailMatchesSourceRow() {
+        verifyDetailMatchesSourceRowForSubtype(subtype(25));
+    }
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_185)
+    public void detailMatchesSourceRowType26() {
+        verifyDetailMatchesSourceRowForSubtype(subtype(26));
+    }
+
+    private void verifyDetailMatchesSourceRowForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().openFirstDetail();
-        Assert.assertTrue(result.url().contains("tab=insurance&type=" + subtype.type()));
-        Assert.assertTrue(result.url().contains("id="));
+        Assert.assertTrue(result.url().contains("tab=insurance&type=" + subtype.type()), result.url());
+        Assert.assertTrue(result.url().contains("id="), result.url());
         Assert.assertTrue(result.drawerText().contains(result.source().status()), result.drawerText());
         Assert.assertTrue(result.drawerText().contains(result.source().type()), result.drawerText());
-        Assert.assertTrue(result.drawerText().contains("Thông tin giao dịch"));
-        Assert.assertTrue(result.drawerText().contains("Số tiền"));
-        Assert.assertTrue(result.drawerText().contains("Thời gian"));
+        Assert.assertTrue(result.drawerText().contains("Thông tin giao dịch"), result.drawerText());
+        Assert.assertTrue(result.drawerText().contains("Số tiền"), result.drawerText());
+        Assert.assertTrue(result.drawerText().contains("Thời gian"), result.drawerText());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_024,
-            dataProvider = "insuranceSubtypes")
-    public void deepLinkReopensSameDetail(TransactionCategoryPage.Subtype subtype) {
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_024)
+    public void deepLinkReopensSameDetail() {
+        verifyDeepLinkReopensSameDetailForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_176)
+    public void deepLinkReopensSameDetailType26() {
+        verifyDeepLinkReopensSameDetailForSubtype(subtype(26));
+    }
+
+    private void verifyDeepLinkReopensSameDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().reopenByDeepLink();
         Assert.assertEquals(result.actualUrl(), result.expectedUrl());
@@ -51,9 +82,17 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Assert.assertTrue(result.drawerText().contains("Thông tin giao dịch"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_025,
-            dataProvider = "insuranceSubtypes")
-    public void headerIconClosesDetailAndKeepsSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_025)
+    public void headerIconClosesDetailAndKeepsSubtype() {
+        verifyHeaderIconClosesDetailAndKeepsSubtypeForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_177)
+    public void headerIconClosesDetailAndKeepsSubtypeType26() {
+        verifyHeaderIconClosesDetailAndKeepsSubtypeForSubtype(subtype(26));
+    }
+
+    private void verifyHeaderIconClosesDetailAndKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().closeDetailWithHeaderIcon();
         Assert.assertTrue(result.closed());
@@ -64,8 +103,15 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_026)
     public void dailyFeeDetailShowsCompleteCashFlowAndCurrentTimeline() {
-        TransactionCategoryPage.Subtype subtype = category().subtypes().stream()
-                .filter(candidate -> candidate.type() == 25).findFirst().orElseThrow();
+        verifyDetailShowsCompleteCashFlowAndCurrentTimeline(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_178)
+    public void refundDetailShowsCompleteCashFlowAndCurrentTimeline() {
+        verifyDetailShowsCompleteCashFlowAndCurrentTimeline(subtype(26));
+    }
+
+    private void verifyDetailShowsCompleteCashFlowAndCurrentTimeline(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().auditFirstDetailInOneFlow();
         String text = result.drawerText();
@@ -81,9 +127,18 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Assert.assertTrue(result.closed());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_027,
-            dataProvider = "insuranceSubtypes")
-    public void cashFlowNetEqualsIncomingPlusOutgoing(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_027)
+    public void cashFlowNetEqualsIncomingPlusOutgoing() {
+        verifyCashFlowNetEqualsIncomingPlusOutgoingForSubtype(subtype(25));
+    }
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_186)
+    public void cashFlowNetEqualsIncomingPlusOutgoingType26() {
+        verifyCashFlowNetEqualsIncomingPlusOutgoingForSubtype(subtype(26));
+    }
+
+    private void verifyCashFlowNetEqualsIncomingPlusOutgoingForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         String text = advancedPage().waitForCashFlowTotals().drawerText();
         BigDecimal incoming = moneyAfterLabel(text, "Tổng vào");
@@ -95,9 +150,20 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
                 incoming + " + " + outgoing + " != " + net);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_028,
-            dataProvider = "insuranceSubtypes")
-    public void senderLinkOpensProfileAndReturnsToSameDrawer(TransactionCategoryPage.Subtype subtype) {
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_028)
+    public void senderLinkOpensProfileAndReturnsToSameDrawer() {
+        verifySenderLinkOpensProfileAndReturnsToSameDrawerForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_179)
+    public void senderLinkOpensProfileAndReturnsToSameDrawerType26() {
+        verifySenderLinkOpensProfileAndReturnsToSameDrawerForSubtype(subtype(26));
+    }
+
+    private void verifySenderLinkOpensProfileAndReturnsToSameDrawerForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().openPartyProfileAndReturn();
         Assert.assertTrue(result.expectedUrl().contains("/vuatho/user?id=")
@@ -108,9 +174,17 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Assert.assertEquals(result.returnedUrl(), result.sourceUrl());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_029,
-            dataProvider = "insuranceSubtypes")
-    public void timelineLinkOpensDifferentTransactionAndReturns(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_029)
+    public void timelineLinkOpensDifferentTransactionAndReturns() {
+        verifyTimelineLinkOpensDifferentTransactionAndReturnsForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_180)
+    public void timelineLinkOpensDifferentTransactionAndReturnsType26() {
+        verifyTimelineLinkOpensDifferentTransactionAndReturnsForSubtype(subtype(26));
+    }
+
+    private void verifyTimelineLinkOpensDifferentTransactionAndReturnsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().openRelatedTransactionAndReturn();
         Assert.assertTrue(result.expectedUrl().contains("/vuatho/transaction?tab=all"),
@@ -122,9 +196,17 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Assert.assertTrue(result.sourceRestored());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_030,
-            dataProvider = "insuranceSubtypes")
-    public void escapeClosesDetailAndKeepsSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_030)
+    public void escapeClosesDetailAndKeepsSubtype() {
+        verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_181)
+    public void escapeClosesDetailAndKeepsSubtypeType26() {
+        verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(subtype(26));
+    }
+
+    private void verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().closeDetailWithEscape();
         Assert.assertTrue(result.closed());
@@ -133,9 +215,17 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
                 result.closedUrl());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_031,
-            dataProvider = "insuranceSubtypes")
-    public void refreshKeepsSameDetailAndSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_031)
+    public void refreshKeepsSameDetailAndSubtype() {
+        verifyRefreshKeepsSameDetailAndSubtypeForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_182)
+    public void refreshKeepsSameDetailAndSubtypeType26() {
+        verifyRefreshKeepsSameDetailAndSubtypeForSubtype(subtype(26));
+    }
+
+    private void verifyRefreshKeepsSameDetailAndSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().refreshOpenDetail();
         Assert.assertEquals(result.actualUrl(), result.expectedUrl());
@@ -143,9 +233,17 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Assert.assertTrue(result.drawerText().contains("Chi tiết giao dịch"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_032,
-            dataProvider = "insuranceSubtypes")
-    public void backAndForwardRestoresSameDetail(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_032)
+    public void backAndForwardRestoresSameDetail() {
+        verifyBackAndForwardRestoresSameDetailForSubtype(subtype(25));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_183)
+    public void backAndForwardRestoresSameDetailType26() {
+        verifyBackAndForwardRestoresSameDetailForSubtype(subtype(26));
+    }
+
+    private void verifyBackAndForwardRestoresSameDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openInsuranceSubtype(subtype);
         var result = advancedPage().backAndForwardDetail();
         Assert.assertTrue(result.closedAfterBack());
@@ -190,5 +288,10 @@ public class TransactionInsuranceDetailTest extends TransactionInsuranceTestSupp
         Matcher matcher = Pattern.compile("(?:^|[?&])" + Pattern.quote(key) + "=([^&]+)")
                 .matcher(url == null ? "" : url);
         return matcher.find() ? matcher.group(1) : "";
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

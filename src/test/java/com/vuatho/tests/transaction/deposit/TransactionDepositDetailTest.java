@@ -6,7 +6,6 @@ import com.vuatho.pages.TransactionHistoryPage;
 import com.vuatho.support.TransactionDepositTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.time.format.DateTimeFormatter;
@@ -27,32 +26,6 @@ public class TransactionDepositDetailTest extends TransactionDepositTestSupport 
         return false;
     }
 
-    @DataProvider(name = "depositSubtypeStatuses")
-    public Object[][] depositSubtypeStatuses() {
-        var rows = new java.util.ArrayList<Object[]>();
-        String requestedType = System.getProperty("deposit.type", "").trim();
-        String requestedStatus = System.getProperty("deposit.status", "").trim();
-        String requestedStatusIndex = System.getProperty("deposit.status.index", "").trim();
-        for (var subtype : category().subtypes()) {
-            if (!requestedType.isBlank()
-                    && !requestedType.equals(String.valueOf(subtype.type()))) {
-                continue;
-            }
-            var statuses = java.util.List.of("Thành công", "Đang chờ", "Đã hủy");
-            for (int statusIndex = 0; statusIndex < statuses.size(); statusIndex++) {
-                String status = statuses.get(statusIndex);
-                if (!requestedStatus.isBlank() && !requestedStatus.equals(status)) {
-                    continue;
-                }
-                if (!requestedStatusIndex.isBlank()
-                        && !requestedStatusIndex.equals(String.valueOf(statusIndex))) {
-                    continue;
-                }
-                rows.add(new Object[]{subtype, status});
-            }
-        }
-        return rows.toArray(Object[][]::new);
-    }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_008)
     public void opensAndClosesDetail() {
@@ -250,10 +223,82 @@ public class TransactionDepositDetailTest extends TransactionDepositTestSupport 
         Assert.assertTrue(digits(text).contains(digits(result.source().amount())), text);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_028,
-            dataProvider = "depositSubtypeStatuses")
-    public void everySubtypeOpensDetailForEveryStatus(
-            TransactionCategoryPage.Subtype subtype, String status) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_028)
+    public void RegularSuccessOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(0), "Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_193)
+    public void RegularPendingOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(0), "Đang chờ");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_194)
+    public void RegularCancelledOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(0), "Đã hủy");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_195)
+    public void ThirdPartySuccessOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(10), "Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_196)
+    public void ThirdPartyPendingOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(10), "Đang chờ");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_197)
+    public void ThirdPartyCancelledOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(10), "Đã hủy");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_198)
+    public void EnterpriseSuccessOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(19), "Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_199)
+    public void EnterprisePendingOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(19), "Đang chờ");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_200)
+    public void EnterpriseCancelledOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(19), "Đã hủy");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_201)
+    public void DepositWalletSuccessOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(20), "Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_202)
+    public void DepositWalletPendingOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(20), "Đang chờ");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_203)
+    public void DepositWalletCancelledOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(20), "Đã hủy");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_204)
+    public void BankTransferSuccessOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(34), "Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_205)
+    public void BankTransferPendingOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(34), "Đang chờ");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_206)
+    public void BankTransferCancelledOpensAndClosesCorrectDetail() {
+        verifyDetailStatus(subtype(34), "Đã hủy");
+    }
+
+    private void verifyDetailStatus(TransactionCategoryPage.Subtype subtype, String status) {
         openDepositSubtype(subtype);
         var result = advancedPage().openAndCloseFirstDetailForStatus(status);
         String combination = subtype.label() + " / " + status;

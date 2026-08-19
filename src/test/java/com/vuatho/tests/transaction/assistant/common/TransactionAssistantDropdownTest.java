@@ -5,7 +5,6 @@ import com.vuatho.pages.TransactionCategoryPage;
 import com.vuatho.support.TransactionAssistantTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -17,19 +16,22 @@ public class TransactionAssistantDropdownTest extends TransactionAssistantTestSu
                 "Lịch sử giao dịch", "Thợ phụ - Dropdown");
     }
 
-    @DataProvider(name = "subtypes")
-    public Object[][] subtypes() {
-        return subtypeRows();
-    }
-
     @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_001)
     public void showsEverySubtype() {
         verifyGroupOptions();
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_002,
-            dataProvider = "subtypes")
-    public void opensEverySubtypeRoute(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_002)
+    public void opensPlatformFeeRoute() {
+        verifyAssistantSubtypeRoute(category().subtypes().get(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_128)
+    public void opensPenaltyRoute() {
+        verifyAssistantSubtypeRoute(category().subtypes().get(1));
+    }
+
+    private void verifyAssistantSubtypeRoute(TransactionCategoryPage.Subtype subtype) {
         var result = transactionPage.selectSubtypeFromDropdown(subtype);
         Assert.assertTrue(result.url().contains("tab=assistant"));
         Assert.assertTrue(result.url().contains("type=" + subtype.type()));

@@ -31,7 +31,12 @@ import com.vuatho.tests.transaction.insurance.TransactionInsuranceExportTest;
 import com.vuatho.tests.transaction.insurance.TransactionInsuranceFilterTest;
 import com.vuatho.tests.transaction.insurance.TransactionInsuranceNavigationTest;
 import com.vuatho.tests.transaction.insurance.TransactionInsuranceOverviewTest;
-import com.vuatho.tests.transaction.order.TransactionOrderTest;
+import com.vuatho.tests.transaction.order.TransactionOrderDetailTest;
+import com.vuatho.tests.transaction.order.TransactionOrderDropdownTest;
+import com.vuatho.tests.transaction.order.TransactionOrderExportTest;
+import com.vuatho.tests.transaction.order.TransactionOrderFilterTest;
+import com.vuatho.tests.transaction.order.TransactionOrderNavigationTest;
+import com.vuatho.tests.transaction.order.TransactionOrderOverviewTest;
 import com.vuatho.tests.transaction.reward.TransactionRewardTest;
 import com.vuatho.tests.transaction.system.TransactionSystemTest;
 import com.vuatho.tests.transaction.withdraw.TransactionWithdrawTest;
@@ -49,7 +54,12 @@ public final class TransactionCategorySuiteRunner {
                 TransactionDepositDetailTest.class,
                 TransactionDepositExportTest.class,
                 TransactionWithdrawTest.class,
-                TransactionOrderTest.class,
+                TransactionOrderDropdownTest.class,
+                TransactionOrderOverviewTest.class,
+                TransactionOrderFilterTest.class,
+                TransactionOrderNavigationTest.class,
+                TransactionOrderDetailTest.class,
+                TransactionOrderExportTest.class,
                 TransactionRewardTest.class,
                 TransactionFeeDropdownTest.class,
                 TransactionFeeOverviewTest.class,

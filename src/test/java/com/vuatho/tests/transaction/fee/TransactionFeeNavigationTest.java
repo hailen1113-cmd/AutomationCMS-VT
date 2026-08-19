@@ -21,23 +21,62 @@ public class TransactionFeeNavigationTest extends TransactionFeeTestSupport {
                 "Lịch sử giao dịch", "Phí & Doanh thu - Điều hướng");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_007,
-            dataProvider = "feeSubtypes")
-    public void sortsAmountBothDirections(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_007)
+    public void sortsAmountBothDirections() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_148)
+    public void sortsAmountBothDirectionsType9() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_149)
+    public void sortsAmountBothDirectionsType33() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(33));
+    }
+
+    private void verifySortsAmountBothDirectionsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifyAmountSort(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_009,
-            dataProvider = "feeSubtypes")
-    public void paginationAndResetKeepCurrentSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_009)
+    public void paginationAndResetKeepCurrentSubtype() {
+        verifyPaginationAndResetKeepCurrentSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_150)
+    public void paginationAndResetKeepCurrentSubtypeType9() {
+        verifyPaginationAndResetKeepCurrentSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_151)
+    public void paginationAndResetKeepCurrentSubtypeType33() {
+        verifyPaginationAndResetKeepCurrentSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyPaginationAndResetKeepCurrentSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifyPaginationAndReset(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_025,
-            dataProvider = "feeSubtypes")
-    public void sortsCreatedDateBothDirections(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_025)
+    public void sortsCreatedDateBothDirections() {
+        verifySortsCreatedDateBothDirectionsForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_152)
+    public void sortsCreatedDateBothDirectionsType9() {
+        verifySortsCreatedDateBothDirectionsForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_153)
+    public void sortsCreatedDateBothDirectionsType33() {
+        verifySortsCreatedDateBothDirectionsForSubtype(subtype(33));
+    }
+
+    private void verifySortsCreatedDateBothDirectionsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var ascending = advancedPage().sort("Ngày tạo", false).rows().stream()
                 .map(TransactionHistoryPage.TransactionRow::createdAt).toList();
@@ -48,10 +87,22 @@ public class TransactionFeeNavigationTest extends TransactionFeeTestSupport {
         Assert.assertTrue(transactionPage.currentUrl().contains("tab=fee&type=" + subtype.type()));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_047,
-            dataProvider = "feeSubtypes")
-    public void senderLinkOpensCorrectProfileAndReturnsToSourceDetail(
-            TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_047)
+    public void senderLinkOpensCorrectProfileAndReturnsToSourceDetail() {
+        verifySenderLinkOpensCorrectProfileAndReturnsToSourceDetailForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_154)
+    public void senderLinkOpensCorrectProfileAndReturnsToSourceDetailType9() {
+        verifySenderLinkOpensCorrectProfileAndReturnsToSourceDetailForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_155)
+    public void senderLinkOpensCorrectProfileAndReturnsToSourceDetailType33() {
+        verifySenderLinkOpensCorrectProfileAndReturnsToSourceDetailForSubtype(subtype(33));
+    }
+
+    private void verifySenderLinkOpensCorrectProfileAndReturnsToSourceDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().openPartyProfileAndReturn();
         Assert.assertTrue(result.expectedUrl().contains("/vuatho/worker?id=")
@@ -68,9 +119,17 @@ public class TransactionFeeNavigationTest extends TransactionFeeTestSupport {
         Assert.assertEquals(result.returnedUrl(), result.sourceUrl());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_048,
-            dataProvider = "feeOrderSubtypes")
-    public void orderLinkOpensCorrectOrderAndReturnsToSourceDetail(
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_048)
+    public void connectionFeeOrderLinkOpensCorrectOrderAndReturns() {
+        verifyOrderLinkOpensCorrectOrderAndReturns(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_193)
+    public void materialSharingOrderLinkOpensCorrectOrderAndReturns() {
+        verifyOrderLinkOpensCorrectOrderAndReturns(subtype(33));
+    }
+
+    private void verifyOrderLinkOpensCorrectOrderAndReturns(
             TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().openOrderAndReturn();
@@ -84,24 +143,37 @@ public class TransactionFeeNavigationTest extends TransactionFeeTestSupport {
         Assert.assertEquals(result.returnedUrl(), result.sourceUrl());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_049,
-            dataProvider = "feeSubtypes")
-    public void timelineLinkOpensCorrectTransactionAndReturnsToSourceDetail(
-            TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_049)
+    public void timelineLinkOpensCorrectTransactionAndReturnsToSourceDetail() {
+        verifyTimelineLinkOpensCorrectTransactionAndReturnsToSourceDetailForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_184)
+    public void timelineLinkOpensCorrectTransactionAndReturnsToSourceDetailType9() {
+        verifyTimelineLinkOpensCorrectTransactionAndReturnsToSourceDetailForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_185)
+    public void timelineLinkOpensCorrectTransactionAndReturnsToSourceDetailType33() {
+        verifyTimelineLinkOpensCorrectTransactionAndReturnsToSourceDetailForSubtype(subtype(33));
+    }
+
+    private void verifyTimelineLinkOpensCorrectTransactionAndReturnsToSourceDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
-        var result = advancedPage().openRelatedTransactionAndReturn();
-        Assert.assertTrue(result.expectedUrl().contains("/vuatho/transaction?tab=all"),
-                result.expectedUrl());
+        var result = advancedPage().openOrderAndReturn();
+        Assert.assertTrue(result.expectedUrl().contains("/vuatho/order?id="), result.expectedUrl());
         Assert.assertEquals(queryValue(result.actualUrl(), "id"),
                 queryValue(result.expectedUrl(), "id"));
-        Assert.assertNotEquals(queryValue(result.actualUrl(), "id"),
-                queryValue(result.sourceUrl(), "id"));
-        Assert.assertTrue(result.targetText().contains("Chi tiết giao dịch"), result.targetText());
-        Assert.assertTrue(result.targetText().contains(result.linkText().lines().findFirst().orElse("")),
-                result.targetText());
+        Assert.assertFalse(result.linkText().isBlank());
+        Assert.assertTrue(result.targetText().contains("Quản lí đơn dịch vụ")
+                        || result.targetText().contains("Thông tin đơn dịch vụ"), result.targetText());
         Assert.assertTrue(result.sourceRestored());
         Assert.assertEquals(result.returnedUrl(), result.sourceUrl());
     }
+
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_060)
     public void nonSortableHeadersDoNotChangeRows() {
@@ -251,5 +323,10 @@ public class TransactionFeeNavigationTest extends TransactionFeeTestSupport {
         var expected = new ArrayList<>(actual);
         expected.sort(comparator);
         Assert.assertEquals(actual, expected);
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

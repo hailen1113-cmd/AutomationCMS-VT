@@ -83,6 +83,21 @@ public final class CustomerWorkerOrderTestCases {
     public static final String CWO_076 = "CWO-076 - Đang làm việc sang Đã xong việc";
     public static final String CWO_077 = "CWO-077 - Đã xong việc sang Hoàn thành đơn";
     public static final String CWO_078 = "CWO-078 - Hủy đơn thật cập nhật trạng thái và lý do";
+    public static final String CWO_079 = "CWO-079 - Xuất chi tiết sau khi tìm mã đơn dòng đầu, file chứa đúng mã đơn đó";
+    public static final String CWO_080 = "CWO-080 - Xuất chi tiết sau khi chọn trạng thái Hoàn thành đơn, file chỉ chứa đơn Hoàn thành đơn";
+    public static final String CWO_081 = "CWO-081 - Xuất chi tiết sau khi chọn thỏa thuận Chấp nhận, file chỉ chứa đơn có thỏa thuận Chấp nhận";
+    public static final String CWO_082 = "CWO-082 - Xuất chi tiết sau khi chọn dịch vụ Sửa máy lạnh, file chỉ chứa đơn Sửa máy lạnh";
+    public static final String CWO_083 = "CWO-083 - Xuất chi tiết sau khi chọn ngày yêu cầu của dòng đầu, file chỉ chứa đơn trong ngày đó";
+    public static final String CWO_084 = "CWO-084 - Xuất chi tiết sau khi chọn Xuất hoá đơn Có yêu cầu, file chỉ chứa đơn có yêu cầu xuất hóa đơn";
+    public static final String CWO_085 = "CWO-085 - Xuất chi tiết khi chọn Hoàn thành đơn + thỏa thuận Chấp nhận + mã đơn đầu tiên, file khớp đủ ba điều kiện";
+    public static final String CWO_086 = "CWO-086 - Ma trận xuất chi tiết: Chọn Tìm kiếm thợ + thỏa thuận Chưa có, file khớp đủ hai điều kiện";
+    public static final String CWO_087 = "CWO-087 - Ma trận xuất chi tiết: Chọn Yêu cầu giá + thỏa thuận Chờ đợi, file khớp đủ hai điều kiện";
+    public static final String CWO_088 = "CWO-088 - Ma trận xuất chi tiết: Chọn Hoàn thành đơn + thỏa thuận Chấp nhận, file khớp đủ hai điều kiện";
+    public static final String CWO_089 = "CWO-089 - Ma trận xuất chi tiết: Chọn Hủy đơn + thỏa thuận Từ chối, file khớp đủ hai điều kiện";
+    public static final String CWO_090 = "CWO-090 - Ma trận xuất thống kê: Tab Đơn hoàn thành + kỳ Tuần, file đúng trạng thái và hai ngày biên";
+    public static final String CWO_091 = "CWO-091 - Ma trận xuất thống kê: Tab Đơn hoàn thành + kỳ Tháng, file đúng trạng thái và hai ngày biên";
+    public static final String CWO_092 = "CWO-092 - Ma trận xuất thống kê: Tab Đơn hủy + kỳ Tuần, file đúng trạng thái và hai ngày biên";
+    public static final String CWO_093 = "CWO-093 - Ma trận xuất thống kê: Tab Đơn hủy + kỳ Tháng, file đúng trạng thái và hai ngày biên";
 
     private CustomerWorkerOrderTestCases() {
     }

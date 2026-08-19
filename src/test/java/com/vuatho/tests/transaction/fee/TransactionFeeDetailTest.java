@@ -6,7 +6,6 @@ import com.vuatho.pages.TransactionHistoryPage;
 import com.vuatho.support.TransactionFeeTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.time.format.DateTimeFormatter;
@@ -27,16 +26,42 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 "Lịch sử giao dịch", "Phí & Doanh thu - Chi tiết");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_008,
-            dataProvider = "feeSubtypes")
-    public void opensAndClosesDetail(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_008)
+    public void opensAndClosesDetail() {
+        verifyOpensAndClosesDetailForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_102)
+    public void opensAndClosesDetailType9() {
+        verifyOpensAndClosesDetailForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_103)
+    public void opensAndClosesDetailType33() {
+        verifyOpensAndClosesDetailForSubtype(subtype(33));
+    }
+
+    private void verifyOpensAndClosesDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         verifyDetail(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_026,
-            dataProvider = "feeSubtypes")
-    public void detailMatchesSourceTypeStatusAmountAndTime(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_026)
+    public void detailMatchesSourceTypeStatusAmountAndTime() {
+        verifyDetailMatchesSourceTypeStatusAmountAndTimeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_104)
+    public void detailMatchesSourceTypeStatusAmountAndTimeType9() {
+        verifyDetailMatchesSourceTypeStatusAmountAndTimeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_105)
+    public void detailMatchesSourceTypeStatusAmountAndTimeType33() {
+        verifyDetailMatchesSourceTypeStatusAmountAndTimeForSubtype(subtype(33));
+    }
+
+    private void verifyDetailMatchesSourceTypeStatusAmountAndTimeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().openFirstDetail();
         String text = result.drawerText();
@@ -50,9 +75,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
         Assert.assertTrue(text.contains(expectedTime), text);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_027,
-            dataProvider = "feeSubtypes")
-    public void detailUrlContainsOneIdAndKeepsSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_027)
+    public void detailUrlContainsOneIdAndKeepsSubtype() {
+        verifyDetailUrlContainsOneIdAndKeepsSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_106)
+    public void detailUrlContainsOneIdAndKeepsSubtypeType9() {
+        verifyDetailUrlContainsOneIdAndKeepsSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_107)
+    public void detailUrlContainsOneIdAndKeepsSubtypeType33() {
+        verifyDetailUrlContainsOneIdAndKeepsSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyDetailUrlContainsOneIdAndKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         String url = advancedPage().openFirstDetail().url();
         Assert.assertEquals(Pattern.compile("(^|[?&])id=[^&]+")
@@ -60,9 +98,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
         Assert.assertTrue(url.contains("tab=fee&type=" + subtype.type()), url);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_028,
-            dataProvider = "feeSubtypes")
-    public void closeIconRemovesIdAndKeepsSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_028)
+    public void closeIconRemovesIdAndKeepsSubtype() {
+        verifyCloseIconRemovesIdAndKeepsSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_108)
+    public void closeIconRemovesIdAndKeepsSubtypeType9() {
+        verifyCloseIconRemovesIdAndKeepsSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_109)
+    public void closeIconRemovesIdAndKeepsSubtypeType33() {
+        verifyCloseIconRemovesIdAndKeepsSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyCloseIconRemovesIdAndKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().closeDetailWithIcon();
         Assert.assertTrue(result.openedUrl().contains("id="));
@@ -73,9 +124,24 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_029)
     public void refreshKeepsFeeConnectionDetailOpen() {
+        verifyRefreshKeepsDetailOpen(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_110)
+    public void refreshKeepsWalletLinkDetailOpen() {
+        verifyRefreshKeepsDetailOpen(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_111)
+    public void refreshKeepsMaterialSharingDetailOpen() {
+        verifyRefreshKeepsDetailOpen(subtype(33));
+    }
+
+    private void verifyRefreshKeepsDetailOpen(TransactionCategoryPage.Subtype subtype) {
+        openFeeSubtype(subtype);
         var result = advancedPage().refreshOpenDetail();
         Assert.assertEquals(result.actualUrl(), result.expectedUrl());
-        Assert.assertTrue(result.actualUrl().contains("tab=fee&type=8"));
+        Assert.assertTrue(result.actualUrl().contains("tab=fee&type=" + subtype.type()), result.actualUrl());
         Assert.assertTrue(result.actualUrl().contains("id="));
         Assert.assertTrue(result.drawerText().contains("Chi tiết giao dịch"));
     }
@@ -91,36 +157,60 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 transactionPage.activeGroupText());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_033,
-            dataProvider = "feeSubtypes")
-    public void detailShowsSubtypeSpecificSections(TransactionCategoryPage.Subtype subtype) {
-        String text = detailAudit(subtype).drawerText();
-        Assert.assertTrue(text.contains("Trạng thái"), text);
-        Assert.assertTrue(text.contains("Thông tin giao dịch"), text);
-        Assert.assertTrue(text.contains("Dòng tiền của"), text);
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_033)
+    public void detailShowsSubtypeSpecificSections() {
+        verifyDetailShowsSubtypeSpecificSectionsForSubtype(subtype(8));
+    }
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_170)
+    public void detailShowsSubtypeSpecificSectionsType9() {
+        verifyDetailShowsSubtypeSpecificSectionsForSubtype(subtype(9));
+    }
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_171)
+    public void detailShowsSubtypeSpecificSectionsType33() {
+        verifyDetailShowsSubtypeSpecificSectionsForSubtype(subtype(33));
+    }
+
+    private void verifyDetailShowsSubtypeSpecificSectionsForSubtype(TransactionCategoryPage.Subtype subtype) {
+        String drawerText = detailAudit(subtype).drawerText();
+        Assert.assertTrue(drawerText.contains("Trạng thái"), drawerText);
+        Assert.assertTrue(drawerText.contains("Thông tin giao dịch"), drawerText);
+        Assert.assertTrue(drawerText.contains("Dòng tiền của"), drawerText);
         switch (subtype.type()) {
-            case 8 -> {
-                Assert.assertTrue(text.contains("Người gửi"), text);
-                Assert.assertTrue(text.contains("Mã đơn dịch vụ"), text);
-            }
-            case 9 -> {
-                Assert.assertTrue(text.contains("Người nhận"), text);
-                Assert.assertTrue(text.contains("Số dư Ví chi phí ban đầu"), text);
-                Assert.assertTrue(text.contains("Số dư Ví chi phí sau khi nạp"), text);
-                Assert.assertTrue(text.contains("Cổng thanh toán"), text);
-            }
-            case 33 -> {
-                Assert.assertTrue(text.contains("Người gửi"), text);
-                Assert.assertTrue(text.contains("Biến động số dư"), text);
-                Assert.assertTrue(text.contains("Mã đơn dịch vụ"), text);
-            }
-            default -> Assert.fail("Chưa khai báo cấu trúc chi tiết type=" + subtype.type());
+            case 8 -> assertContainsAll(drawerText, "Người gửi", "Mã đơn dịch vụ");
+            case 9 -> assertContainsAll(drawerText, "Người nhận", "Số dư Ví chi phí ban đầu",
+                    "Số dư Ví chi phí sau khi nạp", "Cổng thanh toán");
+            case 33 -> assertContainsAll(drawerText, "Người gửi", "Biến động số dư", "Mã đơn dịch vụ");
+            default -> Assert.fail("Chưa khai báo contract chi tiết cho type=" + subtype.type());
         }
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_034,
-            dataProvider = "feeSubtypes")
-    public void escapeClosesDetailAndKeepsSubtype(TransactionCategoryPage.Subtype subtype) {
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_034)
+    public void escapeClosesDetailAndKeepsSubtype() {
+        verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_112)
+    public void escapeClosesDetailAndKeepsSubtypeType9() {
+        verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_113)
+    public void escapeClosesDetailAndKeepsSubtypeType33() {
+        verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyEscapeClosesDetailAndKeepsSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().closeDetailWithEscape();
         Assert.assertTrue(result.openedUrl().contains("id="), result.openedUrl());
@@ -130,9 +220,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 result.closedUrl());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_035,
-            dataProvider = "feeSubtypes")
-    public void deepLinkReopensSameDetailForEachSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_035)
+    public void deepLinkReopensSameDetailForEachSubtype() {
+        verifyDeepLinkReopensSameDetailForEachSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_114)
+    public void deepLinkReopensSameDetailForEachSubtypeType9() {
+        verifyDeepLinkReopensSameDetailForEachSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_115)
+    public void deepLinkReopensSameDetailForEachSubtypeType33() {
+        verifyDeepLinkReopensSameDetailForEachSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyDeepLinkReopensSameDetailForEachSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().reopenByDeepLink();
         Assert.assertEquals(result.actualUrl(), result.expectedUrl());
@@ -143,9 +246,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.drawerText().contains("Thông tin giao dịch"));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_036,
-            dataProvider = "feeSubtypes")
-    public void partyAndRelatedLinksAreValidAndUnique(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_036)
+    public void partyAndRelatedLinksAreValidAndUnique() {
+        verifyPartyAndRelatedLinksAreValidAndUniqueForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_116)
+    public void partyAndRelatedLinksAreValidAndUniqueType9() {
+        verifyPartyAndRelatedLinksAreValidAndUniqueForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_117)
+    public void partyAndRelatedLinksAreValidAndUniqueType33() {
+        verifyPartyAndRelatedLinksAreValidAndUniqueForSubtype(subtype(33));
+    }
+
+    private void verifyPartyAndRelatedLinksAreValidAndUniqueForSubtype(TransactionCategoryPage.Subtype subtype) {
         var result = detailAudit(subtype);
         Assert.assertTrue(result.userHref().contains("/vuatho/user?id=")
                         || result.userHref().contains("/vuatho/worker?id="),
@@ -159,9 +275,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
         });
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_037,
-            dataProvider = "feeSubtypes")
-    public void cashFlowTotalsFinishLoadingForEachSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_037)
+    public void cashFlowTotalsFinishLoadingForEachSubtype() {
+        verifyCashFlowTotalsFinishLoadingForEachSubtypeForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_118)
+    public void cashFlowTotalsFinishLoadingForEachSubtypeType9() {
+        verifyCashFlowTotalsFinishLoadingForEachSubtypeForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_119)
+    public void cashFlowTotalsFinishLoadingForEachSubtypeType33() {
+        verifyCashFlowTotalsFinishLoadingForEachSubtypeForSubtype(subtype(33));
+    }
+
+    private void verifyCashFlowTotalsFinishLoadingForEachSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         var result = detailAudit(subtype);
         boolean hasIncoming = result.drawerText().contains("Tổng vào");
         boolean hasOutgoing = result.drawerText().contains("Tổng ra");
@@ -175,7 +304,21 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_038)
     public void feeConnectionCashFlowMarksCurrentTransaction() {
-        var result = detailAudit(feeSubtype(8));
+        verifyCashFlowMarksCurrentTransaction(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_120)
+    public void walletLinkCashFlowMarksCurrentTransaction() {
+        verifyCashFlowMarksCurrentTransaction(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_121)
+    public void materialSharingCashFlowMarksCurrentTransaction() {
+        verifyCashFlowMarksCurrentTransaction(subtype(33));
+    }
+
+    private void verifyCashFlowMarksCurrentTransaction(TransactionCategoryPage.Subtype subtype) {
+        var result = detailAudit(subtype);
         Assert.assertTrue(result.currentMarked(), result.drawerText());
         Assert.assertTrue(result.drawerText().toLowerCase().contains("đang xem"));
         Assert.assertTrue(result.drawerText().contains(result.source().type()), result.drawerText());
@@ -183,16 +326,17 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 result.drawerText());
     }
 
-    @DataProvider(name = "feeExpandableSubtypes")
-    public Object[][] feeExpandableSubtypes() {
-        return category().subtypes().stream()
-                .filter(subtype -> subtype.type() == 9 || subtype.type() == 33)
-                .map(subtype -> new Object[]{subtype}).toArray(Object[][]::new);
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_039)
+    public void loadMoreAddsWalletLinkRelatedTransactions() {
+        verifyLoadMoreAddsRelatedTransactions(subtype(9));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_039,
-            dataProvider = "feeExpandableSubtypes")
-    public void loadMoreAddsRelatedTransactions(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_192)
+    public void loadMoreAddsMaterialSharingRelatedTransactions() {
+        verifyLoadMoreAddsRelatedTransactions(subtype(33));
+    }
+
+    private void verifyLoadMoreAddsRelatedTransactions(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().expandRelatedHistoryOnce();
         Assert.assertTrue(result.openedUrl().contains("tab=fee&type=" + subtype.type()),
@@ -201,9 +345,22 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 result.beforeCount() + " -> " + result.afterCount());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_040,
-            dataProvider = "feeSubtypes")
-    public void openingAnotherRowChangesIdAndDetail(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_040)
+    public void openingAnotherRowChangesIdAndDetail() {
+        verifyOpeningAnotherRowChangesIdAndDetailForSubtype(subtype(8));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_188)
+    public void openingAnotherWalletLinkRowChangesIdAndDetail() {
+        verifyOpeningAnotherRowChangesIdAndDetailForSubtype(subtype(9));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_189)
+    public void openingAnotherMaterialSharingRowChangesIdAndDetail() {
+        verifyOpeningAnotherRowChangesIdAndDetailForSubtype(subtype(33));
+    }
+
+    private void verifyOpeningAnotherRowChangesIdAndDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var result = advancedPage().openAnotherTransactionDetail();
         Assert.assertNotEquals(result.secondUrl(), result.firstUrl());
@@ -216,9 +373,27 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
         Assert.assertTrue(result.secondDrawerText().contains(result.secondSource().status()));
     }
 
-    @DataProvider(name = "walletLinkStatuses")
-    public Object[][] walletLinkStatuses() {
-        return new Object[][]{{"Thành công"}, {"Thất bại"}};
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_046)
+    public void feeConnectionTimelineEntriesHaveUniqueValidContracts() {
+        var result = feeConnectionElementAudit();
+        Assert.assertFalse(result.timeline().isEmpty(), result.drawerText());
+        Set<String> hrefs = new HashSet<>();
+        Pattern time = Pattern.compile("\\b\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}\\b");
+        Pattern money = Pattern.compile("[+−-]?\\d[\\d.,]*₫");
+        result.timeline().forEach(entry -> {
+            Assert.assertTrue(entry.href().contains("/vuatho/transaction?tab=all"), entry.href());
+            Assert.assertFalse(queryValue(entry.href(), "id").isBlank(), entry.href());
+            Assert.assertEquals(entry.target(), "_blank");
+            Assert.assertTrue(hrefs.add(entry.href()), "Link timeline bị trùng: " + entry.href());
+            Assert.assertTrue(time.matcher(entry.text()).find(), entry.text());
+            Assert.assertTrue(money.matcher(entry.text()).find(), entry.text());
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_172)
+    public void everyVisibleStatusOpensMatchingDetailType9() {
+        verifyEveryVisibleStatusOpensMatchingDetailForSubtype(subtype(9));
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_041,
@@ -299,26 +474,13 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))), current.get(0).text());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_046)
-    public void feeConnectionTimelineEntriesHaveUniqueValidContracts() {
-        var result = feeConnectionElementAudit();
-        Assert.assertFalse(result.timeline().isEmpty(), result.drawerText());
-        Set<String> hrefs = new HashSet<>();
-        Pattern time = Pattern.compile("\\b\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}\\b");
-        Pattern money = Pattern.compile("[+−-]?\\d[\\d.,]*₫");
-        result.timeline().forEach(entry -> {
-            Assert.assertTrue(entry.href().contains("/vuatho/transaction?tab=all"), entry.href());
-            Assert.assertFalse(queryValue(entry.href(), "id").isBlank(), entry.href());
-            Assert.assertEquals(entry.target(), "_blank");
-            Assert.assertTrue(hrefs.add(entry.href()), "Link timeline bị trùng: " + entry.href());
-            Assert.assertTrue(time.matcher(entry.text()).find(), entry.text());
-            Assert.assertTrue(money.matcher(entry.text()).find(), entry.text());
-        });
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_173)
+    public void everyVisibleStatusOpensMatchingDetailType33() {
+        verifyEveryVisibleStatusOpensMatchingDetailForSubtype(subtype(33));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_087,
-            dataProvider = "feeSubtypes")
-    public void everyVisibleStatusOpensMatchingDetail(TransactionCategoryPage.Subtype subtype) {
+    private void verifyEveryVisibleStatusOpensMatchingDetailForSubtype(TransactionCategoryPage.Subtype subtype) {
         openFeeSubtype(subtype);
         var results = advancedPage().openAndCloseEveryVisibleStatus();
         Assert.assertFalse(results.isEmpty(), "Không có trạng thái để kiểm tra " + subtype.label());
@@ -332,6 +494,19 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
             Assert.assertTrue(result.closed());
         });
     }
+
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_087)
+    public void everyVisibleStatusOpensMatchingDetail() {
+        verifyEveryVisibleStatusOpensMatchingDetailForSubtype(subtype(8));
+    }
+
+
+
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_FEE_090)
     public void invalidTypeDoesNotOpenOrSelectWrongFeeSubtype() {
@@ -389,6 +564,13 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
                 .matcher(url).results().map(match -> match.group(1)).findFirst().orElse("");
     }
 
+    private void assertContainsAll(String actual, String... expectedParts) {
+        for (String expectedPart : expectedParts) {
+            Assert.assertTrue(actual.contains(expectedPart),
+                    "Thiếu nội dung '" + expectedPart + "': " + actual);
+        }
+    }
+
     private TransactionCategoryPage.Subtype feeSubtype(int type) {
         return category().subtypes().stream()
                 .filter(candidate -> candidate.type() == type)
@@ -414,5 +596,10 @@ public class TransactionFeeDetailTest extends TransactionFeeTestSupport {
             feeConnectionElementAudit = advancedPage().auditFeeConnectionElement();
         }
         return feeConnectionElementAudit;
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

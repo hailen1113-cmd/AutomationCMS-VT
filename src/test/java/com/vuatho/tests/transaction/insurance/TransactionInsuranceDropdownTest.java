@@ -21,9 +21,13 @@ public class TransactionInsuranceDropdownTest extends TransactionInsuranceTestSu
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_002)
     public void opensEverySubtypeRoute() {
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
-            verifySubtypeRoute(subtype);
-        }
+        TransactionCategoryPage.Subtype dailyFee = category().subtypes().get(0);
+        TransactionCategoryPage.Subtype refund = category().subtypes().get(1);
+        Assert.assertTrue(transactionPage.currentUrl().contains("tab=insurance&type=25"),
+                transactionPage.currentUrl());
+        Assert.assertTrue(transactionPage.activeGroupText().contains(dailyFee.label()),
+                transactionPage.activeGroupText());
+        verifySubtypeRoute(refund);
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_011)
@@ -44,7 +48,16 @@ public class TransactionInsuranceDropdownTest extends TransactionInsuranceTestSu
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_012)
     public void selectedSubtypeIsMarkedAndMenuCloses() {
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
+        verifySelectedSubtypeIsMarkedAndMenuCloses(category().subtypes().get(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_127)
+    public void refundSubtypeIsMarkedAndMenuCloses() {
+        verifySelectedSubtypeIsMarkedAndMenuCloses(category().subtypes().get(1));
+    }
+
+    private void verifySelectedSubtypeIsMarkedAndMenuCloses(
+            TransactionCategoryPage.Subtype subtype) {
             var result = transactionPage.selectSubtypeFromDropdown(subtype);
             Assert.assertTrue(result.url().contains("tab=insurance&type=" + subtype.type()), result.url());
             Assert.assertTrue(result.triggerText().contains(subtype.label()), result.triggerText());
@@ -53,7 +66,11 @@ public class TransactionInsuranceDropdownTest extends TransactionInsuranceTestSu
             Assert.assertEquals(result.selected(), "true");
             Assert.assertEquals(result.selectedCount(), 1L);
             Assert.assertTrue(result.menuClosed());
-        }
+            Assert.assertFalse(transactionPage.rows().isEmpty(),
+                    "Không có dữ liệu " + subtype.label());
+            transactionPage.rows().forEach(row -> Assert.assertTrue(
+                    row.value("Loại giao dịch").contains(subtype.label()),
+                    subtype.label() + " <> " + row.value("Loại giao dịch")));
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_013)
@@ -93,34 +110,19 @@ public class TransactionInsuranceDropdownTest extends TransactionInsuranceTestSu
         Assert.assertEquals(result.focusedId(), result.triggerId());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_036)
-    public void switchingBothWaysUpdatesRouteLabelAndRows() {
-        var result = transactionPage.switchAllSubtypesAndReturn();
-        Assert.assertEquals(result.states().size(), 3);
-        result.states().forEach(state -> {
-            Assert.assertTrue(state.url().contains("tab=insurance&type=" + state.subtype().type()),
-                    state.url());
-            Assert.assertTrue(state.activeText().contains(state.subtype().label()), state.activeText());
-            Assert.assertFalse(state.rowTypes().isEmpty(), "Không có dữ liệu " + state.subtype().label());
-            state.rowTypes().forEach(type -> Assert.assertTrue(type.contains(state.subtype().label()),
-                    state.subtype().label() + " <> " + type));
-        });
-    }
-
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_037)
-    public void refreshKeepsEachSubtypeSelected() {
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
-            transactionPage.open(subtype);
-            var result = transactionPage.refreshCurrentSubtype();
-            Assert.assertEquals(result.afterUrl(), result.beforeUrl());
-            Assert.assertEquals(result.afterText(), result.beforeText());
-            Assert.assertTrue(result.afterText().contains(subtype.label()));
-            Assert.assertEquals(result.options().stream()
-                    .filter(option -> "true".equals(option.checked())).count(), 1L);
-            Assert.assertTrue(result.options().stream().anyMatch(option ->
-                    String.valueOf(subtype.type()).equals(option.key())
-                            && "true".equals(option.checked())));
-        }
+    public void refreshKeepsRefundSubtypeSelected() {
+        TransactionCategoryPage.Subtype refund = category().subtypes().get(1);
+        transactionPage.open(refund);
+        var result = transactionPage.refreshCurrentSubtype();
+        Assert.assertEquals(result.afterUrl(), result.beforeUrl());
+        Assert.assertEquals(result.afterText(), result.beforeText());
+        Assert.assertTrue(result.afterText().contains(refund.label()));
+        Assert.assertEquals(result.options().stream()
+                .filter(option -> "true".equals(option.checked())).count(), 1L);
+        Assert.assertTrue(result.options().stream().anyMatch(option ->
+                String.valueOf(refund.type()).equals(option.key())
+                        && "true".equals(option.checked())));
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_038)

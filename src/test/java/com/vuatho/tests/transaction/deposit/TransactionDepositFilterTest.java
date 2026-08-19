@@ -20,52 +20,256 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_005)
     public void searchesUserAndRestoresRows() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            if (!transactionPage.hasSearchableUser()) {
-                return;
-            }
-            verifySearchAndReset(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        if (!transactionPage.hasSearchableUser()) {
+        return;
+        }
+        verifySearchAndReset(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_116)
+    public void searchesUserAndRestoresRowsType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        if (!transactionPage.hasSearchableUser()) {
+        return;
+        }
+        verifySearchAndReset(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_117)
+    public void searchesUserAndRestoresRowsType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        if (!transactionPage.hasSearchableUser()) {
+        return;
+        }
+        verifySearchAndReset(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_118)
+    public void searchesUserAndRestoresRowsType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        if (!transactionPage.hasSearchableUser()) {
+        return;
+        }
+        verifySearchAndReset(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_119)
+    public void searchesUserAndRestoresRowsType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        if (!transactionPage.hasSearchableUser()) {
+        return;
+        }
+        verifySearchAndReset(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_006)
     public void filterOptionsKeepCurrentTab() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            verifyFilterOptions(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        verifyFilterOptions(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_120)
+    public void filterOptionsKeepCurrentTabType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        verifyFilterOptions(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_121)
+    public void filterOptionsKeepCurrentTabType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        verifyFilterOptions(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_122)
+    public void filterOptionsKeepCurrentTabType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        verifyFilterOptions(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_123)
+    public void filterOptionsKeepCurrentTabType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        verifyFilterOptions(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_033)
     public void everyStatusFiltersMatchingRows() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().applyEveryFilterOption(
-                    com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
-            Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
-            result.results().forEach(option -> {
-                Assert.assertTrue(option.selectedText().contains(option.value()));
-                Assert.assertTrue(option.rows().stream()
-                        .allMatch(row -> row.status().equals(option.value())));
-            });
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
+        Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.status().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_124)
+    public void everyStatusFiltersMatchingRowsType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
+        Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.status().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_125)
+    public void everyStatusFiltersMatchingRowsType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
+        Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.status().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_126)
+    public void everyStatusFiltersMatchingRowsType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
+        Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.status().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_127)
+    public void everyStatusFiltersMatchingRowsType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.STATUS);
+        Assert.assertEquals(result.options(), List.of("Đang chờ", "Thành công", "Đã hủy"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.status().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_034)
     public void everyGatewayFiltersMatchingRows() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().applyEveryFilterOption(
-                    com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
-            Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
-            result.results().forEach(option -> {
-                Assert.assertTrue(option.selectedText().contains(option.value()));
-                Assert.assertTrue(option.rows().stream()
-                        .allMatch(row -> row.gateway().equals(option.value())));
-            });
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
+        Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.gateway().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_128)
+    public void everyGatewayFiltersMatchingRowsType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
+        Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.gateway().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_129)
+    public void everyGatewayFiltersMatchingRowsType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
+        Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.gateway().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_130)
+    public void everyGatewayFiltersMatchingRowsType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
+        Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.gateway().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_131)
+    public void everyGatewayFiltersMatchingRowsType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().applyEveryFilterOption(
+        com.vuatho.pages.TransactionHistoryPage.Filter.GATEWAY);
+        Assert.assertEquals(result.options(), List.of("MOMO", "PAYPAL", "ONEPAY", "BANKING", "NEOX"));
+        result.results().forEach(option -> {
+        Assert.assertTrue(option.selectedText().contains(option.value()));
+        Assert.assertTrue(option.rows().stream()
+        .allMatch(row -> row.gateway().equals(option.value())));
+        });
+        assertCurrentSubtype(subtype);
         });
     }
 
@@ -150,46 +354,226 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_042)
     public void unmatchedSearchAndResetRestoreSubtype() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = transactionPage.unmatchedSearchAndReset(
-                    "NO_DEPOSIT_TRANSACTION_987654321");
-            Assert.assertTrue(result.empty());
-            Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
-            Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
-            Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = transactionPage.unmatchedSearchAndReset(
+        "NO_DEPOSIT_TRANSACTION_987654321");
+        Assert.assertTrue(result.empty());
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
+        Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_132)
+    public void unmatchedSearchAndResetRestoreSubtypeType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = transactionPage.unmatchedSearchAndReset(
+        "NO_DEPOSIT_TRANSACTION_987654321");
+        Assert.assertTrue(result.empty());
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
+        Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_133)
+    public void unmatchedSearchAndResetRestoreSubtypeType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = transactionPage.unmatchedSearchAndReset(
+        "NO_DEPOSIT_TRANSACTION_987654321");
+        Assert.assertTrue(result.empty());
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
+        Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_134)
+    public void unmatchedSearchAndResetRestoreSubtypeType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = transactionPage.unmatchedSearchAndReset(
+        "NO_DEPOSIT_TRANSACTION_987654321");
+        Assert.assertTrue(result.empty());
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
+        Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_135)
+    public void unmatchedSearchAndResetRestoreSubtypeType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = transactionPage.unmatchedSearchAndReset(
+        "NO_DEPOSIT_TRANSACTION_987654321");
+        Assert.assertTrue(result.empty());
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        Assert.assertTrue(result.pageText().contains("Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"));
+        Assert.assertEquals(signatures(result.restored()), signatures(result.before()));
+        assertCurrentSubtype(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_043)
     public void totalAndPaginationUpdateAfterStatusFilter() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().totalAndPaginationAfterStatusFilter();
-            Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
-            Assert.assertTrue(result.selectedStatus().contains("Thành công"));
-            Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
-            Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().totalAndPaginationAfterStatusFilter();
+        Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
+        Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_136)
+    public void totalAndPaginationUpdateAfterStatusFilterType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().totalAndPaginationAfterStatusFilter();
+        Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
+        Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_137)
+    public void totalAndPaginationUpdateAfterStatusFilterType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().totalAndPaginationAfterStatusFilter();
+        Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
+        Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_138)
+    public void totalAndPaginationUpdateAfterStatusFilterType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().totalAndPaginationAfterStatusFilter();
+        Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
+        Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_139)
+    public void totalAndPaginationUpdateAfterStatusFilterType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().totalAndPaginationAfterStatusFilter();
+        Assert.assertTrue(result.afterTotal() <= result.beforeTotal());
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.rows().stream().allMatch(row -> row.status().equals("Thành công")));
+        Assert.assertEquals(result.afterPagination(), result.afterTotal() > 20);
+        assertCurrentSubtype(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_044)
     public void filterPersistsAfterOpeningDetail() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().filterPersistsAfterDetail("Thành công");
-            Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
-            Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
-            Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
-            Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
-                    "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
-            assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
-            assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
-            Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
-                    "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
-            assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().filterPersistsAfterDetail("Thành công");
+        Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
+        Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
+        Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
+        Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
+        "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
+        assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
+        assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
+        Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
+        "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
+        assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_140)
+    public void filterPersistsAfterOpeningDetailType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().filterPersistsAfterDetail("Thành công");
+        Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
+        Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
+        Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
+        Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
+        "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
+        assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
+        assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
+        Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
+        "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
+        assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_141)
+    public void filterPersistsAfterOpeningDetailType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().filterPersistsAfterDetail("Thành công");
+        Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
+        Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
+        Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
+        Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
+        "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
+        assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
+        assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
+        Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
+        "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
+        assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_142)
+    public void filterPersistsAfterOpeningDetailType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().filterPersistsAfterDetail("Thành công");
+        Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
+        Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
+        Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
+        Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
+        "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
+        assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
+        assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
+        Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
+        "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
+        assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_143)
+    public void filterPersistsAfterOpeningDetailType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().filterPersistsAfterDetail("Thành công");
+        Assert.assertTrue(result.selectedStatus().contains(result.expectedStatus()));
+        Assert.assertEquals(result.rowsAfter(), result.rowsBefore());
+        Assert.assertTrue(transactionPage.activeGroupText().contains("Tiền nạp"));
+        Assert.assertTrue(transactionPage.activeGroupText().contains(subtype.label()),
+        "Sau khi đóng chi tiết không còn hiển thị loại " + subtype.label());
+        assertSubtypeUrl(result.listUrlBefore(), subtype, "trước khi mở chi tiết");
+        assertSubtypeUrl(result.openedUrl(), subtype, "khi đang mở chi tiết");
+        Assert.assertEquals(result.browserLocationAfterClose(), result.closedUrl(),
+        "window.location.href khác WebDriver.getCurrentUrl() sau khi đóng chi tiết");
+        assertSubtypeUrl(result.closedUrl(), subtype, "sau khi đóng chi tiết");
         });
     }
 
@@ -203,37 +587,181 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_046)
     public void combinesDateStatusAndGateway() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
-            Assert.assertTrue(result.selectedStatus().contains("Thành công"));
-            Assert.assertTrue(result.selectedGateway().contains("MOMO"));
-            Assert.assertTrue(result.selectedDate().contains(result.date().format(
-                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
-            if (result.empty()) {
-                Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
-            } else {
-                Assert.assertFalse(result.rows().isEmpty());
-                Assert.assertTrue(result.rows().stream().allMatch(row ->
-                        row.status().equals("Thành công")
-                                && row.gateway().equals("MOMO")
-                                && row.createdAt().toLocalDate().equals(result.date())));
-            }
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.selectedGateway().contains("MOMO"));
+        Assert.assertTrue(result.selectedDate().contains(result.date().format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        if (result.empty()) {
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        } else {
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row ->
+        row.status().equals("Thành công")
+        && row.gateway().equals("MOMO")
+        && row.createdAt().toLocalDate().equals(result.date())));
+        }
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_144)
+    public void combinesDateStatusAndGatewayType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.selectedGateway().contains("MOMO"));
+        Assert.assertTrue(result.selectedDate().contains(result.date().format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        if (result.empty()) {
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        } else {
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row ->
+        row.status().equals("Thành công")
+        && row.gateway().equals("MOMO")
+        && row.createdAt().toLocalDate().equals(result.date())));
+        }
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_145)
+    public void combinesDateStatusAndGatewayType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.selectedGateway().contains("MOMO"));
+        Assert.assertTrue(result.selectedDate().contains(result.date().format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        if (result.empty()) {
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        } else {
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row ->
+        row.status().equals("Thành công")
+        && row.gateway().equals("MOMO")
+        && row.createdAt().toLocalDate().equals(result.date())));
+        }
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_146)
+    public void combinesDateStatusAndGatewayType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.selectedGateway().contains("MOMO"));
+        Assert.assertTrue(result.selectedDate().contains(result.date().format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        if (result.empty()) {
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        } else {
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row ->
+        row.status().equals("Thành công")
+        && row.gateway().equals("MOMO")
+        && row.createdAt().toLocalDate().equals(result.date())));
+        }
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_147)
+    public void combinesDateStatusAndGatewayType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().combineStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.selectedStatus().contains("Thành công"));
+        Assert.assertTrue(result.selectedGateway().contains("MOMO"));
+        Assert.assertTrue(result.selectedDate().contains(result.date().format(
+        java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        if (result.empty()) {
+        Assert.assertTrue(result.pageText().contains("Chưa có dữ liệu"));
+        } else {
+        Assert.assertFalse(result.rows().isEmpty());
+        Assert.assertTrue(result.rows().stream().allMatch(row ->
+        row.status().equals("Thành công")
+        && row.gateway().equals("MOMO")
+        && row.createdAt().toLocalDate().equals(result.date())));
+        }
+        assertCurrentSubtype(subtype);
         });
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_047)
     public void resetCombinedFiltersKeepsSubtype() {
-        forEachSubtype(subtype -> {
-            openDepositSubtype(subtype);
-            var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
-            Assert.assertTrue(result.status().contains("Chọn trạng thái"));
-            Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
-            Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
-            Assert.assertEquals(result.page(), 1);
-            Assert.assertTrue(result.rows() > 0);
-            assertCurrentSubtype(subtype);
+        forSubtype(subtype(0), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.status().contains("Chọn trạng thái"));
+        Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
+        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
+        Assert.assertEquals(result.page(), 1);
+        Assert.assertTrue(result.rows() > 0);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_148)
+    public void resetCombinedFiltersKeepsSubtypeType10() {
+        forSubtype(subtype(10), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.status().contains("Chọn trạng thái"));
+        Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
+        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
+        Assert.assertEquals(result.page(), 1);
+        Assert.assertTrue(result.rows() > 0);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_149)
+    public void resetCombinedFiltersKeepsSubtypeType19() {
+        forSubtype(subtype(19), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.status().contains("Chọn trạng thái"));
+        Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
+        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
+        Assert.assertEquals(result.page(), 1);
+        Assert.assertTrue(result.rows() > 0);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_150)
+    public void resetCombinedFiltersKeepsSubtypeType20() {
+        forSubtype(subtype(20), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.status().contains("Chọn trạng thái"));
+        Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
+        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
+        Assert.assertEquals(result.page(), 1);
+        Assert.assertTrue(result.rows() > 0);
+        assertCurrentSubtype(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_151)
+    public void resetCombinedFiltersKeepsSubtypeType34() {
+        forSubtype(subtype(34), subtype -> {
+        openDepositSubtype(subtype);
+        var result = advancedPage().resetStatusGatewayAndDate("Thành công", "MOMO");
+        Assert.assertTrue(result.status().contains("Chọn trạng thái"));
+        Assert.assertTrue(result.gateway().contains("Chọn cổng thanh toán"));
+        Assert.assertTrue(result.date().contains("Chọn khoảng ngày giờ"));
+        Assert.assertEquals(result.page(), 1);
+        Assert.assertTrue(result.rows() > 0);
+        assertCurrentSubtype(subtype);
         });
     }
 
@@ -263,23 +791,14 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         return rows.stream().map(TransactionCategoryPage.TransactionRow::signature).toList();
     }
 
-    private void forEachSubtype(Consumer<TransactionCategoryPage.Subtype> action) {
-        List<String> failures = new ArrayList<>();
-        String requestedType = System.getProperty("deposit.type", "").trim();
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes().stream()
-                .filter(candidate -> requestedType.isBlank()
-                        || requestedType.equals(String.valueOf(candidate.type())))
-                .toList()) {
-            try {
-                action.accept(subtype);
-            } catch (AssertionError | RuntimeException exception) {
-                failures.add(subtype.label() + " (type=" + subtype.type() + "): "
-                        + rootMessage(exception));
-            }
-        }
-        if (!failures.isEmpty()) {
-            Assert.fail("Các loại Tiền nạp không đạt:\n- " + String.join("\n- ", failures));
-        }
+    private void forSubtype(TransactionCategoryPage.Subtype subtype,
+                            Consumer<TransactionCategoryPage.Subtype> action) {
+        action.accept(subtype);
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 
     private String rootMessage(Throwable throwable) {

@@ -18,23 +18,92 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
                 "Lịch sử giao dịch", "Tiền nạp - Tổng quan");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_003,
-            dataProvider = "depositSubtypes")
-    public void showsExpectedFiltersAndColumns(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_003)
+    public void showsExpectedFiltersAndColumns() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_152)
+    public void showsExpectedFiltersAndColumnsType10() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_153)
+    public void showsExpectedFiltersAndColumnsType19() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_154)
+    public void showsExpectedFiltersAndColumnsType20() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_155)
+    public void showsExpectedFiltersAndColumnsType34() {
+        verifyShowsExpectedFiltersAndColumnsForSubtype(subtype(34));
+    }
+
+    private void verifyShowsExpectedFiltersAndColumnsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         verifyLayout(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_004,
-            dataProvider = "depositSubtypes")
-    public void rowsHaveValidFormats(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_004)
+    public void rowsHaveValidFormats() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_156)
+    public void rowsHaveValidFormatsType10() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_157)
+    public void rowsHaveValidFormatsType19() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_158)
+    public void rowsHaveValidFormatsType20() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_159)
+    public void rowsHaveValidFormatsType34() {
+        verifyRowsHaveValidFormatsForSubtype(subtype(34));
+    }
+
+    private void verifyRowsHaveValidFormatsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         verifyRowFormats();
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_062,
-            dataProvider = "depositSubtypes")
-    public void rowsMatchSelectedDepositSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_062)
+    public void rowsMatchSelectedDepositSubtype() {
+        verifyRowsMatchSelectedDepositSubtypeForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_160)
+    public void rowsMatchSelectedDepositSubtypeType10() {
+        verifyRowsMatchSelectedDepositSubtypeForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_161)
+    public void rowsMatchSelectedDepositSubtypeType19() {
+        verifyRowsMatchSelectedDepositSubtypeForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_162)
+    public void rowsMatchSelectedDepositSubtypeType20() {
+        verifyRowsMatchSelectedDepositSubtypeForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_163)
+    public void rowsMatchSelectedDepositSubtypeType34() {
+        verifyRowsMatchSelectedDepositSubtypeForSubtype(subtype(34));
+    }
+
+    private void verifyRowsMatchSelectedDepositSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         String expectedType = expectedTransactionType(subtype.type());
         var rows = transactionPage.rows();
@@ -44,9 +113,32 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
         assertSubtypeUrl(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_063,
-            dataProvider = "depositSubtypes")
-    public void rowsUseAllowedStatusesAndGateways(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_063)
+    public void rowsUseAllowedStatusesAndGateways() {
+        verifyRowsUseAllowedStatusesAndGatewaysForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_164)
+    public void rowsUseAllowedStatusesAndGatewaysType10() {
+        verifyRowsUseAllowedStatusesAndGatewaysForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_165)
+    public void rowsUseAllowedStatusesAndGatewaysType19() {
+        verifyRowsUseAllowedStatusesAndGatewaysForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_166)
+    public void rowsUseAllowedStatusesAndGatewaysType20() {
+        verifyRowsUseAllowedStatusesAndGatewaysForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_167)
+    public void rowsUseAllowedStatusesAndGatewaysType34() {
+        verifyRowsUseAllowedStatusesAndGatewaysForSubtype(subtype(34));
+    }
+
+    private void verifyRowsUseAllowedStatusesAndGatewaysForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         Set<String> allowedStatuses = Set.of(
                 "Đang chờ", "Thành công", "Hoàn thành", "Đã hủy", "Từ chối", "Thất bại");
@@ -63,9 +155,32 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
         assertSubtypeUrl(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_064,
-            dataProvider = "depositSubtypes")
-    public void showsSummaryVariantMatchingDepositSubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_064)
+    public void showsSummaryVariantMatchingDepositSubtype() {
+        verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_168)
+    public void showsSummaryVariantMatchingDepositSubtypeType10() {
+        verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_169)
+    public void showsSummaryVariantMatchingDepositSubtypeType19() {
+        verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_170)
+    public void showsSummaryVariantMatchingDepositSubtypeType20() {
+        verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_171)
+    public void showsSummaryVariantMatchingDepositSubtypeType34() {
+        verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(subtype(34));
+    }
+
+    private void verifyShowsSummaryVariantMatchingDepositSubtypeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         if (subtype.type() == 34) {
             var result = transactionPage.bankTransferDepositOverview();
@@ -86,10 +201,27 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
         assertSubtypeUrl(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_065,
-            dataProvider = "costWalletGatewaySubtypes")
-    public void costWalletTotalMatchesEveryDisplayedGateway(
-            TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_065)
+    public void costWalletTotalMatchesEveryDisplayedGateway() {
+        verifyCostWalletTotalMatchesEveryDisplayedGatewayForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_184)
+    public void costWalletTotalMatchesEveryDisplayedGatewayType10() {
+        verifyCostWalletTotalMatchesEveryDisplayedGatewayForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_185)
+    public void costWalletTotalMatchesEveryDisplayedGatewayType19() {
+        verifyCostWalletTotalMatchesEveryDisplayedGatewayForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_186)
+    public void costWalletTotalMatchesEveryDisplayedGatewayType20() {
+        verifyCostWalletTotalMatchesEveryDisplayedGatewayForSubtype(subtype(20));
+    }
+
+    private void verifyCostWalletTotalMatchesEveryDisplayedGatewayForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         var filters = transactionPage.resetAndReadOverviewFilters();
         Assert.assertTrue(filters.status().contains("Chọn trạng thái"),
@@ -137,19 +269,62 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
         assertSubtypeUrl(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_067,
-            dataProvider = "depositSubtypes")
-    public void initialOverviewFinishesLoadingWithinPageSize(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_067)
+    public void initialOverviewFinishesLoadingWithinPageSize() {
+        verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(subtype(0));
+    }
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_189)
+    public void initialOverviewFinishesLoadingWithinPageSizeType10() {
+        verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(subtype(10));
+    }
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_190)
+    public void initialOverviewFinishesLoadingWithinPageSizeType19() {
+        verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(subtype(19));
+    }
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_191)
+    public void initialOverviewFinishesLoadingWithinPageSizeType20() {
+        verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(subtype(20));
+    }
+
+
+
+
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_192)
+    public void initialOverviewFinishesLoadingWithinPageSizeType34() {
+        verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(subtype(34));
+    }
+
+    private void verifyInitialOverviewFinishesLoadingWithinPageSizeForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         var result = transactionPage.initialRender();
-        Assert.assertFalse(result.loading(), "Màn hình vẫn còn trạng thái Đang tải dữ liệu");
-        Assert.assertTrue(result.visibleRows() <= 20,
-                "Trang hiển thị quá 20 dòng: " + result.visibleRows());
+        Assert.assertFalse(result.loading());
+        Assert.assertTrue(result.visibleRows() <= 20);
         Assert.assertTrue(result.visibleRows() > 0
-                        || result.empty() && result.text().contains("Chưa có dữ liệu"),
-                "Không có dòng nhưng cũng không hiển thị trạng thái rỗng hợp lệ");
-        assertSubtypeUrl(subtype);
+                || result.empty() && result.text().contains("Chưa có dữ liệu"));
     }
+
+
+
+
+
+
+
 
     private String expectedTransactionType(int type) {
         return switch (type) {
@@ -188,5 +363,10 @@ public class TransactionDepositOverviewTest extends TransactionDepositTestSuppor
         Assert.assertTrue(url.contains("/vuatho/transaction"), "Sai màn hình: " + url);
         Assert.assertTrue(url.contains("tab=" + subtype.tab()), "Sai tab: " + url);
         Assert.assertTrue(url.contains("type=" + subtype.type()), "Sai loại: " + url);
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

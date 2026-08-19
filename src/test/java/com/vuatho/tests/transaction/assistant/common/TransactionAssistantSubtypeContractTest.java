@@ -5,7 +5,6 @@ import com.vuatho.pages.TransactionCategoryPage;
 import com.vuatho.support.TransactionAssistantTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** Kiểm tra hợp đồng dữ liệu dùng chung cho cả Phí nền tảng và Tiền phạt. */
@@ -15,14 +14,17 @@ public class TransactionAssistantSubtypeContractTest extends TransactionAssistan
                 "Lịch sử giao dịch", "Thợ phụ - Hợp đồng hai loại");
     }
 
-    @DataProvider(name = "subtypes")
-    public Object[][] subtypes() {
-        return subtypeRows();
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_011)
+    public void platformFeeShowsMatchingRows() {
+        verifySubtypeShowsMatchingRows(category().subtypes().get(0));
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_011,
-            dataProvider = "subtypes")
-    public void everySubtypeShowsMatchingRows(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_129)
+    public void penaltyShowsMatchingRows() {
+        verifySubtypeShowsMatchingRows(category().subtypes().get(1));
+    }
+
+    private void verifySubtypeShowsMatchingRows(TransactionCategoryPage.Subtype subtype) {
         transactionPage.open(subtype);
         var rows = transactionPage.rows();
         Assert.assertFalse(rows.isEmpty(), "Loại giao dịch không có dữ liệu: " + subtype.label());
@@ -32,9 +34,17 @@ public class TransactionAssistantSubtypeContractTest extends TransactionAssistan
                 "Có dòng không thuộc loại giao dịch " + subtype.label());
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_034,
-            dataProvider = "subtypes")
-    public void detailMatchesEverySubtype(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_034)
+    public void platformFeeDetailMatchesSubtype() {
+        verifyDetailMatchesSubtype(category().subtypes().get(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ASSISTANT_130)
+    public void penaltyDetailMatchesSubtype() {
+        verifyDetailMatchesSubtype(category().subtypes().get(1));
+    }
+
+    private void verifyDetailMatchesSubtype(TransactionCategoryPage.Subtype subtype) {
         transactionPage.open(subtype);
         var result = advancedPage().openFirstDetail();
         Assert.assertTrue(result.url().contains("type=" + subtype.type()));

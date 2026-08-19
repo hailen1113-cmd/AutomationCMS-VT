@@ -23,12 +23,34 @@ public class TransactionDepositDropdownTest extends TransactionDepositTestSuppor
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_002)
     public void opensEverySubtypeRoute() {
-        for (TransactionCategoryPage.Subtype subtype : category().subtypes()) {
-            var result = transactionPage.chooseSubtypeFromDropdown(subtype);
-            Assert.assertTrue(result.url().contains("tab=deposit"), result.url());
-            Assert.assertTrue(result.url().contains("type=" + subtype.type()), result.url());
-            Assert.assertTrue(result.triggerText().contains(subtype.label()), result.triggerText());
-        }
+        verifyOpensEverySubtypeRouteForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_088)
+    public void opensEverySubtypeRouteType10() {
+        verifyOpensEverySubtypeRouteForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_089)
+    public void opensEverySubtypeRouteType19() {
+        verifyOpensEverySubtypeRouteForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_090)
+    public void opensEverySubtypeRouteType20() {
+        verifyOpensEverySubtypeRouteForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_091)
+    public void opensEverySubtypeRouteType34() {
+        verifyOpensEverySubtypeRouteForSubtype(subtype(34));
+    }
+
+    private void verifyOpensEverySubtypeRouteForSubtype(TransactionCategoryPage.Subtype subtype) {
+        var result = transactionPage.chooseSubtypeFromDropdown(subtype);
+        Assert.assertTrue(result.url().contains("tab=deposit"), result.url());
+        Assert.assertTrue(result.url().contains("type=" + subtype.type()), result.url());
+        Assert.assertTrue(result.triggerText().contains(subtype.label()), result.triggerText());
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_011)
@@ -107,5 +129,10 @@ public class TransactionDepositDropdownTest extends TransactionDepositTestSuppor
         Assert.assertTrue(result.url().contains("tab=deposit"), result.url());
         Assert.assertTrue(result.url().contains("type=" + subtype.type()), result.url());
         Assert.assertTrue(result.activeText().contains(subtype.label()), result.activeText());
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }

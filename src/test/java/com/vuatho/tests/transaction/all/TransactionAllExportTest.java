@@ -2,6 +2,7 @@ package com.vuatho.tests.transaction.all;
 
 import com.vuatho.core.TestNgRunner;
 import com.vuatho.support.TransactionHistoryTestSupport;
+import com.vuatho.support.TransactionExportWorkbook;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import com.vuatho.utils.TextNormalizer;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -51,6 +52,88 @@ public class TransactionAllExportTest extends TransactionHistoryTestSupport {
         Assert.assertTrue(normalized.contains(TextNormalizer.normalize(result.filterValue())));
         Assert.assertTrue(workbook.rowCount() - 1 > result.visibleRows(),
                 "Excel chỉ chứa dữ liệu của trang hiện tại thay vì toàn bộ dữ liệu phù hợp filter.");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_075)
+    public void gatewayFilteredExportContainsAllMatchingRows() {
+        var result = transactionPage.exportFilteredGateway();
+        var workbook = TransactionExportWorkbook.read(result.file());
+        Assert.assertEquals(workbook.rows().size(), result.totalRows());
+        Assert.assertTrue(workbook.values("Cổng thanh toán").stream()
+                .allMatch(value -> TextNormalizer.normalize(value)
+                        .equals(TextNormalizer.normalize(result.filterValue()))));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_076)
+    public void dateFilteredExportContainsAllMatchingRows() {
+        var result = transactionPage.exportFilteredDate();
+        var workbook = TransactionExportWorkbook.read(result.file());
+        Assert.assertEquals(workbook.rows().size(), result.totalRows());
+        String date = result.date().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+        Assert.assertTrue(workbook.values("Ngày tạo").stream()
+                .map(value -> value.replaceAll("[^0-9]", ""))
+                .allMatch(value -> value.startsWith(date)));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_077)
+    public void combinedFilteredExportContainsAllMatchingRows() {
+        var result = transactionPage.exportCombinedFilters();
+        var workbook = TransactionExportWorkbook.read(result.file());
+        Assert.assertEquals(workbook.rows().size(), result.totalRows());
+        Assert.assertTrue(workbook.values("Loại giao dịch").stream().allMatch(value ->
+                TextNormalizer.normalize(value).equals(TextNormalizer.normalize(result.type()))));
+        Assert.assertTrue(workbook.values("Trạng thái").stream().allMatch(value ->
+                TextNormalizer.normalize(value).equals(TextNormalizer.normalize(result.status()))));
+        Assert.assertTrue(workbook.values("Cổng thanh toán").stream().allMatch(value ->
+                TextNormalizer.normalize(value).equals(TextNormalizer.normalize(result.gateway()))));
+        String date = result.date().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+        Assert.assertTrue(workbook.values("Ngày tạo").stream()
+                .map(value -> value.replaceAll("[^0-9]", ""))
+                .allMatch(value -> value.startsWith(date)));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_078)
+    public void exportsPendingMomoMatrixCell() { verifyMatrix("Đang chờ", "MOMO"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_079)
+    public void exportsPendingPaypalMatrixCell() { verifyMatrix("Đang chờ", "PAYPAL"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_080)
+    public void exportsPendingOnepayMatrixCell() { verifyMatrix("Đang chờ", "ONEPAY"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_081)
+    public void exportsPendingBankingMatrixCell() { verifyMatrix("Đang chờ", "BANKING"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_082)
+    public void exportsPendingNeoxMatrixCell() { verifyMatrix("Đang chờ", "NEOX"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_083)
+    public void exportsSuccessMomoMatrixCell() { verifyMatrix("Thành công", "MOMO"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_084)
+    public void exportsSuccessPaypalMatrixCell() { verifyMatrix("Thành công", "PAYPAL"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_085)
+    public void exportsSuccessOnepayMatrixCell() { verifyMatrix("Thành công", "ONEPAY"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_086)
+    public void exportsSuccessBankingMatrixCell() { verifyMatrix("Thành công", "BANKING"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_087)
+    public void exportsSuccessNeoxMatrixCell() { verifyMatrix("Thành công", "NEOX"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_088)
+    public void exportsFailedMomoMatrixCell() { verifyMatrix("Thất bại", "MOMO"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_089)
+    public void exportsFailedPaypalMatrixCell() { verifyMatrix("Thất bại", "PAYPAL"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_090)
+    public void exportsFailedOnepayMatrixCell() { verifyMatrix("Thất bại", "ONEPAY"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_091)
+    public void exportsFailedBankingMatrixCell() { verifyMatrix("Thất bại", "BANKING"); }
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_092)
+    public void exportsFailedNeoxMatrixCell() { verifyMatrix("Thất bại", "NEOX"); }
+
+    private void verifyMatrix(String status, String gateway) {
+        var result = transactionPage.exportFilteredStatusAndGateway(status, gateway);
+        var workbook = TransactionExportWorkbook.read(result.file());
+        Assert.assertEquals(workbook.rows().size(), result.totalRows(),
+                "File phải chứa toàn bộ dữ liệu phù hợp bộ lọc.");
+        Assert.assertTrue(workbook.values("Trạng thái").stream().allMatch(value ->
+                TextNormalizer.normalize(value).equals(TextNormalizer.normalize(status))),
+                "File có trạng thái khác " + status);
+        Assert.assertTrue(workbook.values("Cổng thanh toán").stream().allMatch(value ->
+                TextNormalizer.normalize(value).equals(TextNormalizer.normalize(gateway))),
+                "File có cổng thanh toán khác " + gateway);
     }
 
     private WorkbookSnapshot readWorkbook(Path file) {

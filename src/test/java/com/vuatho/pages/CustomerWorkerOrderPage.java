@@ -650,9 +650,25 @@ public class CustomerWorkerOrderPage {
             return new WebDriverWait(
                     driver, TestConfig.exportDownloadTimeout())
                     .pollingEvery(Duration.ofMillis(300))
-                    .until(d -> completedDownloadSnapshot(directory).stream()
-                            .filter(file -> !before.contains(file))
-                            .findFirst().orElse(null));
+                    .until(d -> {
+                        String uiError = d.findElements(By.cssSelector(
+                                        ".Toastify__toast-body[role='alert']"))
+                                .stream().filter(WebElement::isDisplayed)
+                                .map(WebElement::getText).map(String::trim)
+                                .filter(text -> {
+                                    String value = normalized(text);
+                                    return value.contains("loi")
+                                            || value.contains("that bai")
+                                            || value.contains("khong the");
+                                }).findFirst().orElse(null);
+                        if (uiError != null) {
+                            throw new IllegalStateException(
+                                    "UI báo xuất Excel thất bại: " + uiError);
+                        }
+                        return completedDownloadSnapshot(directory).stream()
+                                .filter(file -> !before.contains(file))
+                                .findFirst().orElse(null);
+                    });
         } catch (TimeoutException exception) {
             return "";
         }

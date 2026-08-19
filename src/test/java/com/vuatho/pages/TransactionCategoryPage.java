@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
@@ -178,20 +179,6 @@ public class TransactionCategoryPage extends UniformUiPage {
                 triggerId, focused.getAttribute("id"));
     }
 
-    public DropdownRoundTripSnapshot switchAllSubtypesAndReturn() {
-        List<DropdownSubtypeState> states = new ArrayList<>();
-        for (Subtype subtype : category.subtypes()) {
-            chooseSubtypeFromDropdown(subtype);
-            states.add(new DropdownSubtypeState(subtype, currentUrl(), activeGroupText(),
-                    rows().stream().map(row -> row.value("Loại giao dịch")).toList()));
-        }
-        Subtype first = category.subtypes().get(0);
-        chooseSubtypeFromDropdown(first);
-        states.add(new DropdownSubtypeState(first, currentUrl(), activeGroupText(),
-                rows().stream().map(row -> row.value("Loại giao dịch")).toList()));
-        return new DropdownRoundTripSnapshot(states);
-    }
-
     public DropdownReloadSnapshot refreshCurrentSubtype() {
         String beforeUrl = currentUrl();
         String beforeText = activeGroupText();
@@ -301,9 +288,7 @@ public class TransactionCategoryPage extends UniformUiPage {
     }
 
     public InsuranceOverviewSnapshot insuranceOverview(Subtype subtype) {
-        String amountHeading = subtype.type() == 25
-                ? "Tổng trừ phí vt care hàng ngày/tháng"
-                : "Tổng hoàn phí vt care khi hủy gói";
+        String amountHeading = insuranceAmountHeading(subtype);
         List<String> statuses = List.of("Hoàn thành", "Đang chờ", "Từ chối");
         String amountText = overviewBlockText(amountHeading, statuses);
         String countText = overviewBlockText("Tổng số giao dịch", statuses);
@@ -320,6 +305,90 @@ public class TransactionCategoryPage extends UniformUiPage {
         return new InsuranceOverviewSnapshot(subtype, moneyNearLabel(amountText, "Tổng cộng"),
                 countNearLabel(countText, "Tổng cộng"), amounts, counts,
                 amountPercentages, countPercentages, amountText, countText, currentUrl());
+    }
+
+    public InsurancePieOverviewSnapshot insurancePieOverview(Subtype subtype) {
+        FeePieSnapshot amount = pieSnapshot(insuranceAmountHeading(subtype));
+        FeePieSnapshot count = pieSnapshot("Tổng số giao dịch");
+        return new InsurancePieOverviewSnapshot(amount, count, currentUrl());
+    }
+
+    public List<String> visibleInsuranceOverviewHeadings() {
+        return visibleElements(By.cssSelector("main h4")).stream()
+                .map(this::elementText).map(String::trim)
+                .filter(value -> value.equals("Tổng số giao dịch")
+                        || value.toLowerCase(Locale.ROOT).contains("vt care"))
+                .toList();
+    }
+
+    public InsuranceOverviewRefreshSnapshot refreshInsuranceOverview(Subtype subtype) {
+        driver.navigate().refresh();
+        waitForTable();
+        return new InsuranceOverviewRefreshSnapshot(visibleInsuranceOverviewHeadings(),
+                insuranceOverview(subtype), currentUrl(), activeGroupText());
+    }
+
+    private String insuranceAmountHeading(Subtype subtype) {
+        return subtype.type() == 25
+                ? "Tổng trừ phí vt care hàng ngày/tháng"
+                : "Tổng hoàn phí vt care khi hủy gói";
+    }
+
+    /** Đọc hai khối tổng quan dùng chung của các nhóm giao dịch theo trạng thái. */
+    public CategoryStatusOverviewSnapshot categoryStatusOverview() {
+        List<String> headings = categoryOverviewHeadings();
+        if (headings.isEmpty()) {
+            throw new IllegalStateException("Thiếu khối tổng quan của " + category.label()
+                    + ": " + headings);
+        }
+        String amountHeading = headings.get(0);
+        String countHeading = headings.stream()
+                .filter(value -> value.equals("Tổng số giao dịch"))
+                .findFirst().orElse("");
+        List<String> statuses = List.of("Hoàn thành", "Đang chờ", "Từ chối");
+        String amountText = overviewBlockText(amountHeading, statuses);
+        String countText = countHeading.isBlank() ? "" : overviewBlockText(countHeading, statuses);
+        Map<String, BigDecimal> amounts = new LinkedHashMap<>();
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        Map<String, BigDecimal> amountPercentages = new LinkedHashMap<>();
+        Map<String, BigDecimal> countPercentages = new LinkedHashMap<>();
+        for (String status : statuses) {
+            amounts.put(status, moneyNearLabel(amountText, status));
+            if (!countHeading.isBlank()) {
+                counts.put(status, countNearLabel(countText, status));
+                countPercentages.put(status, percentageNearLabel(countText, status));
+            }
+            amountPercentages.put(status, percentageNearLabel(amountText, status));
+        }
+        return new CategoryStatusOverviewSnapshot(amountHeading, countHeading,
+                moneyNearLabel(amountText, "Tổng cộng"),
+                countHeading.isBlank() ? null : countNearLabel(countText, "Tổng cộng"), amounts, counts,
+                amountPercentages, countPercentages, currentUrl());
+    }
+
+    public CategoryStatusPieSnapshot categoryStatusPieOverview() {
+        List<String> headings = categoryOverviewHeadings();
+        String amountHeading = headings.stream()
+                .filter(value -> !value.equals("Tổng số giao dịch"))
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        "Thiếu khối tổng tiền của " + category.label()));
+        FeePieSnapshot countChart = headings.contains("Tổng số giao dịch")
+                ? pieSnapshot("Tổng số giao dịch") : null;
+        return new CategoryStatusPieSnapshot(pieSnapshot(amountHeading), countChart, currentUrl());
+    }
+
+    public List<String> categoryOverviewHeadings() {
+        return visibleElements(By.cssSelector("main h4")).stream()
+                .map(this::elementText).map(String::trim)
+                .filter(value -> value.startsWith("Tổng"))
+                .limit(2).toList();
+    }
+
+    public CategoryStatusRefreshSnapshot refreshCategoryStatusOverview() {
+        driver.navigate().refresh();
+        waitForTable();
+        return new CategoryStatusRefreshSnapshot(categoryOverviewHeadings(),
+                categoryStatusOverview(), currentUrl(), activeGroupText());
     }
 
     public FeeConnectionOverviewSnapshot feeConnectionOverview() {
@@ -1114,9 +1183,14 @@ public class TransactionCategoryPage extends UniformUiPage {
         WebElement drawer = wait.until(d -> d.findElements(
                         By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).stream()
                 .filter(WebElement::isDisplayed)
+                .findFirst().orElse(null));
+        drawer = wait.until(d -> d.findElements(
+                        By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).stream()
+                .filter(WebElement::isDisplayed)
                 .filter(element -> {
-                    String text = elementText(element);
-                    return text.contains("Thông tin giao dịch") && text.contains("Số tiền");
+                    String text = normalizeText(elementText(element));
+                    return !text.isBlank() && !text.contains("dang tai")
+                            && text.contains("trang thai");
                 }).findFirst().orElse(null));
         String openedUrl = currentUrl();
         String drawerText = elementText(drawer);
@@ -1546,7 +1620,7 @@ public class TransactionCategoryPage extends UniformUiPage {
                 new Subtype("Đơn dịch vụ", "order", 2),
                 new Subtype("DN thanh toán đơn", "order", 22),
                 new Subtype("Phí bảo hành", "order", 24),
-                new Subtype("Thu bảo hành", "order", 24),
+                new Subtype("Thu bảo hành", "order", 36),
                 new Subtype("Chi bảo hành", "order", 37),
                 new Subtype("Phí xử phạt", "order", 15)),
                 List.of("Người dùng", "Loại giao dịch", "Trạng thái", "Số tiền", "Cổng thanh toán", "Ngày tạo"),
@@ -1643,6 +1717,25 @@ public class TransactionCategoryPage extends UniformUiPage {
                                             Map<String, BigDecimal> amountPercentages,
                                             Map<String, BigDecimal> countPercentages,
                                             String amountText, String countText, String url) {}
+    public record InsurancePieOverviewSnapshot(FeePieSnapshot amountChart,
+                                               FeePieSnapshot countChart,
+                                               String url) {}
+    public record InsuranceOverviewRefreshSnapshot(List<String> headings,
+                                                   InsuranceOverviewSnapshot overview,
+                                                   String url, String activeText) {}
+    public record CategoryStatusOverviewSnapshot(String amountHeading, String countHeading,
+                                                 BigDecimal totalAmount, Integer totalCount,
+                                                 Map<String, BigDecimal> amounts,
+                                                 Map<String, Integer> counts,
+                                                 Map<String, BigDecimal> amountPercentages,
+                                                 Map<String, BigDecimal> countPercentages,
+                                                 String url) {}
+    public record CategoryStatusPieSnapshot(FeePieSnapshot amountChart,
+                                            FeePieSnapshot countChart,
+                                            String url) {}
+    public record CategoryStatusRefreshSnapshot(List<String> headings,
+                                                CategoryStatusOverviewSnapshot overview,
+                                                String url, String activeText) {}
     public record FeeConnectionOverviewSnapshot(BigDecimal totalRevenue, int transactionCount,
                                                 BigDecimal collected, BigDecimal collectedPercentage,
                                                 BigDecimal debt, BigDecimal debtPercentage,
@@ -1746,9 +1839,6 @@ public class TransactionCategoryPage extends UniformUiPage {
     public record DropdownKeyboardSnapshot(String beforeKey, String url, String activeText,
                                            boolean menuClosed, String triggerId,
                                            String focusedId) {}
-    public record DropdownSubtypeState(Subtype subtype, String url, String activeText,
-                                       List<String> rowTypes) {}
-    public record DropdownRoundTripSnapshot(List<DropdownSubtypeState> states) {}
     public record DropdownReloadSnapshot(String beforeUrl, String afterUrl,
                                          String beforeText, String afterText,
                                          List<DropdownOption> options) {}

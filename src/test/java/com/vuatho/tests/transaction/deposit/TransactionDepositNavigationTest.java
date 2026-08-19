@@ -21,16 +21,62 @@ public class TransactionDepositNavigationTest extends TransactionDepositTestSupp
                 "Lịch sử giao dịch", "Tiền nạp - Điều hướng");
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_007,
-            dataProvider = "depositSubtypes")
-    public void sortsAmountBothDirections(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_007)
+    public void sortsAmountBothDirections() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_176)
+    public void sortsAmountBothDirectionsType10() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_177)
+    public void sortsAmountBothDirectionsType19() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_178)
+    public void sortsAmountBothDirectionsType20() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_179)
+    public void sortsAmountBothDirectionsType34() {
+        verifySortsAmountBothDirectionsForSubtype(subtype(34));
+    }
+
+    private void verifySortsAmountBothDirectionsForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         verifyAmountSort(subtype);
     }
 
-    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_009,
-            dataProvider = "depositSubtypes")
-    public void paginationAndResetKeepCurrentTab(TransactionCategoryPage.Subtype subtype) {
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_009)
+    public void paginationAndResetKeepCurrentTab() {
+        verifyPaginationAndResetKeepCurrentTabForSubtype(subtype(0));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_180)
+    public void paginationAndResetKeepCurrentTabType10() {
+        verifyPaginationAndResetKeepCurrentTabForSubtype(subtype(10));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_181)
+    public void paginationAndResetKeepCurrentTabType19() {
+        verifyPaginationAndResetKeepCurrentTabForSubtype(subtype(19));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_182)
+    public void paginationAndResetKeepCurrentTabType20() {
+        verifyPaginationAndResetKeepCurrentTabForSubtype(subtype(20));
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_183)
+    public void paginationAndResetKeepCurrentTabType34() {
+        verifyPaginationAndResetKeepCurrentTabForSubtype(subtype(34));
+    }
+
+    private void verifyPaginationAndResetKeepCurrentTabForSubtype(TransactionCategoryPage.Subtype subtype) {
         openDepositSubtype(subtype);
         verifyPaginationAndReset(subtype);
     }
@@ -196,5 +242,10 @@ public class TransactionDepositNavigationTest extends TransactionDepositTestSupp
 
     private List<String> signatures(List<TransactionHistoryPage.TransactionRow> rows) {
         return rows.stream().map(TransactionHistoryPage.TransactionRow::signature).toList();
+    }
+
+    private TransactionCategoryPage.Subtype subtype(int type) {
+        return category().subtypes().stream()
+                .filter(value -> value.type() == type).findFirst().orElseThrow();
     }
 }
