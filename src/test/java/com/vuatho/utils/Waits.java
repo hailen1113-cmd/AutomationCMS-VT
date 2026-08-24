@@ -11,6 +11,8 @@ import java.time.Duration;
  * Tạo các điều kiện chờ Selenium dùng chung, giúp thao tác chỉ chạy khi giao diện đã sẵn sàng.
  */
 public final class Waits {
+    private static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMillis(200);
+
     private Waits() {
     }
 
@@ -40,8 +42,39 @@ public final class Waits {
      */
     public static WebDriverWait withTimeout(WebDriver driver, Duration timeout) {
         WebDriverWait wait = new WebDriverWait(driver, timeout);
-        wait.pollingEvery(Duration.ofMillis(200));
+        wait.pollingEvery(DEFAULT_POLLING_INTERVAL);
         wait.ignoring(StaleElementReferenceException.class);
         return wait;
+    }
+
+    /**
+     * Tạm dừng luồng hiện tại và bảo toàn trạng thái interrupt nếu luồng bị đánh thức sớm.
+     *
+     * @param duration thời gian tạm dừng
+     * @return {@code true} khi chờ đủ thời gian, {@code false} khi luồng bị interrupt
+     */
+    public static boolean pause(Duration duration) {
+        try {
+            Thread.sleep(duration.toMillis());
+            return true;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    /**
+     * Tạm dừng luồng hiện tại và chuyển interrupt thành lỗi có ngữ cảnh nghiệp vụ.
+     *
+     * @param duration thời gian tạm dừng
+     * @param interruptionMessage thông báo dùng khi luồng bị interrupt
+     */
+    public static void pause(Duration duration, String interruptionMessage) {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(interruptionMessage, exception);
+        }
     }
 }

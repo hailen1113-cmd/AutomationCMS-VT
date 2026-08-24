@@ -1,5 +1,6 @@
 package com.vuatho.tests.workerviolation;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.testcases.WorkerViolationTestCases;
 
 import com.vuatho.core.TestNgRunner;
@@ -8,7 +9,6 @@ import com.vuatho.pages.WorkerViolationPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -223,7 +223,7 @@ public class StatisticsTest extends WorkerViolationTestSupport {
                 .perform();
 
         if (!required) return null;
-        return new WebDriverWait(driver, Duration.ofSeconds(5)).until(d ->
+        return Waits.withTimeout(driver, Duration.ofSeconds(5)).until(d ->
                 d.findElements(By.cssSelector(".recharts-tooltip-wrapper")).stream()
                         .filter(WebElement::isDisplayed)
                         .map(WebElement::getText)

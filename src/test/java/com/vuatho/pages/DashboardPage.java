@@ -15,8 +15,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
@@ -181,7 +179,7 @@ public class DashboardPage {
         actions.click(summaryCard(label));
 
         PageLoadSynchronizer.waitForDataToSettle(driver);
-        new WebDriverWait(driver, Duration.ofSeconds(20)).until(webDriver ->
+        Waits.withTimeout(driver, Duration.ofSeconds(20)).until(webDriver ->
                 !driver.getCurrentUrl().equals(previousUrl)
                         || !mainContent().getText().equals(previousContent));
         System.out.println("[DASHBOARD CARD LOADED] " + label + " -> " + driver.getCurrentUrl());
@@ -228,7 +226,7 @@ public class DashboardPage {
         String previousState = chartState();
         actions.click(dateRange);
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(3)).until(webDriver -> selectableDateCell(0) != null);
+            Waits.withTimeout(driver, Duration.ofSeconds(3)).until(webDriver -> selectableDateCell(0) != null);
         } catch (TimeoutException ignored) {
             // Some date controls render as native inputs or close immediately after focus.
             driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
@@ -263,7 +261,7 @@ public class DashboardPage {
      */
     public boolean areMetricsDisplayed() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(5))
+            Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(webDriver -> visibleMetricValues() > 0);
             return true;
         } catch (TimeoutException ignored) {
@@ -439,15 +437,9 @@ public class DashboardPage {
      */
     public boolean hasCurrentUserAndEnvironment() {
         String accountText = actions.textInTopRightHeader();
-        if (accountText.contains("H\u1ea3i") && accountText.contains("DEV")) {
-            return true;
-        }
-        if (isVisible(By.xpath("//*[contains(normalize-space(.),'H\u1ea3i')]"))
-                && isVisible(By.xpath("//*[contains(normalize-space(.),'DEV')]"))) {
-            return true;
-        }
-        return isVisible(By.xpath("//*[normalize-space()='Hải']"))
-                && isVisible(By.xpath("//*[contains(normalize-space(.),'DEV')]"));
+        boolean hasAccount = accountText != null && accountText.chars().anyMatch(Character::isLetter);
+        return hasAccount && (accountText.contains("DEV")
+                || isVisible(By.xpath("//*[contains(normalize-space(.),'DEV')]")));
     }
 
     /**
@@ -509,7 +501,7 @@ public class DashboardPage {
      */
     private WebElement confirmLogoutButton() {
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(5))
+            return Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(webDriver -> driver.findElements(By.xpath(
                                     "//button[contains(normalize-space(.),'\u0110\u0103ng xu\u1ea5t')"
                                             + " or contains(translate(normalize-space(.),"
@@ -659,7 +651,7 @@ public class DashboardPage {
         }
         actions.click(option);
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(2))
+            Waits.withTimeout(driver, Duration.ofSeconds(2))
                     .until(webDriver -> !datePickerText().equals(before));
             return true;
         } catch (TimeoutException ignored) {

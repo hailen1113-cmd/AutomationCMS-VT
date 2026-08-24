@@ -66,7 +66,7 @@ public class MutationApiContractTest extends EkycApiTestSupport {
                 + "\"full_name\":\"Automation KYC Fixture\","
                 + "\"gender\":1,"
                 + "\"birthDate\":\"1990-01-01\","
-                + "\"nationality\":\"Viá»‡t Nam\","
+                + "\"nationality\":\"Việt Nam\","
                 + "\"number_card\":\"000000000001\","
                 + "\"place_of_origin\":\"Automation Origin\","
                 + "\"place_of_residence\":\"Automation Residence\""

@@ -4,6 +4,7 @@ import com.vuatho.navigation.MenuTarget;
 import com.vuatho.testdata.PartnerWorkerTestData;
 import com.vuatho.utils.PageLoadSynchronizer;
 import com.vuatho.utils.TextNormalizer;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.ElementNotInteractableException;
@@ -264,9 +265,7 @@ public class WorkerProfilePage {
      */
     public WorkerProfilePage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        this.wait.pollingEvery(Duration.ofMillis(200));
-        this.wait.ignoring(StaleElementReferenceException.class);
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(20));
     }
 
     /**
@@ -743,7 +742,8 @@ public class WorkerProfilePage {
         WebElement label = wait.until(webDriver -> visibleKycStatusLabel(statusLabel));
         scrollToCenter(label);
         label.click();
-        wait.until(webDriver -> selectedKycStatusLabel().equals(statusLabel));
+        wait.until(webDriver -> TextNormalizer.normalize(selectedKycStatusLabel())
+                .equals(TextNormalizer.normalize(statusLabel)));
         PageLoadSynchronizer.waitForDataToSettle(driver);
         waitUntilLoaded();
     }
@@ -1016,9 +1016,7 @@ public class WorkerProfilePage {
         // trong vài nhịp render. Chờ bảng ổn định rồi mới lấy WebElement mới để click.
         PageLoadSynchronizer.waitForDataToSettle(driver);
 
-        WebElement matchingRow = new WebDriverWait(driver, Duration.ofSeconds(30))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        WebElement matchingRow = Waits.withTimeout(driver, Duration.ofSeconds(30))
                 .until(webDriver -> visibleWorkerRowByName(workerName));
         openWorkerInformation(matchingRow);
     }
@@ -1329,7 +1327,7 @@ public class WorkerProfilePage {
         scrollToCenter(mediaButton);
         clickCandidate(mediaButton);
 
-        String detailMode = new WebDriverWait(driver, Duration.ofSeconds(10))
+        String detailMode = Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .pollingEvery(Duration.ofMillis(150))
                 .until(webDriver -> {
                     String newHandle = webDriver.getWindowHandles().stream()
@@ -1502,7 +1500,7 @@ public class WorkerProfilePage {
         clickCandidate(punishButton);
         WebElement dialog;
         try {
-            dialog = new WebDriverWait(driver, Duration.ofSeconds(3))
+            dialog = Waits.withTimeout(driver, Duration.ofSeconds(3))
                     .until(webDriver -> workerPenaltyDialog());
         } catch (TimeoutException exception) {
             dismissTransientOverlays();
@@ -1516,7 +1514,7 @@ public class WorkerProfilePage {
         } else {
             driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
         }
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPenaltyDialog() == null);
         return true;
     }
@@ -1632,7 +1630,7 @@ public class WorkerProfilePage {
 
         dialog = currentWorkerConnectionPenaltyDialogOrOpen();
         clickCandidate(dialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerConnectionPenaltyDialog() == null);
         closeWorkerPenaltyLevelDialog();
 
@@ -1642,7 +1640,7 @@ public class WorkerProfilePage {
                 && initialDuration.equals(
                         connectionPenaltyDurationField(reopenedDialog).getAttribute("value"));
         clickCandidate(reopenedDialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerConnectionPenaltyDialog() == null);
         closeWorkerPenaltyLevelDialog();
         boolean penaltyUnchanged = remainingDaysBefore == activeWorkerPenaltyRemainingDays();
@@ -1686,7 +1684,7 @@ public class WorkerProfilePage {
         clickCandidate(dialog.findElement(CONNECTION_PENALTY_APPLY_BUTTON));
         boolean dialogClosed;
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(20))
+            Waits.withTimeout(driver, Duration.ofSeconds(20))
                     .until(webDriver -> workerConnectionPenaltyDialog() == null);
             dialogClosed = true;
         } catch (TimeoutException exception) {
@@ -1705,7 +1703,7 @@ public class WorkerProfilePage {
                 && durationDays.equals(
                         connectionPenaltyDurationField(reopenedDialog).getAttribute("value"));
         clickCandidate(reopenedDialog.findElement(CONNECTION_PENALTY_CANCEL_BUTTON));
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerConnectionPenaltyDialog() == null);
 
         return new WorkerConnectionPenaltyApplyResult(
@@ -1902,7 +1900,7 @@ public class WorkerProfilePage {
         keepWorkerDetailVisible(observationDuration);
         WebElement cancelButton = dialog.findElement(By.xpath(".//button[normalize-space()='Hủy bỏ']"));
         clickCandidate(cancelButton);
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPenaltyDialog() == null);
         boolean cancelledWithoutCreatingViolation = hasWorkerViolationHistorySection()
                 && workerViolationHistoryText().equals(historyBefore);
@@ -1917,7 +1915,7 @@ public class WorkerProfilePage {
             WebElement closeButton = reopenedDialog.findElement(By.xpath(
                     ".//h5[normalize-space()='Thiết lập xử phạt']/parent::div/parent::div/button"));
             clickCandidate(closeButton);
-            new WebDriverWait(driver, Duration.ofSeconds(5))
+            Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(webDriver -> workerPenaltyDialog() == null);
             topCloseButtonWorks = hasWorkerViolationHistorySection();
         }
@@ -2004,7 +2002,7 @@ public class WorkerProfilePage {
 
         dialog = wait.until(webDriver -> workerPenaltyDialog());
         clickCandidate(dialog.findElement(By.xpath(".//button[normalize-space()='Hủy bỏ']")));
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPenaltyDialog() == null);
         boolean fixtureRemainsUsable = workerViolationHistoryText().equals(historyBefore)
                 && activeWorkerPenaltyRemainingDays() < 0;
@@ -2050,7 +2048,7 @@ public class WorkerProfilePage {
         clickCandidate(punishButton);
         WebElement dialog;
         try {
-            dialog = new WebDriverWait(driver, Duration.ofSeconds(5))
+            dialog = Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(webDriver -> workerPenaltyDialog());
         } catch (TimeoutException exception) {
             System.out.println("[WORKER VIOLATION APPLY] He thong dang chan tao xu phat trung cho user nay.");
@@ -2073,14 +2071,14 @@ public class WorkerProfilePage {
         keepWorkerDetailVisible(observationDuration);
 
         clickCandidate(dialog.findElement(By.xpath(".//button[normalize-space()='Áp dụng']")));
-        new WebDriverWait(driver, Duration.ofSeconds(20))
+        Waits.withTimeout(driver, Duration.ofSeconds(20))
                 .until(webDriver -> workerPenaltyDialog() == null);
         PageLoadSynchronizer.waitForDataToSettle(driver);
         // Bảng lịch sử không tự fetch lại sau khi popup đóng; đổi tab để tải dữ liệu mới từ backend.
         openWorkerDetailTab("Tổng quan");
         openWorkerDetailTab("Xử lý vi phạm");
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(10)).until(webDriver ->
+            Waits.withTimeout(driver, Duration.ofSeconds(10)).until(webDriver ->
                     workerViolationHistoryContains(orderId)
                             || workerViolationHistoryContains(penaltyTitle));
         } catch (TimeoutException ignored) {
@@ -2144,7 +2142,7 @@ public class WorkerProfilePage {
 
         clickCandidate(reductionDialog.findElement(By.xpath(".//button[normalize-space()='Áp dụng']")));
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(20)).until(webDriver ->
+            Waits.withTimeout(driver, Duration.ofSeconds(20)).until(webDriver ->
                     workerPenaltyReductionDialog() == null
                             || activeWorkerPenaltyRemainingDays() == expectedRemainingDays);
         } catch (TimeoutException exception) {
@@ -2208,7 +2206,7 @@ public class WorkerProfilePage {
         boolean removalOptionDisplayed = removalButton.isDisplayed();
         clickCandidate(removalButton);
 
-        WebElement removalDialog = new WebDriverWait(driver, Duration.ofSeconds(20))
+        WebElement removalDialog = Waits.withTimeout(driver, Duration.ofSeconds(20))
                 .until(webDriver -> workerPenaltyRemovalDialog());
         boolean removalDialogDisplayed = removalDialog != null;
         System.out.println("[WORKER PENALTY REMOVE] Da mo popup Go phat.");
@@ -2259,7 +2257,7 @@ public class WorkerProfilePage {
         } else {
             WebElement confirmButton;
             try {
-                confirmButton = new WebDriverWait(driver, Duration.ofSeconds(10)).until(webDriver -> {
+                confirmButton = Waits.withTimeout(driver, Duration.ofSeconds(10)).until(webDriver -> {
                     WebElement currentDialog = workerPenaltyRemovalDialog();
                     if (currentDialog == null) {
                         return null;
@@ -2305,7 +2303,7 @@ public class WorkerProfilePage {
         }
 
         if (workerPenaltyRemovalDialog() != null) {
-            new WebDriverWait(driver, Duration.ofSeconds(20))
+            Waits.withTimeout(driver, Duration.ofSeconds(20))
                     .until(webDriver -> workerPenaltyRemovalDialog() == null);
         }
         closeWorkerPenaltyStatusDialogs();
@@ -2316,7 +2314,7 @@ public class WorkerProfilePage {
 
         boolean activePenaltyRemoved;
         try {
-            activePenaltyRemoved = new WebDriverWait(driver, Duration.ofSeconds(20))
+            activePenaltyRemoved = Waits.withTimeout(driver, Duration.ofSeconds(20))
                     .until(webDriver -> activeWorkerPenaltyRemainingDays() < 0);
         } catch (TimeoutException exception) {
             activePenaltyRemoved = false;
@@ -2378,7 +2376,7 @@ public class WorkerProfilePage {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Khong tim thay nut Huy bo popup Go phat."));
         clickCandidate(cancelButton);
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .until(webDriver -> workerPenaltyRemovalDialog() == null);
         closeWorkerPenaltyStatusDialogs();
         boolean cancelButtonWorks = hasActiveWorkerPenaltyStatusAction();
@@ -2390,7 +2388,7 @@ public class WorkerProfilePage {
         wait.until(webDriver -> workerPenaltyRemovalDialog());
         keepWorkerDetailVisible(observationDuration);
         driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-        new WebDriverWait(driver, Duration.ofSeconds(10))
+        Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .until(webDriver -> workerPenaltyRemovalDialog() == null);
         closeWorkerPenaltyStatusDialogs();
         boolean escapeKeyWorks = workerPenaltyRemovalDialog() == null;
@@ -2786,12 +2784,7 @@ public class WorkerProfilePage {
      * @param duration giá trị duration được truyền vào
      */
     public void keepWorkerDetailVisible(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while keeping worker detail visible.", exception);
-        }
+        Waits.pause(duration, "Interrupted while keeping worker detail visible.");
     }
 
     /**
@@ -2884,9 +2877,10 @@ public class WorkerProfilePage {
      * @return kết quả visible kyc status label sau khi xử lý
      */
     private WebElement visibleKycStatusLabel(String statusLabel) {
+        String expected = TextNormalizer.normalize(statusLabel);
         return driver.findElements(By.cssSelector("[role='radiogroup'] label")).stream()
                 .filter(WebElement::isDisplayed)
-                .filter(label -> label.getText().trim().equals(statusLabel))
+                .filter(label -> TextNormalizer.normalize(label.getText()).equals(expected))
                 .findFirst()
                 .orElse(null);
     }
@@ -3348,7 +3342,7 @@ public class WorkerProfilePage {
             return;
         }
         driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPenaltyLevelDialog() == null);
     }
 
@@ -3427,7 +3421,7 @@ public class WorkerProfilePage {
         } else {
             driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
         }
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPenaltyReductionDialog() == null);
         closeWorkerPenaltyStatusDialogs();
     }
@@ -3439,7 +3433,7 @@ public class WorkerProfilePage {
             return;
         }
         driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerViolationDialog("trang thai") == null);
     }
 
@@ -3552,7 +3546,7 @@ public class WorkerProfilePage {
         WebElement closeButton = dialog.findElement(By.xpath(
                 ".//h5[normalize-space()='Thiết lập xử phạt']/parent::div/parent::div/button"));
         clickCandidate(closeButton);
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(webDriver -> workerPenaltyDialog() == null);
+        Waits.withTimeout(driver, Duration.ofSeconds(5)).until(webDriver -> workerPenaltyDialog() == null);
         return hasWorkerViolationHistorySection();
     }
 
@@ -3594,7 +3588,7 @@ public class WorkerProfilePage {
                 && !"true".equalsIgnoreCase(applyButton.getAttribute("aria-disabled"))) {
             clickCandidate(applyButton);
             try {
-                new WebDriverWait(driver, Duration.ofMillis(1200)).until(webDriver ->
+                Waits.withTimeout(driver, Duration.ofMillis(1200)).until(webDriver ->
                         workerPenaltyDialog() == null
                                 || !workerViolationHistoryText().equals(historyBefore));
             } catch (TimeoutException ignored) {
@@ -3773,7 +3767,7 @@ public class WorkerProfilePage {
                 "parent::div/preceding-sibling::div["
                         + "contains(@class, 'bg-overlay') and contains(@class, 'fixed')][1]"));
         js().executeScript("arguments[0].click();", backdrop);
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        Waits.withTimeout(driver, Duration.ofSeconds(5))
                 .until(webDriver -> workerPostDetailDialog() == null);
     }
 
@@ -4481,9 +4475,7 @@ public class WorkerProfilePage {
      */
     private boolean waitForWorkerDetailToLoad(String previousUrl, String previousState, Duration timeout) {
         try {
-            new WebDriverWait(driver, timeout)
-                    .pollingEvery(Duration.ofMillis(200))
-                    .ignoring(StaleElementReferenceException.class)
+            Waits.withTimeout(driver, timeout)
                     .until(webDriver -> workerDetailIsLoaded(previousUrl, previousState));
             return true;
         } catch (TimeoutException exception) {

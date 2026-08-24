@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -19,7 +20,7 @@ public class OverlayFeaturesPage {
      */
     public OverlayFeaturesPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(10));
         this.controls = new ReadOnlyFeaturesPage(driver);
     }
 

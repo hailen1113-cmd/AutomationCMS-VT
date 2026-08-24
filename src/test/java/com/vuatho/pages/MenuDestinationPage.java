@@ -1,12 +1,12 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.components.SidebarComponent;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.utils.OverlayCleaner;
 import com.vuatho.utils.PageScroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -101,9 +101,8 @@ public class MenuDestinationPage {
      */
     public MenuDestinationPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(45));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(45));
         this.wait.pollingEvery(Duration.ofMillis(300));
-        this.wait.ignoring(StaleElementReferenceException.class);
         this.sidebar = new SidebarComponent(driver);
     }
 

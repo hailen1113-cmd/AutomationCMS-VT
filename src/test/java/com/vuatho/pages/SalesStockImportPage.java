@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -7,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.LocalDate;
 import java.time.Duration;
@@ -633,7 +633,7 @@ public final class SalesStockImportPage extends UniformUiPage {
         new Actions(driver).click(submit).perform();
         boolean loadingOrClosed;
         try {
-            loadingOrClosed = new WebDriverWait(driver, Duration.ofSeconds(5))
+            loadingOrClosed = Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(d -> Boolean.TRUE.equals(((JavascriptExecutor) d)
                             .executeScript("return window.__importSubmitProtected===true;")));
         } catch (TimeoutException ignored) {

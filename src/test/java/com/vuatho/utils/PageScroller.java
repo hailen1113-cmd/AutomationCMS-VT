@@ -145,11 +145,6 @@ public final class PageScroller {
      * Thực hiện xử lý pause trong luồng kiểm thử.
      */
     private static void pause() {
-        try {
-            Thread.sleep(STEP_DELAY.toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Scrolling was interrupted.", exception);
-        }
+        Waits.pause(STEP_DELAY, "Scrolling was interrupted.");
     }
 }

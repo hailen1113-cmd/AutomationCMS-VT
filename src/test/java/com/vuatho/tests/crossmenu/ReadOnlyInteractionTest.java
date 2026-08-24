@@ -40,7 +40,9 @@ public class ReadOnlyInteractionTest extends BaseTest {
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
 
         features.switchView("Thẻ");
+        Assert.assertTrue(features.isControlSelected("Thẻ"), "Chế độ Thẻ không được chọn.");
         features.switchView("Bảng");
+        Assert.assertTrue(features.isControlSelected("Bảng"), "Chế độ Bảng không được chọn.");
     }
 
     /**
@@ -52,6 +54,8 @@ public class ReadOnlyInteractionTest extends BaseTest {
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
 
         features.openDropdownAndVerifyOption("Tiền nạp", "Nạp thường");
+        Assert.assertTrue(driver.getCurrentUrl().contains("/vuatho/transaction"),
+                driver.getCurrentUrl());
         features.goToPaginationPage("2");
     }
 

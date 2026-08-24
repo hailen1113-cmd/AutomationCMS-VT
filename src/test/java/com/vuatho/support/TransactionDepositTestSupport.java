@@ -1,12 +1,12 @@
 package com.vuatho.support;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.pages.TransactionCategoryPage;
 import org.testng.Assert;
 
 import java.time.Duration;
 import java.util.List;
 
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** Support dùng chung cho toàn bộ testcase của nhóm Tiền nạp. */
 public abstract class TransactionDepositTestSupport extends TransactionCategoryTestSupport {
@@ -27,7 +27,7 @@ public abstract class TransactionDepositTestSupport extends TransactionCategoryT
     }
 
     protected final List<String> waitForRowsToChange(List<String> before) {
-        return new WebDriverWait(driver, Duration.ofSeconds(15)).until(d -> {
+        return Waits.withTimeout(driver, Duration.ofSeconds(15)).until(d -> {
             List<String> current = transactionPage.rows().stream()
                     .map(TransactionCategoryPage.TransactionRow::signature).toList();
             return current.equals(before) ? null : current;

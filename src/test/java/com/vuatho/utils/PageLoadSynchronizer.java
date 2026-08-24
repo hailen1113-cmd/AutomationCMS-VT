@@ -62,7 +62,7 @@ public final class PageLoadSynchronizer {
                 .executeScript("return document.readyState")));
         pauseForDebounce();
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(3)).until(webDriver ->
+            Waits.withTimeout(driver, Duration.ofSeconds(3)).until(webDriver ->
                     webDriver.findElements(LOADING_INDICATORS).stream()
                             .noneMatch(element -> element.isDisplayed()));
         } catch (org.openqa.selenium.TimeoutException ignored) {
@@ -191,11 +191,6 @@ public final class PageLoadSynchronizer {
      * @param message giá trị message được truyền vào
      */
     private static void sleep(Duration duration, String message) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(message, exception);
-        }
+        Waits.pause(duration, message);
     }
 }

@@ -1,9 +1,9 @@
 package com.vuatho.utils;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
@@ -31,7 +31,9 @@ public final class ElementActions {
         scrollToCenter(element);
         try {
             element.click();
-        } catch (WebDriverException exception) {
+        } catch (ElementNotInteractableException intercepted) {
+            // Không gọi OverlayCleaner ở đây: Escape sẽ đóng đúng dropdown/menu
+            // vừa mở và làm test đứng chờ option đến hết timeout.
             js().executeScript("arguments[0].click();", element);
         }
     }

@@ -241,10 +241,6 @@ public final class SalesStockPage extends UniformInventoryPage {
                 "./ancestor::div[contains(@class,'rounded-2xl')][1]"));
     }
 
-    private String cardText(String title) {
-        return elementText(card(title));
-    }
-
     private int firstNumber(String value) {
         List<Integer> values = numbers(value);
         return values.isEmpty() ? -1 : values.get(0);

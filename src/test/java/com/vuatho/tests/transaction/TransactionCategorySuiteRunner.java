@@ -37,7 +37,14 @@ import com.vuatho.tests.transaction.order.TransactionOrderExportTest;
 import com.vuatho.tests.transaction.order.TransactionOrderFilterTest;
 import com.vuatho.tests.transaction.order.TransactionOrderNavigationTest;
 import com.vuatho.tests.transaction.order.TransactionOrderOverviewTest;
-import com.vuatho.tests.transaction.reward.TransactionRewardTest;
+import com.vuatho.tests.transaction.order.TransactionOrderSubmissionTest;
+import com.vuatho.tests.transaction.reward.TransactionRewardOverviewAndExportTest;
+import com.vuatho.tests.transaction.reward.TransactionRewardDetailTest;
+import com.vuatho.tests.transaction.reward.TransactionRewardFilterTest;
+import com.vuatho.tests.transaction.reward.TransactionRewardNavigationTest;
+import com.vuatho.tests.transaction.system.TransactionSystemDetailTest;
+import com.vuatho.tests.transaction.system.TransactionSystemFilterTest;
+import com.vuatho.tests.transaction.system.TransactionSystemNavigationTest;
 import com.vuatho.tests.transaction.system.TransactionSystemTest;
 import com.vuatho.tests.transaction.withdraw.TransactionWithdrawTest;
 
@@ -60,7 +67,11 @@ public final class TransactionCategorySuiteRunner {
                 TransactionOrderNavigationTest.class,
                 TransactionOrderDetailTest.class,
                 TransactionOrderExportTest.class,
-                TransactionRewardTest.class,
+                TransactionOrderSubmissionTest.class,
+                TransactionRewardOverviewAndExportTest.class,
+                TransactionRewardFilterTest.class,
+                TransactionRewardNavigationTest.class,
+                TransactionRewardDetailTest.class,
                 TransactionFeeDropdownTest.class,
                 TransactionFeeOverviewTest.class,
                 TransactionFeeFilterTest.class,
@@ -85,6 +96,10 @@ public final class TransactionCategorySuiteRunner {
                 TransactionAssistantPenaltyNavigationTest.class,
                 TransactionAssistantPenaltyDetailTest.class,
                 TransactionAssistantPenaltyExportTest.class,
-                TransactionSystemTest.class);
+                TransactionSystemTest.class,
+                TransactionSystemFilterTest.class,
+                TransactionSystemNavigationTest.class,
+                TransactionSystemDetailTest.class,
+                TransactionDrawerAccessibilityTest.class);
     }
 }

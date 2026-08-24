@@ -3,6 +3,7 @@ package com.vuatho.pages;
 import com.vuatho.testdata.PartnerWorkerTestData;
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -41,9 +42,8 @@ public class WorkerViolationPage {
 
     public WorkerViolationPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(30));
         this.wait.pollingEvery(Duration.ofMillis(250));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     public WorkerViolationPage openFromMenu() {
@@ -484,12 +484,8 @@ public class WorkerViolationPage {
         delayMillis = Math.max(0, Math.min(delayMillis, 30_000));
         if (delayMillis == 0) return;
         System.out.println("[QUAN SAT] " + step + " - dung " + delayMillis + "ms");
-        try {
-            Thread.sleep(delayMillis);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Bi gian doan khi dung quan sat popup thong ke.", exception);
-        }
+        Waits.pause(Duration.ofMillis(delayMillis),
+                "Bi gian doan khi dung quan sat popup thong ke.");
     }
 
     public void closeDialog() {
@@ -507,7 +503,7 @@ public class WorkerViolationPage {
         if (row == null) return false;
         click(row);
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -> firstVisible(DIALOGS) != null);
+            return Waits.withTimeout(driver, Duration.ofSeconds(5)).until(d -> firstVisible(DIALOGS) != null);
         } catch (RuntimeException ignored) {
             return false;
         }
@@ -564,12 +560,8 @@ public class WorkerViolationPage {
         delayMillis = Math.max(0, Math.min(delayMillis, 30_000));
         if (delayMillis == 0) return;
         System.out.println("[QUAN SAT PHAN TRANG] " + step + " - dung " + delayMillis + "ms");
-        try {
-            Thread.sleep(delayMillis);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Bi gian doan khi quan sat pagination.", exception);
-        }
+        Waits.pause(Duration.ofMillis(delayMillis),
+                "Bi gian doan khi quan sat pagination.");
     }
 
     private boolean paginationDisabled(String aria) {
@@ -674,7 +666,7 @@ public class WorkerViolationPage {
 
     private void waitForResultChangeOrSettled(String before) {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(3)).pollingEvery(Duration.ofMillis(100))
+            Waits.withTimeout(driver, Duration.ofSeconds(3)).pollingEvery(Duration.ofMillis(100))
                     .until(d -> isLoading() || !resultFingerprint().equals(before));
         } catch (RuntimeException ignored) {
             // A valid filter can return exactly the same first page; the settled-state wait below is authoritative.

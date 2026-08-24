@@ -8,6 +8,7 @@ import com.vuatho.exploration.UiFeatureExplorer;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.pages.ReadOnlyFeaturesPage;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -55,7 +56,10 @@ public class OverlayFeatureInventoryTest extends BaseTest {
     @Test(description = CrossMenuTestCases.CROSS_MENU_009, dataProvider = "overlays")
     public void inventoryOverlayFeatures(MenuTarget target, String controlLabel) {
         requireAuthenticatedSession("inventory overlay");
-        new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        MenuDestinationPage page = new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        Assert.assertTrue(page.isLoaded(), "Trang chưa tải xong: " + target);
+        Assert.assertTrue(page.urlMatchesExpectedDestination(),
+                "Sai route sau khi mở " + target + ": " + page.currentUrl());
 
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
         features.openControl(controlLabel);

@@ -31,5 +31,9 @@ public class SandboxAccessTest extends BaseTest {
             throw new SkipException(
                     "Vercel protection is blocking automation. Set VERCEL_AUTOMATION_BYPASS_SECRET.");
         }
+        Assert.assertTrue(page.isOnExpectedDomain(),
+                "Browser was redirected away from the ERP sandbox");
+        Assert.assertFalse(page.title().isBlank(), "The page title should not be empty");
+        Assert.assertFalse(page.isBlockedByVercel(), "ERP vẫn bị Vercel chặn sau khi mở URL.");
     }
 }

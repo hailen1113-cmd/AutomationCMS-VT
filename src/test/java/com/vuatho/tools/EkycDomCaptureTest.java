@@ -6,6 +6,7 @@ import com.vuatho.core.BaseTest;
 import com.vuatho.flows.AuthenticationFlow;
 import com.vuatho.pages.EkycPage;
 import com.vuatho.pages.LoginPage;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -71,7 +72,7 @@ public class EkycDomCaptureTest extends BaseTest {
 
     /** Mở panel bộ lọc khi nút tồn tại và chờ tài liệu trình duyệt ổn định. */
     private void openFilterIfAvailable() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = Waits.withTimeout(driver, Duration.ofSeconds(10));
         if (driver.findElements(FILTER_BUTTON).stream().noneMatch(WebElement::isDisplayed)) {
             return;
         }
@@ -120,11 +121,6 @@ public class EkycDomCaptureTest extends BaseTest {
 
     /** Chờ ngắn để animation hoặc render bất đồng bộ hoàn tất trước khi chụp. */
     private void sleepBriefly() {
-        try {
-            Thread.sleep(Duration.ofSeconds(2).toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting for eKYC DOM state.", exception);
-        }
+        Waits.pause(Duration.ofSeconds(2), "Interrupted while waiting for eKYC DOM state.");
     }
 }

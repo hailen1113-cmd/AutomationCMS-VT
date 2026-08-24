@@ -1,5 +1,6 @@
 package com.vuatho.components;
 
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -32,8 +33,8 @@ public class SidebarComponent {
      */
     public SidebarComponent(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, DEFAULT_TIMEOUT);
-        this.toggleWait = new WebDriverWait(driver, TOGGLE_TIMEOUT);
+        this.wait = Waits.withTimeout(driver, DEFAULT_TIMEOUT);
+        this.toggleWait = Waits.withTimeout(driver, TOGGLE_TIMEOUT);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -252,10 +253,9 @@ public class UniformOrderPage extends UniformUiPage {
         waitForLoadingToFinish();
         long[] emptySince = {0L};
         try {
-            new org.openqa.selenium.support.ui.WebDriverWait(
+            Waits.withTimeout(
                     driver, java.time.Duration.ofSeconds(12))
                     .pollingEvery(java.time.Duration.ofMillis(300))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> {
                         SearchResult result =
                                 currentSearchResult(type, keyword);
@@ -1111,9 +1111,8 @@ public class UniformOrderPage extends UniformUiPage {
 
     /** Chờ React render lại combobox theo placeholder sau khi thêm/xóa dữ liệu. */
     private WebElement waitForCreateCombobox(String placeholder) {
-        return new org.openqa.selenium.support.ui.WebDriverWait(
+        return Waits.withTimeout(
                 driver, java.time.Duration.ofSeconds(10))
-                .ignoring(StaleElementReferenceException.class)
                 .until(d -> visibleCreateComboboxes(createOrderDrawer()).stream()
                         .filter(combo -> comboboxPlaceholder(combo)
                                 .contains(placeholder))
@@ -1144,7 +1143,7 @@ public class UniformOrderPage extends UniformUiPage {
             int optionIndex,
             String step) {
         click(input, step);
-        List<WebElement> options = new org.openqa.selenium.support.ui.WebDriverWait(
+        List<WebElement> options = Waits.withTimeout(
                 driver, java.time.Duration.ofSeconds(8))
                 .until(d -> {
                     List<WebElement> rendered = d.findElements(
@@ -1163,7 +1162,7 @@ public class UniformOrderPage extends UniformUiPage {
 
     /** Chờ option đầu tiên của React Select đang mở. */
     private WebElement waitForFirstReactOption(int seconds) {
-        return new org.openqa.selenium.support.ui.WebDriverWait(
+        return Waits.withTimeout(
                 driver, java.time.Duration.ofSeconds(seconds))
                 .until(d -> d.findElements(By.cssSelector("[role='option']"))
                         .stream()

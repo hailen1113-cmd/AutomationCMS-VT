@@ -23,11 +23,12 @@ public class TransactionInsuranceDropdownTest extends TransactionInsuranceTestSu
     public void opensEverySubtypeRoute() {
         TransactionCategoryPage.Subtype dailyFee = category().subtypes().get(0);
         TransactionCategoryPage.Subtype refund = category().subtypes().get(1);
-        Assert.assertTrue(transactionPage.currentUrl().contains("tab=insurance&type=25"),
-                transactionPage.currentUrl());
-        Assert.assertTrue(transactionPage.activeGroupText().contains(dailyFee.label()),
-                transactionPage.activeGroupText());
-        verifySubtypeRoute(refund);
+        var first = transactionPage.chooseSubtypeFromDropdown(dailyFee);
+        Assert.assertTrue(first.url().contains("tab=insurance&type=25"), first.url());
+        Assert.assertTrue(first.triggerText().contains(dailyFee.label()), first.triggerText());
+        var second = transactionPage.chooseSubtypeFromDropdown(refund);
+        Assert.assertTrue(second.url().contains("tab=insurance&type=26"), second.url());
+        Assert.assertTrue(second.triggerText().contains(refund.label()), second.triggerText());
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_INSURANCE_011)

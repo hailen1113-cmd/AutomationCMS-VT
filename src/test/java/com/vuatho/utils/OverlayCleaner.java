@@ -7,7 +7,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
@@ -101,7 +100,7 @@ public final class OverlayCleaner {
     @SuppressWarnings("null")
     private static void waitUntilClear(WebDriver driver) {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(3))
+            Waits.withTimeout(driver, Duration.ofSeconds(3))
                     .until(webDriver -> !blockingOverlayIsVisible(webDriver));
         } catch (TimeoutException ignored) {
             // Leave the original click/wait to fail with context if the overlay is genuinely stuck.

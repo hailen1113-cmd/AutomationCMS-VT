@@ -105,20 +105,33 @@ public final class ConsoleEncoding {
         }
 
         private boolean isReportLine(String text) {
-            return text.startsWith("=")
-                    || text.startsWith("STARTING:")
-                    || text.startsWith("RUNNING:")
-                    || text.startsWith("Scenario:")
-                    || text.startsWith("Class   :")
-                    || text.startsWith("Method  :")
-                    || text.startsWith("[PASS]")
-                    || text.startsWith("[FAIL]")
-                    || text.startsWith("[SKIP]")
-                    || text.startsWith("Reason:")
-                    || text.startsWith("Total :")
-                    || text.startsWith("PASS  :")
-                    || text.startsWith("FAIL  :")
-                    || text.startsWith("SKIP  :");
+            String trimmed = text == null ? "" : text.trim();
+            return trimmed.startsWith("=")
+                    || trimmed.startsWith("STARTING:")
+                    || trimmed.startsWith("RUNNING:")
+                    || trimmed.startsWith("Scenario:")
+                    || trimmed.startsWith("Class   :")
+                    || trimmed.startsWith("Method  :")
+                    || trimmed.startsWith("[PASS]")
+                    || trimmed.startsWith("[FAIL]")
+                    || trimmed.startsWith("[SKIP]")
+                    || trimmed.startsWith("Reason:")
+                    || trimmed.startsWith("Total :")
+                    || trimmed.startsWith("PASS  :")
+                    || trimmed.startsWith("FAIL  :")
+                    || trimmed.startsWith("SKIP  :")
+                    || trimmed.startsWith("Mo WebDriver")
+                    || trimmed.startsWith("Dong WebDriver")
+                    || trimmed.startsWith("Dung lai WebDriver")
+                    || trimmed.startsWith("Su dung Chrome")
+                    || trimmed.startsWith("Giu WebDriver")
+                    || trimmed.startsWith("FAILED CONFIGURATION")
+                    || trimmed.startsWith("SKIPPED CONFIGURATION")
+                    || trimmed.startsWith("Please complete")
+                    || trimmed.startsWith("Google dang")
+                    || trimmed.contains("Exception")
+                    || trimmed.contains("Caused by:")
+                    || trimmed.contains("user data directory");
         }
     }
 }

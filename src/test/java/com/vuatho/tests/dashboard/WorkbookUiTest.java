@@ -26,12 +26,12 @@ public class WorkbookUiTest extends DashboardTestSupport {
     @DataProvider(name = "overviewCards", parallel = false)
     public Object[][] overviewCards() {
         return new Object[][]{
-                {"OVD-001", "ÄÆ¡n dá»‹ch vá»¥"},
-                {"OVD-002", "Sá»‘ lÆ°á»£ng ngÆ°á»i dÃ¹ng"},
-                {"OVD-003", "Sá»‘ lÆ°á»£ng thá»£"},
-                {"OVD-004", "Nghiá»‡p vá»¥"},
-                {"OVD-005", "NgÃ nh nghá»"},
-                {"OVD-006", "Ná»n táº£ng Vua Thá»£"}
+                {"OVD-001", "Đơn dịch vụ"},
+                {"OVD-002", "Số lượng người dùng"},
+                {"OVD-003", "Số lượng thợ"},
+                {"OVD-004", "Nghiệp vụ"},
+                {"OVD-005", "Ngành nghề"},
+                {"OVD-006", "Nền tảng Vua Thợ"}
         };
     }
 
@@ -54,9 +54,9 @@ public class WorkbookUiTest extends DashboardTestSupport {
     @DataProvider(name = "dashboardSections", parallel = false)
     public Object[][] dashboardSections() {
         return new Object[][]{
-                {"GCC-001", "Vua Thá»£ TrÃªn ToÃ n Cáº§u"},
-                {"UST-001", "Danh SÃ¡ch NgÆ°á»i DÃ¹ng"},
-                {"INS-001", "Danh SÃ¡ch NgÃ nh Nghá»"}
+                {"GCC-001", "Vua Thợ Trên Toàn Cầu"},
+                {"UST-001", "Danh Sách Người Dùng"},
+                {"INS-001", "Danh Sách Ngành Nghề"}
         };
     }
 
@@ -79,11 +79,11 @@ public class WorkbookUiTest extends DashboardTestSupport {
     @DataProvider(name = "periodSelections", parallel = false)
     public Object[][] periodSelections() {
         return new Object[][]{
-                {"UST-004", 0, "NgÃ y"}, {"UST-005", 0, "Tuáº§n"},
-                {"UST-006", 0, "ThÃ¡ng"}, {"UST-007", 0, "QuÃ½"},
-                {"UST-008", 0, "NÄƒm"}, {"INS-004", 1, "NgÃ y"},
-                {"INS-005", 1, "Tuáº§n"}, {"INS-006", 1, "ThÃ¡ng"},
-                {"INS-007", 1, "QuÃ½"}, {"INS-008", 1, "NÄƒm"}
+                {"UST-004", 0, "Ngày"}, {"UST-005", 0, "Tuần"},
+                {"UST-006", 0, "Tháng"}, {"UST-007", 0, "Quý"},
+                {"UST-008", 0, "Năm"}, {"INS-004", 1, "Ngày"},
+                {"INS-005", 1, "Tuần"}, {"INS-006", 1, "Tháng"},
+                {"INS-007", 1, "Quý"}, {"INS-008", 1, "Năm"}
         };
     }
 

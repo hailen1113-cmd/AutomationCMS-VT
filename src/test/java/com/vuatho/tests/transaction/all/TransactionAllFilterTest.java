@@ -158,6 +158,18 @@ public class TransactionAllFilterTest extends TransactionHistoryTestSupport {
         });
     }
 
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_093)
+    public void filtersByEveryTransactionTypeOption() {
+        var result = transactionPage.applyEveryFilterOption(TransactionHistoryPage.Filter.TYPE);
+        Assert.assertEquals(result.options().size(), 36);
+        Assert.assertEquals(result.results().size(), result.options().size());
+        result.results().forEach(option -> {
+            Assert.assertTrue(option.selectedText().contains(option.value()));
+            Assert.assertTrue(option.rows().stream()
+                    .allMatch(row -> row.type().equals(option.value())));
+        });
+    }
+
     @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_050)
     public void closingFilterWithoutSelectionKeepsRows() {
         var result = transactionPage.dismissFilterWithoutSelection(

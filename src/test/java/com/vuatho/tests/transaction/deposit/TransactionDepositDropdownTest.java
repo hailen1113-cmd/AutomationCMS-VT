@@ -78,18 +78,21 @@ public class TransactionDepositDropdownTest extends TransactionDepositTestSuppor
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_013)
     public void switchingSubtypeReloadsMatchingRows() {
-        var first = category().subtypes().get(0);
         var last = category().subtypes().get(category().subtypes().size() - 1);
         assertDepositRows();
         List<String> firstRows = transactionPage.rows().stream()
                 .map(TransactionCategoryPage.TransactionRow::signature).toList();
 
         var selectedLast = transactionPage.chooseSubtypeFromDropdown(last);
+        Assert.assertTrue(selectedLast.url().contains("tab=deposit"), selectedLast.url());
         Assert.assertTrue(selectedLast.url().contains("type=" + last.type()), selectedLast.url());
         Assert.assertTrue(selectedLast.triggerText().contains(last.label()), selectedLast.triggerText());
         List<String> lastRows = waitForRowsToChange(firstRows);
         assertDepositRows();
         Assert.assertNotEquals(lastRows, firstRows);
+        transactionPage.rows().forEach(row -> Assert.assertTrue(
+                row.value("Loại giao dịch").contains(last.label()),
+                "Dòng không thuộc loại " + last.label() + ": " + row.signature()));
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_014)

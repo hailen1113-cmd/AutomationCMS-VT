@@ -216,6 +216,14 @@ public abstract class TransactionCategoryTestSupport extends BaseTest {
         assertSubtypeUrl(result.url(), subtype);
     }
 
+    /** Xác minh cả file, schema và toàn bộ dữ liệu của export không áp dụng bộ lọc. */
+    protected void verifyCompleteExport(TransactionCategoryPage.Subtype subtype) {
+        requireFilteredRows(subtype, "không áp dụng bộ lọc");
+        var export = transactionPage.exportCurrentSubtype();
+        assertExportContainsAllFilteredRows(export.file());
+        assertSubtypeUrl(export.url(), subtype);
+    }
+
     protected void verifyExportAfterSearch(TransactionCategoryPage.Subtype subtype) {
         var filter = transactionPage.applySearchFromFirstUser();
         requireFilteredRows(subtype, "tên/SĐT dòng đầu=" + filter.query());
@@ -371,6 +379,86 @@ public abstract class TransactionCategoryTestSupport extends BaseTest {
         assertSubtypeUrl(export.url(), subtype);
     }
 
+    protected void verifyExportAfterReset(TransactionCategoryPage.Subtype subtype) {
+        int baselineTotal = advancedPage().totalDisplayed();
+        Assert.assertTrue(baselineTotal > 0,
+                "Không có dữ liệu baseline để kiểm tra export sau Reset type=" + subtype.type());
+        var reset = advancedPage().resetStatusGatewayAndDate("Thành công", "PAYPAL");
+        Assert.assertEquals(reset.page(), 1);
+        Assert.assertEquals(advancedPage().totalDisplayed(), baselineTotal,
+                "Reset chưa khôi phục tổng dữ liệu baseline type=" + subtype.type());
+        var export = transactionPage.exportCurrentSubtype();
+        assertExportContainsAllFilteredRows(export.file());
+        assertSubtypeUrl(export.url(), subtype);
+    }
+
+    protected void verifyRepeatedExport(TransactionCategoryPage.Subtype subtype) {
+        requireFilteredRows(subtype, "không áp dụng bộ lọc");
+        var first = transactionPage.exportCurrentSubtype();
+        var firstWorkbook = assertExportContainsAllFilteredRows(first.file());
+        var firstModified = fileModifiedAt(first.file());
+
+        var second = transactionPage.exportCurrentSubtype();
+        var secondWorkbook = assertExportContainsAllFilteredRows(second.file());
+        var secondModified = fileModifiedAt(second.file());
+
+        Assert.assertEquals(secondWorkbook.headers(), firstWorkbook.headers());
+        Assert.assertTrue(!second.file().equals(first.file()) || secondModified.compareTo(firstModified) > 0,
+                "Lần export thứ hai không tạo mới hoặc cập nhật file: " + second.file());
+        assertSubtypeUrl(second.url(), subtype);
+    }
+
+    protected void verifyExportFromSecondPage(TransactionCategoryPage.Subtype subtype) {
+        int expectedTotal = advancedPage().goToSecondPageForExport();
+        var export = transactionPage.exportCurrentSubtype();
+        var workbook = assertExportContainsAllFilteredRows(export.file());
+        Assert.assertEquals(workbook.rows().size(), expectedTotal,
+                "Export từ trang 2 phải chứa toàn bộ dữ liệu type=" + subtype.type());
+        assertSubtypeUrl(export.url(), subtype);
+    }
+
+    protected void verifyEmptyResultExport(TransactionCategoryPage.Subtype subtype) {
+        var empty = transactionPage.applyUnmatchedSearchForExport();
+        Assert.assertTrue(empty.empty(), "Từ khóa kiểm thử chưa tạo trạng thái rỗng type=" + subtype.type());
+        Assert.assertEquals(advancedPage().totalDisplayed(), 0);
+        var export = transactionPage.exportCurrentSubtype();
+        TransactionExportWorkbook.Snapshot workbook = TransactionExportWorkbook.read(export.file());
+        assertExportSchema(workbook);
+        Assert.assertTrue(workbook.rows().isEmpty(),
+                "File export phải rỗng khi bảng không có kết quả type=" + subtype.type());
+        assertSubtypeUrl(export.url(), subtype);
+    }
+
+    protected void verifyExportContainsFirstVisibleRow(TransactionCategoryPage.Subtype subtype) {
+        TransactionCategoryPage.TransactionRow source = transactionPage.rows().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có dòng UI để đối chiếu export type=" + subtype.type()));
+        var export = transactionPage.exportCurrentSubtype();
+        TransactionExportWorkbook.Snapshot workbook = assertExportContainsAllFilteredRows(export.file());
+        List<String> users = workbook.values("Người dùng");
+        List<String> types = workbook.values("Loại giao dịch");
+        List<String> statuses = workbook.values("Trạng thái");
+        List<String> amounts = workbook.values("Số tiền");
+        List<String> gateways = workbook.values("Cổng thanh toán");
+        List<String> dates = workbook.values("Ngày tạo");
+        boolean matched = false;
+        for (int index = 0; index < workbook.rows().size(); index++) {
+            if (normalize(users.get(index)).equals(normalize(source.value("Người dùng")))
+                    && normalize(types.get(index)).equals(normalize(source.value("Loại giao dịch")))
+                    && normalize(statuses.get(index)).equals(normalize(source.value("Trạng thái")))
+                    && digitsOnly(amounts.get(index)).equals(digitsOnly(source.value("Số tiền")))
+                    && normalize(gateways.get(index)).equals(normalize(source.value("Cổng thanh toán")))
+                    && digitsOnly(dates.get(index)).equals(digitsOnly(source.value("Ngày tạo")))) {
+                matched = true;
+                break;
+            }
+        }
+        Assert.assertTrue(matched,
+                "File export không chứa nguyên vẹn dòng UI đầu tiên type=" + subtype.type()
+                        + ": " + source.signature());
+        assertSubtypeUrl(export.url(), subtype);
+    }
+
     protected void verifyExportForSubtype(int type,
                                           Consumer<TransactionCategoryPage.Subtype> verification) {
         TransactionCategoryPage.Subtype subtype = category().subtypes().stream()
@@ -399,7 +487,30 @@ public abstract class TransactionCategoryTestSupport extends BaseTest {
         }
         Assert.assertEquals(workbook.rows().size(), expected,
                 "File phải chứa toàn bộ dữ liệu phù hợp filter, không chỉ trang hiện tại.");
+        if (category() == TransactionCategoryPage.Category.REWARD) {
+            assertExportSchema(workbook);
+        }
         return workbook;
+    }
+
+    private void assertExportSchema(TransactionExportWorkbook.Snapshot workbook) {
+        category().headers().forEach(header -> Assert.assertTrue(workbook.hasHeader(header),
+                "File export thiếu cột bắt buộc: " + header));
+        long distinctHeaders = workbook.headers().stream().map(this::normalize).distinct().count();
+        Assert.assertEquals(distinctHeaders, (long) workbook.headers().size(),
+                "File export có tiêu đề cột bị trùng: " + workbook.headers());
+    }
+
+    private java.nio.file.attribute.FileTime fileModifiedAt(java.nio.file.Path file) {
+        try {
+            return Files.getLastModifiedTime(file);
+        } catch (java.io.IOException exception) {
+            throw new AssertionError("Không đọc được thời gian cập nhật file export " + file, exception);
+        }
+    }
+
+    private String digitsOnly(String value) {
+        return value == null ? "" : value.replaceAll("[^0-9]", "");
     }
 
     private void assertDates(TransactionExportWorkbook.Snapshot workbook, LocalDate expected) {

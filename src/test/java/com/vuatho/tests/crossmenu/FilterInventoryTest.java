@@ -9,6 +9,7 @@ import com.vuatho.exploration.UiFeatureExplorer;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.MenuCatalog;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -42,7 +43,10 @@ public class FilterInventoryTest extends BaseTest {
         requireAuthenticatedSession("inventory bộ lọc");
         UiFeatureExplorer explorer = new UiFeatureExplorer(driver);
 
-        new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        MenuDestinationPage page = new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        Assert.assertTrue(page.isLoaded(), "Trang chưa tải xong: " + target);
+        Assert.assertTrue(page.urlMatchesExpectedDestination(),
+                "Sai route sau khi mở " + target + ": " + page.currentUrl());
         List<UiControl> filters = explorer.visibleControls().stream()
                 .filter(this::isFilterControl)
                 .toList();

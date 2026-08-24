@@ -3,11 +3,12 @@ package com.vuatho.pages;
 import com.vuatho.config.TestConfig;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.testdata.EkycInformationField;
+import com.vuatho.utils.ElementActions;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,7 +17,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.net.URI;
 import java.text.Normalizer;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +42,7 @@ public class EkycPage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+    private final ElementActions actions;
 
     public enum KycSide {
         FRONT("mat truoc"),
@@ -61,9 +62,9 @@ public class EkycPage {
      */
     public EkycPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, TestConfig.defaultWaitTimeout());
+        this.wait = Waits.withTimeout(driver, TestConfig.defaultWaitTimeout());
+        this.actions = new ElementActions(driver);
         this.wait.pollingEvery(Duration.ofMillis(300));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     /**
@@ -1012,20 +1013,6 @@ public class EkycPage {
     }
 
     /**
-     * Kích hoạt drawer button trong luồng kiểm thử.
-     * @param exactText giá trị exact text được truyền vào
-     */
-    private void clickDrawerButton(String exactText) {
-        WebElement button = visibleDrawer().findElements(By.xpath(".//button[normalize-space()='" + exactText + "']"))
-                .stream()
-                .filter(WebElement::isDisplayed)
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Drawer button not found: " + exactText));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block:'center'});", button);
-        button.click();
-    }
-
-    /**
      * Kích hoạt first drawer button containing trong luồng kiểm thử.
      * @param labels giá trị labels được truyền vào
      */
@@ -1503,11 +1490,7 @@ public class EkycPage {
      * @param element phần tử cần thao tác
      */
     private void clickElement(WebElement element) {
-        try {
-            element.click();
-        } catch (ElementClickInterceptedException exception) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
-        }
+        actions.click(element);
     }
 
     /**
@@ -1777,12 +1760,7 @@ public class EkycPage {
      * Thực hiện xử lý pause after load trong luồng kiểm thử.
      */
     private void pauseAfterLoad() {
-        try {
-            Thread.sleep(Duration.ofSeconds(2).toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while waiting after eKYC load.", exception);
-        }
+        Waits.pause(Duration.ofSeconds(2), "Interrupted while waiting after eKYC load.");
     }
 
     /**

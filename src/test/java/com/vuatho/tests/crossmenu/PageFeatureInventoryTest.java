@@ -7,6 +7,7 @@ import com.vuatho.core.TestNgRunner;
 import com.vuatho.exploration.UiFeatureExplorer;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.pages.MenuDestinationPage;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -54,7 +55,10 @@ public class PageFeatureInventoryTest extends BaseTest {
     @Test(description = CrossMenuTestCases.CROSS_MENU_010, dataProvider = "representativePages")
     public void inventoryVisibleFeatures(MenuTarget target) {
         requireAuthenticatedSession("inventory tính năng trang");
-        new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        MenuDestinationPage page = new MenuDestinationPage(driver).openAndWaitUntilLoaded(target, false);
+        Assert.assertTrue(page.isLoaded(), "Trang chưa tải xong: " + target);
+        Assert.assertTrue(page.urlMatchesExpectedDestination(),
+                "Sai route sau khi mở " + target + ": " + page.currentUrl());
         new UiFeatureExplorer(driver).printInventory(target.toString());
     }
 }

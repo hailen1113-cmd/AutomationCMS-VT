@@ -29,7 +29,7 @@ public abstract class BaseTest {
         // trước dòng testcase đang chạy của ConsoleTestListener.
         ConsoleEncoding.showOnlyTestReport();
         // Mỗi test method dùng lại browser cấp suite nếu browser đó vẫn còn sống.
-        driver = DriverSession.acquire();
+        driver = DriverSession.acquire(reuseDriverBetweenTestMethods());
         OverlayCleaner.dismissBlockingOverlays(driver);
     }
 

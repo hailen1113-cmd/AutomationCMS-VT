@@ -92,7 +92,17 @@ public final class DriverFactory {
                 .connectionTimeout(Duration.ofSeconds(15))
                 .readTimeout(Duration.ofSeconds(30));
         ChromeDriverService service = new ChromeDriverService.Builder().build();
-        WebDriver driver = new ChromeDriver(service, options, clientConfig);
+        WebDriver driver;
+        try {
+            driver = new ChromeDriver(service, options, clientConfig);
+        } catch (RuntimeException exception) {
+            try {
+                service.stop();
+            } catch (RuntimeException ignored) {
+                // ChromeDriver constructor đã fail; chỉ cần dừng service nếu còn sống.
+            }
+            throw exception;
+        }
         if (!TestConfig.headless()) {
             // Maximize thêm lần nữa vì một số máy có thể bỏ qua --start-maximized lúc khởi động.
             driver.manage().window().maximize();

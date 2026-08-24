@@ -26,10 +26,10 @@ public class FilterTest extends WorkerProfileTestSupport {
     @DataProvider(name = "kycStatusFilters", parallel = false)
     public Object[][] kycStatusFilters() {
         return new Object[][] {
-                { "Chua KYC" },
-                { "Cho KYC" },
-                { "Da KYC" },
-                { "Tu choi" }
+                { "Chưa KYC" },
+                { "Chờ KYC" },
+                { "Đã KYC" },
+                { "Từ chối" }
         };
     }
 
@@ -73,7 +73,7 @@ public class FilterTest extends WorkerProfileTestSupport {
             description = WorkerProfileTestCases.WORKER_PROFILE_003)
     public void workerKycStatusFilterCanBeResetSafely() {
         workerProfilePage.openFilter();
-        workerProfilePage.selectKycStatus("Da KYC");
+        workerProfilePage.selectKycStatus("Đã KYC");
 
         workerProfilePage.resetFilter();
         workerProfilePage.openFilter();

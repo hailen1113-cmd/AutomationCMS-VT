@@ -1,8 +1,8 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.Keys;
@@ -21,9 +21,7 @@ public class ReadOnlyFeaturesPage {
      */
     public ReadOnlyFeaturesPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        this.wait.pollingEvery(Duration.ofMillis(200));
-        this.wait.ignoring(StaleElementReferenceException.class);
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(20));
     }
 
     /**

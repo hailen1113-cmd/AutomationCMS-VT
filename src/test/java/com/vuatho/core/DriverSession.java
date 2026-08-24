@@ -19,8 +19,16 @@ final class DriverSession {
     }
 
     static WebDriver acquire() {
+        return acquire(true);
+    }
+
+    static WebDriver acquire(boolean reuseExisting) {
+        if (!reuseExisting) {
+            quitQuietly();
+        }
         // Chỉ mở browser mới khi chưa có browser hoặc browser cũ đã bị đóng/crash.
         if (!isAlive(sharedDriver)) {
+            quitQuietly();
             System.out.println("Mo WebDriver moi cho bo test...");
             try {
                 sharedDriver = DriverFactory.createChromeDriver();
@@ -34,6 +42,19 @@ final class DriverSession {
             System.out.println("Dung lai WebDriver hien tai cho testcase tiep theo...");
         }
         return sharedDriver;
+    }
+
+    private static void quitQuietly() {
+        if (sharedDriver == null) {
+            return;
+        }
+        try {
+            sharedDriver.quit();
+        } catch (WebDriverException ignored) {
+            // Session đã chết; vẫn phải giải phóng reference để mở Chrome mới trên cùng profile.
+        } finally {
+            sharedDriver = null;
+        }
     }
 
     static void releaseAfterSuite() {

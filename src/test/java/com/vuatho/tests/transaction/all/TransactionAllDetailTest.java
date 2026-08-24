@@ -156,6 +156,31 @@ public class TransactionAllDetailTest extends TransactionHistoryTestSupport {
                 result.secondDrawerText());
     }
 
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_094)
+    public void detailCloseButtonHasAccessibleName() {
+        var result = transactionPage.inspectDetailCloseAccessibility();
+        boolean hasAccessibleName = !result.ariaLabel().isBlank()
+                || !result.title().isBlank() || !result.text().isBlank();
+
+        Assert.assertTrue(hasAccessibleName,
+                "Nút đóng drawer cần aria-label, title hoặc nội dung chữ");
+        Assert.assertTrue(result.closed());
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_ALL_095)
+    public void rejectedTransactionLinkOpensExpectedDetailFromAllTab() {
+        var result = transactionPage.openRejectedTransactionLink();
+
+        Assert.assertTrue(result.sourceUrl().contains("tab=all"), result.sourceUrl());
+        Assert.assertTrue(result.linkText().contains("Xem giao dịch bị từ chối"),
+                result.linkText());
+        Assert.assertEquals(result.actualUrl(), result.expectedUrl());
+        Assert.assertTrue(result.actualUrl().contains("/vuatho/transaction?"), result.actualUrl());
+        Assert.assertTrue(result.actualUrl().contains("id="), result.actualUrl());
+        Assert.assertTrue(result.drawerText().contains("Chi tiết giao dịch"),
+                result.drawerText());
+    }
+
     private String digits(String value) {
         return value == null ? "" : value.replaceAll("[^0-9]", "");
     }

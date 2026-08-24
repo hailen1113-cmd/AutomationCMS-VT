@@ -2,6 +2,7 @@ package com.vuatho.support;
 
 import com.vuatho.core.BaseTest;
 import com.vuatho.pages.UniformOrderPage;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 

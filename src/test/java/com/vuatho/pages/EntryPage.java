@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import org.openqa.selenium.WebDriver;
 
@@ -63,7 +64,7 @@ public class EntryPage {
      */
     public boolean waitForVercelAccess(Duration timeout) {
         try {
-            new org.openqa.selenium.support.ui.WebDriverWait(driver, timeout)
+            Waits.withTimeout(driver, timeout)
                     .until(webDriver -> !isBlockedByVercel());
             waitForDocumentReady();
             return true;
@@ -76,7 +77,7 @@ public class EntryPage {
      * Chờ for document ready trong luồng kiểm thử.
      */
     private void waitForDocumentReady() {
-        new org.openqa.selenium.support.ui.WebDriverWait(driver, Duration.ofSeconds(20))
+        Waits.withTimeout(driver, Duration.ofSeconds(20))
                 .until(webDriver -> "complete".equals(
                         ((org.openqa.selenium.JavascriptExecutor) webDriver)
                                 .executeScript("return document.readyState")));

@@ -130,9 +130,13 @@ public class OverlayContractTest extends BaseTest {
         open(childOf("Marketing", "Chương Trình Khuyến Mãi"));
         ReadOnlyFeaturesPage features = new ReadOnlyFeaturesPage(driver);
 
+        String url = driver.getCurrentUrl();
         features.openFirstTextInput();
+        Assert.assertTrue(url.contains("/vuatho/"), url);
         features.closeOverlay();
         PageLoadSynchronizer.waitForDataToSettle(driver);
+        Assert.assertTrue(driver.getCurrentUrl().contains("/vuatho/"),
+                driver.getCurrentUrl());
     }
 
     /**

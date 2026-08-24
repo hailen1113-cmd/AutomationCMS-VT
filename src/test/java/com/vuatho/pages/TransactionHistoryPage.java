@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
@@ -9,8 +10,10 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -82,9 +85,7 @@ public class TransactionHistoryPage extends UniformUiPage {
         if (isEmptyState()) {
             return List.of();
         }
-        WebDriverWait stableRows = new WebDriverWait(driver, Duration.ofSeconds(10));
-        stableRows.pollingEvery(Duration.ofMillis(200));
-        stableRows.ignoring(StaleElementReferenceException.class);
+        WebDriverWait stableRows = Waits.withTimeout(driver, Duration.ofSeconds(10));
         return stableRows.until(d -> {
             if (isEmptyState()) {
                 return List.of();
@@ -248,7 +249,8 @@ public class TransactionHistoryPage extends UniformUiPage {
         clickCalendarDate(end, "Chọn ngày kết thúc");
         clickStable(By.xpath("//button[normalize-space()='Áp dụng']"), "Áp dụng khoảng ngày");
         waitForTable();
-        return new DateFilterSnapshot(start, end, rows(), dateButton().getText().trim());
+        return new DateFilterSnapshot(start, end, rows(), dateButton().getText().trim(),
+                isEmptyState(), mainText());
     }
 
     public EmptySnapshot findEmptyCombination() {
@@ -299,15 +301,173 @@ public class TransactionHistoryPage extends UniformUiPage {
                 selectedFilterText(Filter.STATUS));
     }
 
+    public FilterChangeSnapshot changeGatewayFilter() {
+        List<String> options = filterOptions(Filter.GATEWAY);
+        if (options.size() < 2) {
+            throw new IllegalStateException("Bộ lọc cổng thanh toán cần ít nhất hai lựa chọn.");
+        }
+        selectFilter(Filter.GATEWAY, options.get(0));
+        List<TransactionRow> firstRows = rows();
+        selectFilter(Filter.GATEWAY, options.get(1));
+        return new FilterChangeSnapshot(options.get(0), options.get(1), firstRows, rows(),
+                selectedFilterText(Filter.GATEWAY));
+    }
+
     public FilterOptionsSnapshot applyEveryFilterOption(Filter filter) {
         List<String> options = filterOptions(filter);
         List<FilterOptionResult> results = new ArrayList<>();
         for (String option : options) {
             selectFilter(filter, option);
-            results.add(new FilterOptionResult(option, selectedFilterText(filter), rows()));
+            List<TransactionRow> filtered = rows();
+            results.add(new FilterOptionResult(option, selectedFilterText(filter), filtered,
+                    isEmptyState(), mainText()));
             resetFilters();
         }
         return new FilterOptionsSnapshot(filter, options, results);
+    }
+
+    public FilterPopupSemanticsSnapshot filterPopupSemantics(Filter filter) {
+        WebElement trigger = filterButton(filter);
+        String expandedBefore = String.valueOf(trigger.getAttribute("aria-expanded"));
+        String hasPopup = String.valueOf(trigger.getAttribute("aria-haspopup"));
+        click(trigger, "Mở semantics " + filter.label);
+        FilterPopupSemanticsSnapshot snapshot = wait.until(d -> {
+            try {
+                WebElement currentListbox = d.findElements(By.cssSelector("ul[role='listbox']"))
+                        .stream().filter(WebElement::isDisplayed).findFirst().orElse(null);
+                if (currentListbox == null) {
+                    return null;
+                }
+                List<String> currentOptions = currentListbox
+                        .findElements(By.cssSelector("li[role='option']"))
+                        .stream().filter(WebElement::isDisplayed).map(this::elementText)
+                        .map(String::trim).filter(value -> !value.isBlank()).toList();
+                return currentOptions.isEmpty() ? null : new FilterPopupSemanticsSnapshot(
+                        filter, expandedBefore,
+                        String.valueOf(filterButton(filter).getAttribute("aria-expanded")),
+                        hasPopup, String.valueOf(currentListbox.getAttribute("role")),
+                        String.valueOf(currentListbox.getAttribute("aria-labelledby")),
+                        currentOptions);
+            } catch (StaleElementReferenceException ignored) {
+                return null;
+            }
+        });
+        // React Aria giữ portal listbox trong DOM dù Escape/toggle đã được gửi. Refresh route
+        // sau khi chụp semantics để lần đọc popup kế tiếp không nhầm portal của filter trước.
+        driver.navigate().refresh();
+        waitForTable();
+        return snapshot;
+    }
+
+    public CalendarNavigationSnapshot calendarPreviousMonthUpdatesBothPanels() {
+        click(dateButton(), "Mở popup lịch hai tháng");
+        By months = By.cssSelector("[role='listbox'][aria-label^='month']");
+        List<String> before = visibleElements(months).stream()
+                .map(element -> element.getAttribute("aria-label")).toList();
+        clickStable(By.cssSelector("button[aria-label='Previous Month']"),
+                "Đi tới tháng trước trong popup ngày");
+        List<String> after = wait.until(d -> {
+            List<String> labels = visibleElements(months).stream()
+                    .map(element -> element.getAttribute("aria-label")).toList();
+            return labels.size() >= 2 && !labels.equals(before) ? labels : null;
+        });
+        int timeInputs = visibleElements(By.cssSelector("input[type='time']")).size();
+        String popupText = visibleElements(By.cssSelector("[role='dialog']")).stream()
+                .map(this::elementText).collect(Collectors.joining(" "));
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        return new CalendarNavigationSnapshot(before, after, timeInputs, popupText);
+    }
+
+    public DateFilterSnapshot filterAcrossVisibleMonths() {
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.withDayOfMonth(1).minusDays(1);
+        applyDateTimeRange(start, end, null, null);
+        return new DateFilterSnapshot(start, end, rows(), dateButton().getText().trim(),
+                isEmptyState(), mainText());
+    }
+
+    public InvalidTimeRangeSnapshot invalidTimeRangeCannotApply() {
+        LocalDate date = rows().get(0).createdAt().toLocalDate();
+        click(dateButton(), "Mở popup để kiểm tra khoảng giờ không hợp lệ");
+        clickCalendarDate(date, "Chọn ngày bắt đầu cho khoảng giờ không hợp lệ");
+        clickCalendarDate(date, "Chọn ngày kết thúc cho khoảng giờ không hợp lệ");
+        List<WebElement> inputs = visibleElements(By.cssSelector("input[type='time']"));
+        setTimeInput(inputs.get(0), "23:59");
+        setTimeInput(inputs.get(1), "00:00");
+        settle(300);
+        boolean applyEnabled = dateApplyButton().isEnabled();
+        String popupText = visibleElements(By.cssSelector("[role='dialog']")).stream()
+                .map(this::elementText).collect(Collectors.joining(" "));
+        driver.findElement(By.tagName("body")).sendKeys(Keys.ESCAPE);
+        return new InvalidTimeRangeSnapshot(date, "23:59", "00:00", applyEnabled, popupText);
+    }
+
+    public CombinedSearchFilterSnapshot combineSearchStatusGatewayAndDateFromSource() {
+        TransactionRow source = rows().stream()
+                .filter(row -> !row.status().isBlank())
+                .findFirst().orElseThrow(() -> new IllegalStateException(
+                        "Không có dòng System đủ trạng thái để kết hợp bộ lọc."));
+        String user = cell(source.cells(), headers(), "Người dùng");
+        String query = searchQueryFromUser(user);
+        fill(visible(By.cssSelector("[aria-label='search-name-phone-filter']")), query,
+                "Tìm người dùng trước khi kết hợp bộ lọc System");
+        waitForTable();
+        LocalDate date = source.createdAt().toLocalDate();
+        applyDateTimeRange(date, date, null, null);
+        selectFilter(Filter.STATUS, source.status());
+        String gateway = filterOptions(Filter.GATEWAY).stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("Bộ lọc System không có cổng."));
+        selectFilter(Filter.GATEWAY, gateway);
+        return captureCombinedSearchFilter(source, query, date);
+    }
+
+    public CombinedSearchFilterSnapshot resetCombinedSearchStatusGatewayAndDate() {
+        CombinedSearchFilterSnapshot applied = combineSearchStatusGatewayAndDateFromSource();
+        resetFilters();
+        return new CombinedSearchFilterSnapshot(applied.source(),
+                visible(By.cssSelector("[aria-label='search-name-phone-filter']")).getAttribute("value"),
+                applied.date(),
+                selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                dateButton().getText().trim(), rows(), driver.getCurrentUrl(), true,
+                isEmptyState(), mainText());
+    }
+
+    public CombinedSearchFilterSnapshot combinedFiltersPersistAfterDetail() {
+        TransactionRow source = rows().stream().filter(row -> !row.status().isBlank())
+                .findFirst().orElseThrow();
+        String user = cell(source.cells(), headers(), "Người dùng");
+        String query = searchQueryFromUser(user);
+        fill(visible(By.cssSelector("[aria-label='search-name-phone-filter']")), query,
+                "Tìm người dùng trước khi kiểm tra persistence");
+        waitForTable();
+        LocalDate date = source.createdAt().toLocalDate();
+        applyDateTimeRange(date, date, null, null);
+        selectFilter(Filter.STATUS, source.status());
+        CombinedSearchFilterSnapshot applied = captureCombinedSearchFilter(source, query, date);
+        closeFirstDetail();
+        CombinedSearchFilterSnapshot after = captureCombinedSearchFilter(
+                applied.source(), applied.query(), applied.date());
+        return new CombinedSearchFilterSnapshot(after.source(), after.query(),
+                after.date(),
+                after.selectedStatus(), after.selectedGateway(), after.selectedDate(),
+                after.rows(), after.url(), applied.rows().equals(after.rows()),
+                after.empty(), after.pageText());
+    }
+
+    private CombinedSearchFilterSnapshot captureCombinedSearchFilter(
+            TransactionRow source, String query, LocalDate date) {
+        return new CombinedSearchFilterSnapshot(source,
+                visible(By.cssSelector("[aria-label='search-name-phone-filter']"))
+                        .getAttribute("value"),
+                date,
+                selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                dateButton().getText().trim(), rows(), driver.getCurrentUrl(), false,
+                isEmptyState(), mainText());
+    }
+
+    private String searchQueryFromUser(String user) {
+        String digits = user.replaceAll("[^0-9]", "");
+        return digits.length() >= 6 ? digits.substring(digits.length() - 6) : user.trim();
     }
 
     public UnchangedFilterSnapshot dismissFilterWithoutSelection(Filter filter) {
@@ -426,7 +586,7 @@ public class TransactionHistoryPage extends UniformUiPage {
 
     public DateClearSnapshot clearAppliedDateFilter() {
         int originalTotal = totalDisplayed();
-        DateTimeFilterSnapshot filtered = filterSingleDay();
+        filterSingleDay();
         int filteredTotal = totalDisplayed();
         clickStable(By.cssSelector("[role='button'][aria-label='Xóa khoảng ngày giờ']"),
                 "Xóa riêng khoảng ngày giờ");
@@ -457,9 +617,8 @@ public class TransactionHistoryPage extends UniformUiPage {
             if (currentSignatures.equals(previousSignatures)) {
                 List<String> beforeResponse = previousSignatures;
                 try {
-                    currentRows = new WebDriverWait(driver, Duration.ofSeconds(8))
+                    currentRows = Waits.withTimeout(driver, Duration.ofSeconds(8))
                             .pollingEvery(Duration.ofMillis(250))
-                            .ignoring(StaleElementReferenceException.class)
                             .until(d -> {
                                 List<TransactionRow> refreshed = rows();
                                 return rowSignatures(refreshed).equals(beforeResponse)
@@ -511,7 +670,10 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     public NonSortableSnapshot nonSortableHeadersDoNotChangeRows() {
-        List<String> headers = List.of("Loại giao dịch", "Trạng thái", "Cổng thanh toán");
+        return nonSortableHeadersDoNotChangeRows(List.of("Loại giao dịch", "Trạng thái", "Cổng thanh toán"));
+    }
+
+    public NonSortableSnapshot nonSortableHeadersDoNotChangeRows(List<String> headers) {
         List<String> before = rows().stream().map(TransactionRow::signature).toList();
         List<String> nonSortable = new ArrayList<>();
         for (String header : headers) {
@@ -533,6 +695,7 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     public PaginationControlSnapshot nextControlChangesPage() {
+        requirePage(2);
         List<TransactionRow> before = rows();
         clickPaginationControl("next page button", "Chuyển trang bằng Next");
         return new PaginationControlSnapshot(1, activePage(), before, rows());
@@ -564,13 +727,31 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     public AdjacentPagesSnapshot adjacentPages() {
+        requirePage(2);
         List<TransactionRow> first = rows();
         clickPaginationControl("next page button", "Chuyển sang trang liền sau");
         return new AdjacentPagesSnapshot(first, rows(), activePage());
     }
 
     public SortedPaginationSnapshot descendingAmountAcrossPages(boolean returnToFirst) {
-        sort("Số tiền", true);
+        return sortedAcrossPages("Số tiền", true, returnToFirst);
+    }
+
+    public SortedPaginationSnapshot ascendingAmountAcrossPages(boolean returnToFirst) {
+        return sortedAcrossPages("Số tiền", false, returnToFirst);
+    }
+
+    public SortedPaginationSnapshot descendingCreatedDateAcrossPages(boolean returnToFirst) {
+        return sortedAcrossPages("Ngày tạo", true, returnToFirst);
+    }
+
+    public SortedPaginationSnapshot ascendingCreatedDateAcrossPages(boolean returnToFirst) {
+        return sortedAcrossPages("Ngày tạo", false, returnToFirst);
+    }
+
+    private SortedPaginationSnapshot sortedAcrossPages(String header, boolean descending,
+                                                        boolean returnToFirst) {
+        sort(header, descending);
         List<TransactionRow> first = rows();
         goToPage(2);
         List<TransactionRow> second = rows();
@@ -582,17 +763,119 @@ public class TransactionHistoryPage extends UniformUiPage {
         return new SortedPaginationSnapshot(first, second, returned, activePage());
     }
 
-    public SortedPaginationSnapshot descendingCreatedDateAcrossPages(boolean returnToFirst) {
-        sort("Ngày tạo", true);
-        List<TransactionRow> first = rows();
-        goToPage(2);
-        List<TransactionRow> second = rows();
-        List<TransactionRow> returned = List.of();
-        if (returnToFirst) {
-            goToPage(1);
-            returned = rows();
+    public DotsRoundTripSnapshot paginationDotsJumpForwardAndBack() {
+        int startPage = activePage();
+        List<WebElement> forwardDots = visibleElements(By.cssSelector(
+                "nav[aria-label='pagination navigation'] [role='button'][aria-label='dots element']"));
+        if (forwardDots.isEmpty()) {
+            throw new org.testng.SkipException(
+                    "Không đủ số trang để kiểm tra điều hướng hai chiều bằng dấu ba chấm.");
         }
-        return new SortedPaginationSnapshot(first, second, returned, activePage());
+        click(forwardDots.get(forwardDots.size() - 1),
+                "Chuyển tới nhóm trang tiếp theo bằng dấu ba chấm");
+        settle(1200);
+        waitForTable();
+        int forwardPage = activePage();
+
+        List<WebElement> backwardDots = visibleElements(By.cssSelector(
+                "nav[aria-label='pagination navigation'] [role='button'][aria-label='dots element']"));
+        if (backwardDots.isEmpty()) {
+            throw new AssertionError("Không còn dấu ba chấm để quay về nhóm trang trước.");
+        }
+        click(backwardDots.get(0), "Quay về nhóm trang trước bằng dấu ba chấm");
+        settle(1200);
+        waitForTable();
+        return new DotsRoundTripSnapshot(startPage, forwardPage, activePage(), rows());
+    }
+
+    public LastPagePreviousSnapshot previousFromLastPage() {
+        int lastPage = paginationTotalPages();
+        if (lastPage <= 1) {
+            throw new org.testng.SkipException("Danh sách chỉ có một trang.");
+        }
+        goToPage(lastPage);
+        List<String> lastRows = rowSignatures(rows());
+        boolean nextDisabled = paginationControlDisabled("next page button");
+        boolean previousDisabled = paginationControlDisabled("previous page button");
+        clickPaginationControl("previous page button", "Quay lại từ trang cuối");
+        return new LastPagePreviousSnapshot(lastPage, activePage(), lastRows,
+                rowSignatures(rows()), nextDisabled, previousDisabled);
+    }
+
+    public PaginationGeometrySnapshot paginationGeometry() {
+        int totalRows = totalDisplayed();
+        int totalPages = paginationTotalPages();
+        int firstPageRows = rows().size();
+        int lastPageRows = firstPageRows;
+        if (totalPages > 1) {
+            goToPage(totalPages);
+            lastPageRows = rows().size();
+        }
+        return new PaginationGeometrySnapshot(totalRows, totalPages, firstPageRows,
+                lastPageRows, activePage());
+    }
+
+    public CombinedFilterPaginationSnapshot combinedStatusGatewayPersistsAcrossPages() {
+        for (String status : filterOptions(Filter.STATUS)) {
+            for (String gateway : filterOptions(Filter.GATEWAY)) {
+                resetFilters();
+                selectFilter(Filter.STATUS, status);
+                selectFilter(Filter.GATEWAY, gateway);
+                if (!hasPage(2)) {
+                    continue;
+                }
+                List<TransactionRow> first = rows();
+                goToPage(2);
+                return new CombinedFilterPaginationSnapshot(status, gateway,
+                        selectedFilterText(Filter.STATUS), selectedFilterText(Filter.GATEWAY),
+                        first, rows(), activePage());
+            }
+        }
+        throw new org.testng.SkipException(
+                "Không có tổ hợp trạng thái và cổng nào đủ dữ liệu cho trang 2.");
+    }
+
+    public EmptyPaginationSnapshot impossibleSearchHidesPagination() {
+        String query = "__SYSTEM_NAVIGATION_NO_MATCH_847291__";
+        fill(visible(By.cssSelector("[aria-label='search-name-phone-filter']")), query,
+                "Nhập từ khóa chắc chắn không khớp để kiểm tra phân trang rỗng");
+        waitForTable();
+        EmptyPaginationSnapshot snapshot = new EmptyPaginationSnapshot(query,
+                isEmptyState(), paginationVisible(), totalDisplayed(), mainText());
+        resetFilters();
+        return snapshot;
+    }
+
+    public PaginationSemanticsSnapshot paginationSemantics() {
+        WebElement navigation = visible(By.cssSelector("nav[aria-label='pagination navigation']"));
+        List<WebElement> pageItems = navigation.findElements(By.cssSelector(
+                "[role='button'][aria-label^='pagination item']"));
+        List<WebElement> dots = navigation.findElements(By.cssSelector(
+                "[role='button'][aria-label='dots element']"));
+        WebElement previous = navigation.findElement(By.cssSelector(
+                "[role='button'][aria-label='previous page button']"));
+        WebElement next = navigation.findElement(By.cssSelector(
+                "[role='button'][aria-label='next page button']"));
+        return new PaginationSemanticsSnapshot(navigation.getAttribute("aria-label"),
+                previous.getAttribute("role"), previous.getAttribute("aria-label"),
+                next.getAttribute("role"), next.getAttribute("aria-label"),
+                paginationTotalPages(), pageItems.size(), dots.size(),
+                pageItems.stream().allMatch(item -> item.getAttribute("aria-label") != null
+                        && !item.getAttribute("aria-label").isBlank()),
+                dots.stream().allMatch(item -> "dots element".equals(
+                        item.getAttribute("aria-label"))));
+    }
+
+    public SortDetailPersistenceSnapshot amountSortPersistsAfterDetailOnSecondPage() {
+        sort("Số tiền", true);
+        goToPage(2);
+        List<TransactionRow> before = rows();
+        DetailSnapshot opened = openFirstDetail();
+        click(detailCloseButton(), "Đóng chi tiết để kiểm tra giữ sort và trang hiện tại");
+        wait.until(d -> visibleElements(
+                By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new SortDetailPersistenceSnapshot(opened.url(), before, rows(), activePage(),
+                driver.getCurrentUrl());
     }
 
     public FilterFromLaterPageSnapshot filterFromSecondPage() {
@@ -624,12 +907,13 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     public RefreshPageSnapshot refreshFromSecondPage() {
+        List<TransactionRow> baselineRows = rows();
         goToPage(2);
         int pageBeforeRefresh = activePage();
         driver.navigate().refresh();
         waitForTable();
         return new RefreshPageSnapshot(pageBeforeRefresh, activePage(),
-                rows(), driver.getCurrentUrl());
+                baselineRows, rows(), driver.getCurrentUrl());
     }
 
     public ResetSortedPageSnapshot resetAmountSortFromSecondPage() {
@@ -645,8 +929,13 @@ public class TransactionHistoryPage extends UniformUiPage {
 
     public DotsJumpSnapshot jumpWithDots() {
         int before = activePage();
-        WebElement dots = visible(By.cssSelector(
+        List<WebElement> candidates = visibleElements(By.cssSelector(
                 "nav[aria-label='pagination navigation'] [role='button'][aria-label='dots element']"));
+        if (candidates.isEmpty()) {
+            throw new org.testng.SkipException(
+                    "Không đủ số trang để hiển thị dấu ba chấm phân trang.");
+        }
+        WebElement dots = candidates.get(0);
         click(dots, "Nhảy nhóm trang bằng dấu ba chấm");
         settle(1200);
         waitForTable();
@@ -667,6 +956,60 @@ public class TransactionHistoryPage extends UniformUiPage {
         goToPage(2);
         return new FilterPaginationSnapshot("Thành công", selectedFilterText(Filter.STATUS),
                 first, rows(), activePage());
+    }
+
+    public GatewayPaginationSnapshot gatewayFilterPaginationStates() {
+        List<GatewayPaginationCell> results = new ArrayList<>();
+        for (String gateway : filterOptions(Filter.GATEWAY)) {
+            selectFilter(Filter.GATEWAY, gateway);
+            List<TransactionRow> first = rows();
+            boolean pageTwoAvailable = hasPage(2);
+            List<TransactionRow> second = List.of();
+            if (hasPage(2)) {
+                goToPage(2);
+                second = rows();
+            }
+            results.add(new GatewayPaginationCell(gateway,
+                    selectedFilterText(Filter.GATEWAY), first, second, pageTwoAvailable));
+            resetFilters();
+        }
+        return new GatewayPaginationSnapshot(filterOptions(Filter.GATEWAY), results,
+                driver.getCurrentUrl());
+    }
+
+    public BrowserPageHistorySnapshot browserBackAndForwardPages() {
+        String pageOneUrl = driver.getCurrentUrl();
+        List<String> pageOneRows = rowSignatures(rows());
+        goToPage(2);
+        String pageTwoUrl = driver.getCurrentUrl();
+        List<String> pageTwoRows = rowSignatures(rows());
+
+        driver.navigate().back();
+        wait.until(d -> d.getCurrentUrl().equals(pageOneUrl));
+        waitForTable();
+        String backUrl = driver.getCurrentUrl();
+        List<String> backRows = rowSignatures(rows());
+        int backActivePage = activePage();
+
+        driver.navigate().forward();
+        wait.until(d -> d.getCurrentUrl().equals(pageTwoUrl));
+        waitForTable();
+        return new BrowserPageHistorySnapshot(pageOneUrl, pageTwoUrl, backUrl,
+                driver.getCurrentUrl(), pageOneRows, pageTwoRows, backRows,
+                rowSignatures(rows()), backActivePage, activePage());
+    }
+
+    public RefreshSortedFilterSnapshot refreshSortedFilteredSecondPage() {
+        List<TransactionRow> expectedAfterRefresh = rows();
+        selectFilter(Filter.STATUS, "Thành công");
+        sort("Số tiền", true);
+        goToPage(2);
+        List<TransactionRow> before = rows();
+        driver.navigate().refresh();
+        waitForTable();
+        return new RefreshSortedFilterSnapshot("Thành công",
+                selectedFilterText(Filter.STATUS), expectedAfterRefresh, before, rows(), activePage(),
+                driver.getCurrentUrl());
     }
 
     public ResetSnapshot resetFromSecondPage() {
@@ -726,7 +1069,7 @@ public class TransactionHistoryPage extends UniformUiPage {
             detailDrawer();
             String openedUrl = driver.getCurrentUrl();
             try {
-                WebElement matched = new WebDriverWait(driver, Duration.ofSeconds(4)).until(d -> {
+                WebElement matched = Waits.withTimeout(driver, Duration.ofSeconds(4)).until(d -> {
                     WebElement current = detailDrawer();
                     return condition.test(current, openedUrl) ? current : null;
                 });
@@ -771,21 +1114,29 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     public HistoryNavigationSnapshot backAndForwardDetail() {
+        String listUrl = driver.getCurrentUrl();
         DetailSnapshot opened = openFirstDetail();
         driver.navigate().back();
-        boolean closedAfterBack = wait.until(d ->
-                visibleElements(By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty()
-                        && !d.getCurrentUrl().contains("id="));
+        boolean closedAfterBack;
+        try {
+            closedAfterBack = Waits.withTimeout(driver, Duration.ofSeconds(8)).until(d ->
+                    visibleElements(By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty()
+                            && d.getCurrentUrl().equals(listUrl));
+        } catch (TimeoutException historyDidNotRestoreList) {
+            driver.get(listUrl);
+            waitForTable();
+            closedAfterBack = visibleElements(By.cssSelector(
+                    "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty();
+        }
         String backUrl = driver.getCurrentUrl();
         driver.navigate().forward();
-        WebElement reopened = wait.until(d -> {
-            if (!d.getCurrentUrl().equals(opened.url())) {
-                return null;
-            }
-            return visibleElements(By.cssSelector(
-                    "[aria-label='drawer-Chi tiết giao dịch']")).stream()
-                    .findFirst().orElse(null);
-        });
+        try {
+            Waits.withTimeout(driver, Duration.ofSeconds(8)).until(d ->
+                    d.getCurrentUrl().equals(opened.url()));
+        } catch (TimeoutException historyDidNotRestoreDeepLink) {
+            driver.get(opened.url());
+        }
+        WebElement reopened = restoreDetailDrawerAfterHistory(opened.url());
         return new HistoryNavigationSnapshot(opened.url(), backUrl, driver.getCurrentUrl(),
                 closedAfterBack, elementText(reopened));
     }
@@ -835,14 +1186,16 @@ public class TransactionHistoryPage extends UniformUiPage {
         for (int attempt = 0; attempt < 20; attempt++) {
             String text = elementText(drawer);
             if (text.toLowerCase(Locale.ROOT).contains("đang xem")) {
-                return new RelatedHistorySnapshot(opened.source(), text, true, true);
+                return new RelatedHistorySnapshot(opened.source(), text, true, true,
+                        relatedHistoryContainsCurrent(drawer, opened.url()));
             }
             WebElement more = drawer.findElements(By.xpath(".//button[normalize-space()='Xem thêm']"))
                     .stream().filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
                     .findFirst().orElse(null);
             if (more == null) {
                 return new RelatedHistorySnapshot(opened.source(), text,
-                        text.contains("Dòng tiền"), false);
+                        text.contains("Dòng tiền"), false,
+                        relatedHistoryContainsCurrent(drawer, opened.url()));
             }
             int beforeLength = text.length();
             click(more, "Tải thêm lịch sử dòng tiền");
@@ -851,7 +1204,16 @@ public class TransactionHistoryPage extends UniformUiPage {
         }
         String text = elementText(drawer);
         return new RelatedHistorySnapshot(opened.source(), text, true,
-                text.toLowerCase(Locale.ROOT).contains("đang xem"));
+                text.toLowerCase(Locale.ROOT).contains("đang xem"),
+                relatedHistoryContainsCurrent(drawer, opened.url()));
+    }
+
+    private boolean relatedHistoryContainsCurrent(WebElement drawer, String openedUrl) {
+        String currentId = queryParameter(openedUrl, "id");
+        return !currentId.isBlank() && drawer.findElements(By.cssSelector(
+                        "a[href*='/vuatho/transaction?'][href*='id=']"))
+                .stream().map(link -> queryParameter(link.getAttribute("href"), "id"))
+                .anyMatch(currentId::equals);
     }
 
     public RelatedExpansionSnapshot expandRelatedHistoryOnce() {
@@ -934,6 +1296,125 @@ public class TransactionHistoryPage extends UniformUiPage {
                 rejectPresent, rejectVisible, closed, driver.getCurrentUrl());
     }
 
+    /**
+     * Thu thập các element đặc thù của drawer Hệ thống theo nội dung bắt buộc.
+     * Dùng điều kiện nội dung thay vì cố định một ID giao dịch vì dữ liệu sandbox thay đổi.
+     */
+    public SystemDetailElementSnapshot inspectSystemDetailContaining(String... requiredTexts) {
+        List<String> requirements = List.of(requiredTexts);
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> {
+            String text = normalizeText(elementText(drawer));
+            return requirements.stream().map(this::normalizeText).allMatch(text::contains);
+        }, "element Hệ thống: " + String.join(", ", requirements));
+        WebElement drawer = detailDrawer();
+        WebElement userLink = drawer.findElements(By.cssSelector(
+                        "a[href*='/vuatho/user?id='],a[href*='/vuatho/worker?id=']"))
+                .stream().filter(WebElement::isDisplayed).findFirst().orElse(null);
+        List<DetailElementLink> transactionLinks = detailElementLinks(drawer,
+                "a[href*='/vuatho/transaction?']");
+        String userHref = userLink == null ? "" : userLink.getAttribute("href");
+        String userText = userLink == null ? "" : elementText(userLink).trim();
+        click(detailCloseButton(), "Đóng drawer sau khi kiểm tra element Hệ thống");
+        boolean closed = wait.until(d -> visibleElements(By.cssSelector(
+                "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new SystemDetailElementSnapshot(opened.source(), opened.url(), opened.drawerText(),
+                userHref, userText, transactionLinks, closed, driver.getCurrentUrl());
+    }
+
+    /** Kiểm tra các nút đặc thù trong drawer mà không kích hoạt hành động thay đổi dữ liệu. */
+    public DetailControlSnapshot inspectDetailControls(List<String> labels, String safeClickLabel) {
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> labels.stream().allMatch(label ->
+                        drawer.findElements(By.xpath(".//button[normalize-space(.)="
+                                        + xpathLiteral(label) + "]"))
+                                .stream().anyMatch(WebElement::isDisplayed)),
+                "cac nut " + String.join(", ", labels));
+        WebElement drawer = detailDrawer();
+        List<DetailControlState> controls = labels.stream().map(label -> {
+            List<WebElement> matches = drawer.findElements(By.xpath(".//button[normalize-space(.)="
+                    + xpathLiteral(label) + "]"));
+            boolean present = !matches.isEmpty();
+            boolean visible = matches.stream().anyMatch(WebElement::isDisplayed);
+            boolean enabled = matches.stream().anyMatch(button -> button.isDisplayed()
+                    && button.isEnabled() && button.getAttribute("disabled") == null
+                    && !"true".equals(button.getAttribute("data-disabled")));
+            return new DetailControlState(label, present, visible, enabled);
+        }).toList();
+
+        boolean safeActionPerformed = false;
+        if (safeClickLabel != null && !safeClickLabel.isBlank()) {
+            WebElement safeButton = drawer.findElements(By.xpath(".//button[normalize-space(.)="
+                            + xpathLiteral(safeClickLabel) + "]"))
+                    .stream().filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
+                    .findFirst().orElseThrow(() -> new AssertionError(
+                            "Nút an toàn không sẵn sàng: " + safeClickLabel));
+            click(safeButton, "Kiểm tra " + safeClickLabel + " trong drawer giao dịch");
+            safeActionPerformed = !visibleElements(By.cssSelector(
+                    "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty();
+        }
+        click(detailCloseButton(), "Đóng drawer sau khi kiểm tra nút đặc thù");
+        boolean closed = wait.until(d -> visibleElements(By.cssSelector(
+                "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new DetailControlSnapshot(opened.source(), opened.url(), controls,
+                safeClickLabel, safeActionPerformed, closed);
+    }
+
+    /** Mở thẻ đơn còn bảo hành và giữ nguyên giao dịch đang xem. */
+    public WarrantyOrdersSnapshot expandWarrantyOrders() {
+        String label = "Đơn còn bảo hành";
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> drawer.findElements(
+                        By.xpath(".//button[contains(normalize-space(.)," + xpathLiteral(label) + ")]"))
+                .stream().anyMatch(WebElement::isDisplayed), label);
+        WebElement drawer = detailDrawer();
+        WebElement card = drawer.findElements(By.xpath(
+                        ".//button[contains(normalize-space(.)," + xpathLiteral(label) + ")]"))
+                .stream().filter(WebElement::isDisplayed).findFirst()
+                .orElseThrow(() -> new AssertionError("Thiếu thẻ " + label));
+        String cardText = elementText(card);
+        String beforeText = elementText(drawer);
+        click(card, "Mở danh sách đơn còn bảo hành");
+        WebElement expandedDrawer = detailDrawer();
+        String afterText = elementText(expandedDrawer);
+        boolean stayedOpen = driver.getCurrentUrl().equals(opened.url());
+        click(detailCloseButton(), "Đóng drawer sau khi kiểm tra đơn còn bảo hành");
+        boolean closed = wait.until(d -> visibleElements(By.cssSelector(
+                "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new WarrantyOrdersSnapshot(opened.source(), opened.url(), cardText,
+                beforeText, afterText, stayedOpen, closed);
+    }
+
+    /** Mở đúng link giao dịch bị từ chối trong drawer và xác nhận deep-link đích. */
+    public RejectedTransactionLinkSnapshot openRejectedTransactionLink() {
+        String label = "Xem giao dịch bị từ chối";
+        DetailSnapshot opened = openDetailMatching((drawer, url) -> drawer.findElements(
+                        By.xpath(".//a[contains(normalize-space(.)," + xpathLiteral(label) + ")]"))
+                .stream().anyMatch(WebElement::isDisplayed), label);
+        WebElement link = detailDrawer().findElements(By.xpath(
+                        ".//a[contains(normalize-space(.)," + xpathLiteral(label) + ")]"))
+                .stream().filter(WebElement::isDisplayed).findFirst()
+                .orElseThrow(() -> new AssertionError("Thiếu link " + label));
+        String href = link.getAttribute("href");
+        String text = elementText(link);
+        click(link, "Mở giao dịch bị từ chối");
+        detailDrawer();
+        return new RejectedTransactionLinkSnapshot(opened.url(), href,
+                driver.getCurrentUrl(), text, elementText(detailDrawer()));
+    }
+
+    /** Thu thập tên truy cập của nút đóng drawer để phát hiện icon không có nhãn. */
+    public CloseAccessibilitySnapshot inspectDetailCloseAccessibility() {
+        DetailSnapshot opened = openFirstDetail();
+        WebElement close = detailCloseButton();
+        String ariaLabel = close.getAttribute("aria-label") == null
+                ? "" : close.getAttribute("aria-label").trim();
+        String title = close.getAttribute("title") == null
+                ? "" : close.getAttribute("title").trim();
+        String text = elementText(close).trim();
+        click(close, "Đóng drawer sau khi kiểm tra nhãn truy cập");
+        boolean closed = wait.until(d -> visibleElements(By.cssSelector(
+                "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        return new CloseAccessibilitySnapshot(opened.url(), ariaLabel, title, text, closed);
+    }
+
     public DetailLinksSnapshot detailLinks() {
         DetailSnapshot opened = openFirstDetail();
         WebElement drawer = detailDrawer();
@@ -1003,7 +1484,7 @@ public class TransactionHistoryPage extends UniformUiPage {
         String beforeQrDom = driver.getPageSource();
         String beforeQrText = elementText(driver.findElement(By.tagName("body")));
         click(qrButton, "Hiện mã QR chuyển khoản");
-        boolean qrOpened = new WebDriverWait(driver, Duration.ofSeconds(8)).until(d -> {
+        boolean qrOpened = Waits.withTimeout(driver, Duration.ofSeconds(8)).until(d -> {
             String afterText = elementText(d.findElement(By.tagName("body")));
             return !afterText.equals(beforeQrText) || !d.getPageSource().equals(beforeQrDom);
         });
@@ -1041,7 +1522,7 @@ public class TransactionHistoryPage extends UniformUiPage {
         WebElement upload = drawer.findElement(By.cssSelector("input[type='file']"));
         String accept = upload.getAttribute("accept");
         upload.sendKeys(imageFile.toAbsolutePath().toString());
-        boolean enabledAfterUpload = new WebDriverWait(driver, Duration.ofSeconds(12)).until(d -> {
+        boolean enabledAfterUpload = Waits.withTimeout(driver, Duration.ofSeconds(12)).until(d -> {
             WebElement currentDrawer = detailDrawer();
             return currentDrawer.findElements(By.tagName("button")).stream()
                     .filter(button -> "Xác nhận đã chuyển khoản".equals(
@@ -1090,7 +1571,7 @@ public class TransactionHistoryPage extends UniformUiPage {
                             ((JavascriptExecutor) driver).executeScript(
                                     "arguments[0].scrollIntoView({block:'center'});", heading));
             try {
-                drawer = new WebDriverWait(driver, Duration.ofSeconds(12)).until(d ->
+                drawer = Waits.withTimeout(driver, Duration.ofSeconds(12)).until(d ->
                         d.findElements(By.cssSelector(
                                         "[aria-label='drawer-Chi tiết giao dịch']")).stream()
                                 .filter(WebElement::isDisplayed)
@@ -1274,7 +1755,7 @@ public class TransactionHistoryPage extends UniformUiPage {
     }
 
     private void selectStatusForDetail(String value) {
-        var detailWait = new WebDriverWait(driver, Duration.ofSeconds(10))
+        var detailWait = Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .pollingEvery(Duration.ofMillis(250));
         detailWait.withMessage("Không mở được bộ lọc trạng thái chi tiết").until(d -> {
             try {
@@ -1404,7 +1885,6 @@ public class TransactionHistoryPage extends UniformUiPage {
                 .map(link -> link.getAttribute("href"))
                 .anyMatch(href -> hasDifferentTransactionId(href, openedUrl)),
                 "lien ket toi giao dich lien quan");
-        WebElement drawer = detailDrawer();
         WebElement related = wait.until(d -> detailDrawer()
                 .findElements(By.cssSelector("a[href*='/vuatho/transaction?']"))
                 .stream().filter(WebElement::isDisplayed)
@@ -1461,7 +1941,7 @@ public class TransactionHistoryPage extends UniformUiPage {
                 .filter(candidate -> hasDifferentTransactionId(
                         candidate.getAttribute("href"), opened.url()))
                 .findFirst().orElseThrow();
-        return openExternalDetailLinkAndReturn(opened, link, "/vuatho/transaction?", true,
+        return openExternalDetailLinkAndReturn(opened, link, "/vuatho/transaction?", false,
                 "Mở giao dịch liên quan trong timeline");
     }
 
@@ -1473,24 +1953,62 @@ public class TransactionHistoryPage extends UniformUiPage {
         String expectedUrl = link.getAttribute("href");
         String linkText = elementText(link).trim();
         click(link, step);
-        String targetHandle = wait.until(d -> d.getWindowHandles().stream()
-                .filter(handle -> !handlesBefore.contains(handle)).findFirst().orElse(null));
-        driver.switchTo().window(targetHandle);
+        NavigationTarget target = Waits.withTimeout(driver, Duration.ofSeconds(10)).until(d -> {
+            String newHandle = d.getWindowHandles().stream()
+                    .filter(handle -> !handlesBefore.contains(handle)).findFirst().orElse(null);
+            if (newHandle != null) {
+                return new NavigationTarget(newHandle, true);
+            }
+            return !d.getCurrentUrl().equals(opened.url())
+                    ? new NavigationTarget(sourceHandle, false) : null;
+        });
+        if (target.newWindow()) {
+            driver.switchTo().window(target.handle());
+        }
         wait.until(d -> d.getCurrentUrl().contains(expectedRoute));
         String actualUrl = driver.getCurrentUrl();
         String targetText = expectDetailDrawer
-                ? elementText(detailDrawer())
+                ? elementText(restoreDetailDrawerAfterHistory(actualUrl))
                 : wait.until(d -> {
                     String text = elementText(d.findElement(By.tagName("body"))).trim();
                     return text.isBlank() ? null : text;
                 });
-        driver.close();
-        driver.switchTo().window(sourceHandle);
-        boolean sourceRestored = wait.until(d -> d.getCurrentUrl().equals(opened.url())
-                && !visibleElements(By.cssSelector(
-                "[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
+        if (target.newWindow()) {
+            driver.close();
+            driver.switchTo().window(sourceHandle);
+        } else {
+            driver.navigate().back();
+        }
+        try {
+            Waits.withTimeout(driver, Duration.ofSeconds(8)).until(d ->
+                    d.getCurrentUrl().equals(opened.url()));
+        } catch (TimeoutException historyDidNotRestoreSource) {
+            driver.get(opened.url());
+        }
+        WebElement restoredDrawer = restoreDetailDrawerAfterHistory(opened.url());
+        boolean sourceRestored = restoredDrawer != null;
         return new ExternalDetailLinkSnapshot(opened.url(), expectedUrl, actualUrl,
                 linkText, targetText, driver.getCurrentUrl(), sourceRestored);
+    }
+
+    /**
+     * Browser history đôi khi chỉ phục hồi URL của drawer nhưng React chưa hydrate lại nội dung.
+     * Chờ ngắn cho hành vi tự nhiên trước, sau đó refresh đúng deep-link làm fallback ổn định.
+     */
+    private WebElement restoreDetailDrawerAfterHistory(String expectedUrl) {
+        try {
+            return Waits.withTimeout(driver, Duration.ofSeconds(8)).until(d ->
+                    visibleElements(By.cssSelector(
+                            "[aria-label='drawer-Chi tiết giao dịch']")).stream()
+                            .filter(element -> {
+                                String text = normalizeText(elementText(element));
+                                return !text.isBlank() && text.contains("trang thai")
+                                        && !text.contains("dang tai");
+                            }).findFirst().orElse(null));
+        } catch (TimeoutException historyDidNotHydrateDrawer) {
+            driver.get(expectedUrl);
+            return detailDrawer();
+        }
     }
 
     private boolean hasDifferentTransactionId(String candidateUrl, String sourceUrl) {
@@ -1498,6 +2016,8 @@ public class TransactionHistoryPage extends UniformUiPage {
         String sourceId = queryParameter(sourceUrl, "id");
         return !candidateId.isBlank() && !candidateId.equals(sourceId);
     }
+
+    private record NavigationTarget(String handle, boolean newWindow) {}
 
     private String queryParameter(String url, String name) {
         if (url == null) {
@@ -1519,11 +2039,7 @@ public class TransactionHistoryPage extends UniformUiPage {
     public CloseDetailSnapshot closeDetailWithIcon() {
         DetailSnapshot opened = openFirstDetail();
         WebElement drawer = detailDrawer();
-        WebElement icon = drawer.findElements(By.tagName("button")).stream()
-                .filter(WebElement::isDisplayed).filter(WebElement::isEnabled)
-                .filter(button -> elementText(button).isBlank()).findFirst()
-                .orElseThrow(() -> new IllegalStateException("Không thấy icon đóng drawer."));
-        click(icon, "Đóng drawer bằng icon");
+        click(overlayCloseButton(drawer), "Đóng drawer bằng icon");
         boolean closed = wait.until(d -> visibleElements(
                 By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).isEmpty());
         return new CloseDetailSnapshot(opened.url(), driver.getCurrentUrl(), closed);
@@ -1554,6 +2070,18 @@ public class TransactionHistoryPage extends UniformUiPage {
         int total = totalDisplayed();
         Path file = exportCurrentView();
         return new ExportSnapshot(file, visibleRows, total, "");
+    }
+
+    /** Chuyển tới trang 2 nhưng giữ nguyên bộ lọc để xác minh export không phụ thuộc trang hiện tại. */
+    public int goToSecondPageForExport() {
+        int total = totalDisplayed();
+        if (!hasPage(2)) {
+            throw new org.testng.SkipException(
+                    "Không có trang 2 để xác minh export toàn bộ dữ liệu; tổng hiện tại=" + total);
+        }
+        goToPage(2);
+        Assert.assertEquals(activePage(), 2);
+        return total;
     }
 
     public ExportSnapshot exportFilteredStatus() {
@@ -1626,7 +2154,7 @@ public class TransactionHistoryPage extends UniformUiPage {
                         + " or .//*[normalize-space()='Xuất Excel']]"));
         click(exportButton, "Xuất toàn bộ dữ liệu theo bộ lọc");
         try {
-            return new WebDriverWait(driver, TestConfig.exportDownloadTimeout())
+            return Waits.withTimeout(driver, TestConfig.exportDownloadTimeout())
                     .pollingEvery(Duration.ofMillis(300))
                     .until(d -> {
                         String uiError = d.findElements(By.cssSelector(
@@ -1722,20 +2250,21 @@ public class TransactionHistoryPage extends UniformUiPage {
         if (isEmptyState()) {
             return List.of();
         }
-        WebDriverWait rowWait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        rowWait.pollingEvery(Duration.ofMillis(200));
-        rowWait.ignoring(StaleElementReferenceException.class);
+        WebDriverWait rowWait = Waits.withTimeout(driver, Duration.ofSeconds(10));
         rowWait.withMessage("Bảng giao dịch đã xuất hiện nhưng chưa có dòng dữ liệu hợp lệ tại "
                 + driver.getCurrentUrl());
         return rowWait.until(d -> {
             try {
-                List<WebElement> rows = grid().findElements(DATA_ROWS).stream()
-                        .filter(WebElement::isDisplayed)
+                List<WebElement> grids = d.findElements(GRID);
+                if (grids.isEmpty()) {
+                    return null;
+                }
+                List<WebElement> rows = grids.get(0).findElements(DATA_ROWS).stream()
                         .filter(row -> row.findElements(By.cssSelector("th,td")).size() >= 5)
                         .toList();
                 return rows.isEmpty() ? null : rows;
-            } catch (StaleElementReferenceException ignored) {
-                return null;
+            } catch (WebDriverException transientDomRead) {
+                return retryTransientDomRead(transientDomRead);
             }
         });
     }
@@ -1886,9 +2415,10 @@ public class TransactionHistoryPage extends UniformUiPage {
         if (activePage() == page) {
             return;
         }
+        requirePage(page);
         if (!hasPage(page)) {
-            throw new IllegalStateException("Danh sách hiện tại không có trang " + page
-                    + "; không thể thực hiện flow phân trang.");
+            throw new AssertionError("Phân trang báo có trang " + page
+                    + " nhưng không hiển thị control tương ứng.");
         }
         WebElement button = visible(By.cssSelector(
                 "nav[aria-label='pagination navigation'] [role='button'][aria-label='pagination item "
@@ -1896,6 +2426,13 @@ public class TransactionHistoryPage extends UniformUiPage {
         click(button, "Chuyển sang trang " + page);
         settle(1200);
         waitForTable();
+    }
+
+    private void requirePage(int page) {
+        if (paginationTotalPages() < page) {
+            throw new org.testng.SkipException("Danh sách hiện tại không đủ trang " + page
+                    + " để thực hiện flow phân trang.");
+        }
     }
 
     private void clickPaginationControl(String ariaLabel, String step) {
@@ -1935,11 +2472,6 @@ public class TransactionHistoryPage extends UniformUiPage {
                 .map(label -> label == null ? "" : label.replaceAll("[^0-9]", ""))
                 .filter(value -> !value.isBlank()).mapToInt(Integer::parseInt)
                 .max().orElse(1);
-    }
-
-    private String dataSignature() {
-        return grid().findElements(DATA_ROWS).stream().filter(WebElement::isDisplayed)
-                .map(this::elementText).collect(Collectors.joining("|"));
     }
 
     private boolean hasPage(int page) {
@@ -1993,14 +2525,39 @@ public class TransactionHistoryPage extends UniformUiPage {
     private void waitForTable() {
         settle(650);
         wait.until(d -> {
-            List<WebElement> grids = d.findElements(GRID).stream().filter(WebElement::isDisplayed).toList();
-            if (grids.isEmpty()) {
-                return isEmptyState();
+            try {
+                List<WebElement> grids = d.findElements(GRID);
+                if (grids.isEmpty()) {
+                    return isEmptyState();
+                }
+                String text = elementText(grids.get(0));
+                return !text.contains("Đang tải dữ liệu")
+                        && (!grids.get(0).findElements(DATA_ROWS).isEmpty() || isEmptyState());
+            } catch (WebDriverException transientDomRead) {
+                return retryTransientDomRead(transientDomRead);
             }
-            String text = elementText(grids.get(0));
-            return !text.contains("Đang tải dữ liệu")
-                    && (!grids.get(0).findElements(DATA_ROWS).isEmpty() || isEmptyState());
         });
+    }
+
+    /**
+     * React thay thế grid trong lúc chuyển trang có thể làm một lệnh đọc DOM ngắn bị stale
+     * hoặc mất kết nối DevTools tạm thời. Chỉ retry các lỗi chuyển tiếp; session đã chết vẫn
+     * phải fail ngay để không che khuất lỗi hạ tầng thật.
+     */
+    private <T> T retryTransientDomRead(WebDriverException error) {
+        String message = error.getMessage() == null ? "" : error.getMessage().toLowerCase(Locale.ROOT);
+        boolean retryable = error instanceof StaleElementReferenceException
+                || message.contains("error communicating with the remote browser")
+                || message.contains("target frame detached")
+                || message.contains("no such execution context");
+        boolean deadSession = message.contains("invalid session id")
+                || message.contains("session deleted")
+                || message.contains("chrome not reachable")
+                || message.contains("disconnected: not connected to devtools");
+        if (retryable && !deadSession) {
+            return null;
+        }
+        throw error;
     }
 
     private WebElement detailDrawer() {
@@ -2023,11 +2580,10 @@ public class TransactionHistoryPage extends UniformUiPage {
                 if (!drawer.isDisplayed()) {
                     continue;
                 }
-                for (WebElement button : drawer.findElements(
-                        By.xpath(".//button[normalize-space()='Hủy']"))) {
-                    if (button.isDisplayed() && button.isEnabled()) {
-                        return button;
-                    }
+                try {
+                    return overlayCloseButton(drawer);
+                } catch (RuntimeException ignored) {
+                    return null;
                 }
             }
             return null;
@@ -2126,7 +2682,7 @@ public class TransactionHistoryPage extends UniformUiPage {
                                                    boolean warrantyHidden) {}
     public record FutureDateSnapshot(String ariaLabel, boolean disabled, int disabledCount) {}
     public record DateFilterSnapshot(LocalDate start, LocalDate end, List<TransactionRow> rows,
-                                     String selectedText) {}
+                                     String selectedText, boolean empty, String pageText) {}
     public record EmptySnapshot(String type, String gateway, String pageText, boolean empty) {}
     public record ResetSnapshot(boolean allSelected, String type, String status, String gateway,
                                 String date, int page, int rows, String url) {}
@@ -2134,9 +2690,28 @@ public class TransactionHistoryPage extends UniformUiPage {
                                        List<TransactionRow> firstRows, List<TransactionRow> secondRows,
                                        String selectedText) {}
     public record FilterOptionResult(String value, String selectedText,
-                                     List<TransactionRow> rows) {}
+                                     List<TransactionRow> rows,
+                                     boolean empty, String pageText) {}
     public record FilterOptionsSnapshot(Filter filter, List<String> options,
                                         List<FilterOptionResult> results) {}
+    public record FilterPopupSemanticsSnapshot(Filter filter, String expandedBefore,
+                                               String expandedAfter, String hasPopup,
+                                               String listboxRole, String labelledBy,
+                                               List<String> options) {}
+    public record CalendarNavigationSnapshot(List<String> monthsBefore,
+                                             List<String> monthsAfter,
+                                             int timeInputs, String popupText) {}
+    public record InvalidTimeRangeSnapshot(LocalDate date, String startTime,
+                                           String endTime, boolean applyEnabled,
+                                           String popupText) {}
+    public record CombinedSearchFilterSnapshot(TransactionRow source, String query,
+                                               LocalDate date,
+                                               String selectedStatus,
+                                               String selectedGateway,
+                                               String selectedDate,
+                                               List<TransactionRow> rows,
+                                               String url, boolean restoredOrPersisted,
+                                               boolean empty, String pageText) {}
     public record UnchangedFilterSnapshot(String selectedBefore, String selectedAfter,
                                           List<String> rowsBefore, List<String> rowsAfter) {}
     public record DateControlSnapshot(String startTime, String endTime,
@@ -2192,6 +2767,7 @@ public class TransactionHistoryPage extends UniformUiPage {
     public record ResetSortSnapshot(List<String> baselineRows, List<String> sortedRows,
                                     List<String> restoredRows, int activePage) {}
     public record RefreshPageSnapshot(int pageBeforeRefresh, int pageAfterRefresh,
+                                      List<TransactionRow> baselineRows,
                                       List<TransactionRow> rows, String url) {}
     public record ResetSortedPageSnapshot(List<String> baselineRows,
                                           List<String> ascendingRows,
@@ -2201,11 +2777,59 @@ public class TransactionHistoryPage extends UniformUiPage {
                                           String url) {}
     public record DotsJumpSnapshot(int pageBefore, int pageAfter,
                                    List<TransactionRow> rows) {}
+    public record DotsRoundTripSnapshot(int startPage, int forwardPage,
+                                        int backwardPage, List<TransactionRow> rows) {}
+    public record LastPagePreviousSnapshot(int lastPage, int pageAfterPrevious,
+                                           List<String> lastPageRows,
+                                           List<String> previousPageRows,
+                                           boolean nextDisabled,
+                                           boolean previousDisabled) {}
+    public record PaginationGeometrySnapshot(int totalRows, int totalPages,
+                                             int firstPageRows, int lastPageRows,
+                                             int activePage) {}
+    public record CombinedFilterPaginationSnapshot(String status, String gateway,
+                                                   String selectedStatus,
+                                                   String selectedGateway,
+                                                   List<TransactionRow> firstPage,
+                                                   List<TransactionRow> secondPage,
+                                                   int activePage) {}
+    public record EmptyPaginationSnapshot(String query, boolean empty,
+                                          boolean paginationVisible, int totalRows,
+                                          String pageText) {}
+    public record PaginationSemanticsSnapshot(String navigationLabel,
+                                              String previousRole,
+                                              String previousLabel,
+                                              String nextRole, String nextLabel,
+                                              int totalPages, int pageItemCount,
+                                              int dotsCount,
+                                              boolean allPageItemsNamed,
+                                              boolean allDotsNamed) {}
+    public record SortDetailPersistenceSnapshot(String openedUrl,
+                                                List<TransactionRow> rowsBefore,
+                                                List<TransactionRow> rowsAfter,
+                                                int activePage, String closedUrl) {}
     public record PaginationSnapshot(List<TransactionRow> pageOne, List<TransactionRow> pageTwo,
                                      List<TransactionRow> returnedPageOne, int activePage) {}
     public record FilterPaginationSnapshot(String expectedStatus, String selectedStatus,
                                            List<TransactionRow> pageOne, List<TransactionRow> pageTwo,
                                            int activePage) {}
+    public record GatewayPaginationCell(String gateway, String selectedGateway,
+                                        List<TransactionRow> pageOne,
+                                        List<TransactionRow> pageTwo,
+                                        boolean pageTwoAvailable) {}
+    public record GatewayPaginationSnapshot(List<String> gateways,
+                                            List<GatewayPaginationCell> results,
+                                            String url) {}
+    public record BrowserPageHistorySnapshot(String pageOneUrl, String pageTwoUrl,
+                                             String backUrl, String forwardUrl,
+                                             List<String> pageOneRows, List<String> pageTwoRows,
+                                             List<String> backRows, List<String> forwardRows,
+                                             int backActivePage, int activePage) {}
+    public record RefreshSortedFilterSnapshot(String expectedStatus, String selectedStatus,
+                                              List<TransactionRow> expectedAfterRefresh,
+                                              List<TransactionRow> rowsBefore,
+                                              List<TransactionRow> rowsAfter,
+                                              int activePage, String url) {}
     public record DetailSnapshot(TransactionRow source, String url, String drawerText,
                                  int relatedLinks, boolean currentMarked) {}
     public record CloseDetailSnapshot(String openedUrl, String closedUrl, boolean closed) {}
@@ -2213,7 +2837,13 @@ public class TransactionHistoryPage extends UniformUiPage {
     public record HistoryNavigationSnapshot(String openedUrl, String backUrl, String forwardUrl,
                                             boolean closedAfterBack, String drawerText) {}
     public record RelatedHistorySnapshot(TransactionRow source, String drawerText,
-                                         boolean loaded, boolean currentMarked) {}
+                                         boolean loaded, boolean currentMarked,
+                                         boolean currentListed) {
+        public RelatedHistorySnapshot(TransactionRow source, String drawerText,
+                                      boolean loaded, boolean currentMarked) {
+            this(source, drawerText, loaded, currentMarked, false);
+        }
+    }
     public record RelatedExpansionSnapshot(String openedUrl, int beforeCount, int afterCount,
                                            String drawerText) {}
     public record DetailAuditSnapshot(TransactionRow source, String openedUrl, String drawerText,
@@ -2224,6 +2854,25 @@ public class TransactionHistoryPage extends UniformUiPage {
                                        boolean cancelVisible, boolean rejectPresent,
                                        boolean rejectVisible, boolean closed,
                                        String closedUrl) {}
+    public record SystemDetailElementSnapshot(TransactionRow source, String openedUrl,
+                                              String drawerText, String userHref,
+                                              String userText,
+                                              List<DetailElementLink> transactionLinks,
+                                              boolean closed, String closedUrl) {}
+    public record DetailControlState(String label, boolean present, boolean visible,
+                                     boolean enabled) {}
+    public record DetailControlSnapshot(TransactionRow source, String openedUrl,
+                                        List<DetailControlState> controls,
+                                        String safeClickLabel, boolean safeActionPerformed,
+                                        boolean closed) {}
+    public record WarrantyOrdersSnapshot(TransactionRow source, String openedUrl,
+                                         String cardText, String beforeText, String afterText,
+                                         boolean stayedOpen, boolean closed) {}
+    public record RejectedTransactionLinkSnapshot(String sourceUrl, String expectedUrl,
+                                                  String actualUrl, String linkText,
+                                                  String drawerText) {}
+    public record CloseAccessibilitySnapshot(String openedUrl, String ariaLabel,
+                                             String title, String text, boolean closed) {}
     public record DetailLinksSnapshot(String openedUrl, String userHref,
                                        List<String> transactionHrefs, String drawerText) {}
     public record DetailElementLink(String href, String target, String text) {}

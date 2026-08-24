@@ -2,10 +2,11 @@ package com.vuatho.pages;
 
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -28,9 +29,8 @@ abstract class UniformUiPage {
 
     protected UniformUiPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, TestConfig.longWaitTimeout());
+        this.wait = Waits.withTimeout(driver, TestConfig.longWaitTimeout());
         this.wait.pollingEvery(Duration.ofMillis(300));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     /** Mở một route của module Đồng phục và chờ main tải xong. */
@@ -89,9 +89,53 @@ abstract class UniformUiPage {
         observe(element, step);
         try {
             element.click();
-        } catch (RuntimeException exception) {
+        } catch (ElementNotInteractableException intercepted) {
+            // Escape từ OverlayCleaner đóng dropdown/menu vừa mở, rồi wait option 45s.
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
         }
+    }
+
+    /**
+     * Nút đóng drawer/dialog: ưu tiên aria-label/Đóng/X, không dùng Hủy
+     * vì Hủy trên chi tiết giao dịch có thể hủy nghiệp vụ pending.
+     */
+    protected WebElement overlayCloseButton(WebElement overlay) {
+        List<WebElement> buttons = overlay.findElements(By.tagName("button")).stream()
+                .filter(WebElement::isDisplayed)
+                .filter(WebElement::isEnabled)
+                .toList();
+        for (WebElement button : buttons) {
+            String aria = String.valueOf(button.getAttribute("aria-label")).trim();
+            String text = elementText(button).trim();
+            if (isOverlayCloseLabel(aria) || isOverlayCloseLabel(text)) {
+                return button;
+            }
+        }
+        for (WebElement svg : overlay.findElements(By.cssSelector(
+                "button svg.rotate-45, button.rotate-45 svg, button [class*='rotate-45']"))) {
+            if (!svg.isDisplayed()) {
+                continue;
+            }
+            WebElement parent = svg.findElement(By.xpath("./ancestor::button[1]"));
+            if (parent.isDisplayed() && parent.isEnabled()) {
+                return parent;
+            }
+        }
+        int overlayTop = overlay.getRect().getY();
+        for (WebElement button : buttons) {
+            String text = elementText(button).trim();
+            if ("Hủy".equals(text) || "Lưu".equals(text) || "Xác nhận".equals(text) || !text.isBlank()) {
+                continue;
+            }
+            try {
+                if (button.getRect().getY() < overlayTop + 80 && button.getRect().getHeight() <= 48) {
+                    return button;
+                }
+            } catch (RuntimeException ignored) {
+                // Bỏ qua button header không đọc được kích thước.
+            }
+        }
+        throw new IllegalStateException("Không thấy nút đóng overlay (X/Đóng).");
     }
 
     /** Nhập dữ liệu có cuộn và thời gian quan sát. */
@@ -116,9 +160,8 @@ abstract class UniformUiPage {
     /** Chờ spinner/loading của React biến mất và dữ liệu hoặc empty-state xuất hiện. */
     protected void waitForLoadingToFinish() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(10))
+            Waits.withTimeout(driver, Duration.ofSeconds(10))
                     .pollingEvery(Duration.ofMillis(250))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> {
                 String text = d.findElement(By.tagName("main")).getText();
                 // Một số bảng giữ node "Đang tải dữ liệu" ẩn trong DOM sau khi
@@ -140,11 +183,7 @@ abstract class UniformUiPage {
 
     /** Chờ ngắn cho debounce/API React hoàn tất trước khi đọc DOM mới. */
     protected void settle(long milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
+        Waits.pause(Duration.ofMillis(milliseconds));
     }
 
     /** Giữ màn hình theo observation.delay.ms ở chế độ có giao diện để quan sát từng thao tác. */
@@ -152,11 +191,7 @@ abstract class UniformUiPage {
         if (TestConfig.headless()) {
             return;
         }
-        try {
-            Thread.sleep(TestConfig.observationDelayMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-        }
+        Waits.pause(Duration.ofMillis(TestConfig.observationDelayMillis()));
     }
 
     private void observe(WebElement element, String step) {
@@ -185,6 +220,14 @@ abstract class UniformUiPage {
                         + "arguments[0].style.outline='3px solid '+arguments[1];"
                         + "arguments[0].style.outlineOffset='2px';",
                 element, color);
+    }
+
+    private static boolean isOverlayCloseLabel(String value) {
+        String normalized = value == null ? "" : value.trim();
+        return "Close".equalsIgnoreCase(normalized)
+                || "Đóng".equalsIgnoreCase(normalized)
+                || "X".equalsIgnoreCase(normalized)
+                || "×".equals(normalized);
     }
 
     protected static String xpathLiteral(String value) {

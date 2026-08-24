@@ -55,7 +55,8 @@ public class ApprovalRejectionTest extends WorkerStopRequestTestSupport {
                         + " không có trạng thái Đã từ chối.");
     }
 
-    @Test(groups = {"worker-stop-request", "mutation", "skip", "requires-zero-balance"},
+    @Test(groups = {"worker-stop-request", "mutation", "skip", "requires-zero-balance",
+            "data-interaction"},
             description = WorkerStopRequestTestCases.STOP_REQUEST_003)
     public void skipZeroBalanceRequestMovesItToSkipped() {
         DetailSnapshot request = stopRequestPage.openFirstPendingWithAction(Action.SKIP);

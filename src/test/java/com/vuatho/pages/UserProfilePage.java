@@ -3,11 +3,10 @@ package com.vuatho.pages;
 import com.vuatho.navigation.MenuTarget;
 import com.vuatho.utils.PageLoadSynchronizer;
 import com.vuatho.utils.TextNormalizer;
+import com.vuatho.utils.ElementActions;
 import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -47,6 +46,7 @@ public class UserProfilePage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+    private final ElementActions actions;
 
     /**
      * Khởi tạo UserProfilePage với các phụ thuộc cần thiết.
@@ -55,7 +55,7 @@ public class UserProfilePage {
     public UserProfilePage(WebDriver driver) {
         this.driver = driver;
         this.wait = Waits.standard(driver);
-        this.wait.ignoring(StaleElementReferenceException.class);
+        this.actions = new ElementActions(driver);
     }
 
     /**
@@ -871,12 +871,8 @@ public class UserProfilePage {
     private void waitUntilDetailSurfaceStable() {
         wait.until(webDriver -> {
             String firstState = detailSurfaceState();
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException exception) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("Bi gian doan khi doi noi dung tab nguoi dung on dinh.", exception);
-            }
+            Waits.pause(java.time.Duration.ofMillis(500),
+                    "Bi gian doan khi doi noi dung tab nguoi dung on dinh.");
             return firstState.equals(detailSurfaceState()) && noLoadingIndicatorIsVisible();
         });
     }
@@ -945,12 +941,8 @@ public class UserProfilePage {
      * Thực hiện xử lý pause for scroll trong luồng kiểm thử.
      */
     private void pauseForScroll() {
-        try {
-            Thread.sleep(600);
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Bi gian doan khi scroll tab nguoi dung.", exception);
-        }
+        Waits.pause(java.time.Duration.ofMillis(600),
+                "Bi gian doan khi scroll tab nguoi dung.");
     }
 
     /**
@@ -1390,11 +1382,7 @@ public class UserProfilePage {
      * @param element phần tử cần thao tác
      */
     private void click(WebElement element) {
-        try {
-            element.click();
-        } catch (ElementClickInterceptedException exception) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
-        }
+        actions.click(element);
     }
 
     /**

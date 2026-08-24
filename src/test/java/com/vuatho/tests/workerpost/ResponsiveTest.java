@@ -15,7 +15,7 @@ public class ResponsiveTest extends WorkerPostManagementTestSupport {
                 "Quản lý bài đăng thợ", "Responsive menu quản lý bài đăng");
     }
 
-    @Test(groups = {"worker-post-management", "read-only", "responsive"},
+    @Test(groups = {"worker-post-management", "read-only", "responsive", "data-interaction"},
             description = WorkerPostTestCases.WORKER_POST_022)
     public void tabletViewportKeepsCoreContentUsable() {
         Dimension original = driver.manage().window().getSize();

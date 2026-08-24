@@ -1,20 +1,14 @@
 package com.vuatho.tests.transaction.system;
 
 import com.vuatho.core.TestNgRunner;
-import com.vuatho.pages.TransactionCategoryPage;
-import com.vuatho.support.TransactionCategoryTestSupport;
+import com.vuatho.support.TransactionSystemTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.annotations.Test;
 
-/** Kiểm tra chuyên biệt nhóm Hệ thống trong Lịch sử giao dịch. */
-public class TransactionSystemTest extends TransactionCategoryTestSupport {
+/** Kiểm tra tổng quan và xuất Excel của nhóm Hệ thống. */
+public class TransactionSystemTest extends TransactionSystemTestSupport {
     public static void main(String[] args) {
-        TestNgRunner.run(TransactionSystemTest.class, "Lịch sử giao dịch", "Hệ thống");
-    }
-
-    @Override
-    protected TransactionCategoryPage.Category category() {
-        return TransactionCategoryPage.Category.SYSTEM;
+        TestNgRunner.run(TransactionSystemTest.class, "Lịch sử giao dịch", "Hệ thống - Tổng quan và xuất Excel");
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_001)
@@ -122,6 +116,41 @@ public class TransactionSystemTest extends TransactionCategoryTestSupport {
     public void exportsFailedBankingMatrixCell() { verifyMatrix("Thất bại", "BANKING"); }
     @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_030)
     public void exportsFailedNeoxMatrixCell() { verifyMatrix("Thất bại", "NEOX"); }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_089)
+    public void exportsSearchAndDateResults() {
+        verifyExportForSubtype(7, this::verifyExportAfterSearchAndDate);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_090)
+    public void exportsSearchStatusAndDateResults() {
+        verifyExportForSubtype(7, this::verifyExportAfterSearchStatusAndDate);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_091)
+    public void exportsAfterResetContainsBaseline() {
+        verifyExportForSubtype(7, this::verifyExportAfterReset);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_092)
+    public void repeatedExportCreatesFreshFile() {
+        verifyExportForSubtype(7, this::verifyRepeatedExport);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_093)
+    public void exportFromSecondPageContainsAllRows() {
+        verifyExportForSubtype(7, this::verifyExportFromSecondPage);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_094)
+    public void emptyResultExportHasSchemaAndNoRows() {
+        verifyExportForSubtype(7, this::verifyEmptyResultExport);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_SYSTEM_095)
+    public void exportContainsFirstVisibleRow() {
+        verifyExportForSubtype(7, this::verifyExportContainsFirstVisibleRow);
+    }
 
     private void verifyMatrix(String status, String gateway) {
         verifyExportMatrixCellOnFirstSubtype(status, gateway);

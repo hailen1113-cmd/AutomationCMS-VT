@@ -18,8 +18,12 @@ import java.util.List;
  * Đọc workbook eKYC, ánh xạ từng dòng thành test case và kiểm tra dữ liệu bắt buộc.
  */
 public final class EkycWorkbookCatalog {
-    private static final String DEFAULT_WORKBOOK =
-            "C:\\Users\\Lenovo\\Downloads\\Testcase_eKYC_Senior_Automation_574_Cases_Chi_Tiet_7_Truong.xlsx";
+    private static final String WORKBOOK_FILE_NAME =
+            "Testcase_eKYC_Senior_Automation_574_Cases_Chi_Tiet_7_Truong.xlsx";
+    private static final Path PACKAGED_WORKBOOK = Path.of(
+            "src", "test", "resources", "testcases", WORKBOOK_FILE_NAME);
+    private static final String LEGACY_WORKBOOK =
+            "C:\\Users\\Lenovo\\Downloads\\" + WORKBOOK_FILE_NAME;
     private static final String SHEET_NAME = "Tất_cả_testcase";
 
     /**
@@ -116,10 +120,19 @@ public final class EkycWorkbookCatalog {
      */
     private static Path workbookPath() {
         String configured = configured("ekyc.testcase.workbook", "EKYC_TESTCASE_WORKBOOK");
-        if (configured == null || configured.isBlank()) {
-            configured = DEFAULT_WORKBOOK;
+        if (!configured.isBlank()) {
+            return Path.of(configured).toAbsolutePath().normalize();
         }
-        return Path.of(configured).toAbsolutePath().normalize();
+        if (Files.isRegularFile(PACKAGED_WORKBOOK)) {
+            return PACKAGED_WORKBOOK.toAbsolutePath().normalize();
+        }
+        Path legacy = Path.of(LEGACY_WORKBOOK);
+        if (Files.isRegularFile(legacy)) {
+            return legacy.toAbsolutePath().normalize();
+        }
+        throw new IllegalStateException(
+                "Không tìm thấy workbook eKYC. Đặt file vào " + PACKAGED_WORKBOOK
+                        + " hoặc truyền -Dekyc.testcase.workbook=<đường dẫn>.");
     }
 
     /**

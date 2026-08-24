@@ -46,11 +46,11 @@ public class AutomationFrameworkQualityTest {
     public void dashboardFlowUsesExplicitWaits() throws IOException {
         String source = source("pages", "DashboardPage.java")
                 + source("components", "SidebarComponent.java")
-                + source("tests", "DashboardTestSupport.java")
-                + source("tests", "CoreUiTest.java")
-                + source("tests", "SummaryCardsTest.java")
-                + source("tests", "WorkbookUiTest.java")
-                + source("tests", "LogoutTest.java");
+                + source("support", "dashboard", "DashboardTestSupport.java")
+                + source("tests", "dashboard", "CoreUiTest.java")
+                + source("tests", "dashboard", "SummaryCardsTest.java")
+                + source("tests", "dashboard", "WorkbookUiTest.java")
+                + source("tests", "dashboard", "LogoutTest.java");
         Assert.assertFalse(source.contains("Thread.sleep"),
                 "Dashboard flow must use condition-based waits");
     }
@@ -94,7 +94,11 @@ public class AutomationFrameworkQualityTest {
      * @param file giá trị file được truyền vào
      * @return kết quả source sau khi xử lý
      */
-    private String source(String folder, String file) throws IOException {
-        return Files.readString(TEST_SOURCE.resolve(folder).resolve(file));
+    private String source(String... parts) throws IOException {
+        Path path = TEST_SOURCE;
+        for (String part : parts) {
+            path = path.resolve(part);
+        }
+        return Files.readString(path);
     }
 }

@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -34,7 +35,6 @@ import java.util.stream.Collectors;
 
 /** Thao tác dùng chung cho tám nhóm chuyên biệt của màn hình Lịch sử giao dịch. */
 public class TransactionCategoryPage extends UniformUiPage {
-    private static final String ALL_ROUTE = "/vuatho/transaction?tab=all";
     private static final By GRID = By.cssSelector(
             "[role='grid'][aria-label='Table about Transaction Management']");
     private static final By DATA_ROWS = By.cssSelector("tbody tr");
@@ -469,9 +469,7 @@ public class TransactionCategoryPage extends UniformUiPage {
     }
 
     private RevenueChartSnapshot revenueChartSnapshot() {
-        WebDriverWait chartWait = new WebDriverWait(driver, Duration.ofSeconds(12));
-        chartWait.pollingEvery(Duration.ofMillis(200));
-        chartWait.ignoring(StaleElementReferenceException.class);
+        WebDriverWait chartWait = Waits.withTimeout(driver, Duration.ofSeconds(12));
         return chartWait.until(d -> readRevenueChartSnapshot());
     }
 
@@ -1003,6 +1001,86 @@ public class TransactionCategoryPage extends UniformUiPage {
         return new SearchSnapshot(query, before, filtered, restored, currentUrl());
     }
 
+    public SearchSnapshot searchByFirstUserName() {
+        List<TransactionRow> before = rows();
+        TransactionRow source = before.stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có giao dịch để kiểm tra tìm kiếm theo tên."));
+        String withoutPhone = PHONE.matcher(source.value("Người dùng")).replaceAll(" ")
+                .replace("(", " ").replace(")", " ").trim();
+        if (withoutPhone.isBlank()) {
+            throw new IllegalStateException("Dòng giao dịch không có tên người dùng để tìm kiếm.");
+        }
+        return searchAndRestore(firstSearchToken(withoutPhone), before,
+                "Tìm giao dịch theo tên người dùng thật");
+    }
+
+    public SearchSnapshot searchByFirstUserPhone() {
+        List<TransactionRow> before = rows();
+        TransactionRow source = before.stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có giao dịch để kiểm tra tìm kiếm theo SĐT."));
+        Matcher matcher = PHONE.matcher(source.value("Người dùng"));
+        if (!matcher.find()) {
+            throw new IllegalStateException("Dòng giao dịch không có SĐT để tìm kiếm.");
+        }
+        return searchAndRestore(matcher.group(), before,
+                "Tìm giao dịch theo SĐT người dùng thật");
+    }
+
+    public SearchSnapshot searchByFirstUserNameWithPadding() {
+        List<TransactionRow> before = rows();
+        TransactionRow source = before.stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có giao dịch để kiểm tra khoảng trắng tìm kiếm."));
+        String withoutPhone = PHONE.matcher(source.value("Người dùng")).replaceAll(" ")
+                .replace("(", " ").replace(")", " ").trim();
+        if (withoutPhone.isBlank()) {
+            throw new IllegalStateException("Dòng giao dịch không có tên người dùng để tìm kiếm.");
+        }
+        return searchAndRestore("  " + firstSearchToken(withoutPhone) + "  ", before,
+                "Tìm tên người dùng có khoảng trắng đầu cuối");
+    }
+
+    public SearchSnapshot searchByFirstUserNameWithToggledCase() {
+        List<TransactionRow> before = rows();
+        TransactionRow source = before.stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có giao dịch để kiểm tra chữ hoa thường."));
+        String withoutPhone = PHONE.matcher(source.value("Người dùng")).replaceAll(" ")
+                .replace("(", " ").replace(")", " ").trim();
+        if (withoutPhone.isBlank()) {
+            throw new IllegalStateException("Dòng giao dịch không có tên người dùng để tìm kiếm.");
+        }
+        String token = firstSearchToken(withoutPhone);
+        String toggled = token.equals(token.toUpperCase(Locale.ROOT))
+                ? token.toLowerCase(Locale.ROOT) : token.toUpperCase(Locale.ROOT);
+        return searchAndRestore(toggled, before, "Tìm tên người dùng không phân biệt hoa thường");
+    }
+
+    public SearchSnapshot searchByFirstUserPhonePartial() {
+        List<TransactionRow> before = rows();
+        TransactionRow source = before.stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Không có giao dịch để kiểm tra SĐT một phần."));
+        Matcher matcher = PHONE.matcher(source.value("Người dùng"));
+        if (!matcher.find()) {
+            throw new IllegalStateException("Dòng giao dịch không có SĐT để tìm kiếm.");
+        }
+        String phone = matcher.group();
+        String partial = phone.substring(Math.max(0, phone.length() - 6));
+        return searchAndRestore(partial, before, "Tìm giao dịch theo một phần SĐT");
+    }
+
+    private SearchSnapshot searchAndRestore(String query, List<TransactionRow> before, String step) {
+        WebElement input = visible(By.cssSelector("[aria-label='search-name-phone-filter']"));
+        fill(input, query, step);
+        List<TransactionRow> filtered = waitForSearchRows(query);
+        input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE);
+        List<TransactionRow> restored = waitForRestoredRows(before);
+        return new SearchSnapshot(query, before, filtered, restored, currentUrl());
+    }
+
     public AppliedSearchSnapshot applySearchFromFirstUser() {
         TransactionRow source = rows().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException(
@@ -1137,6 +1215,15 @@ public class TransactionCategoryPage extends UniformUiPage {
                 currentUrl(), activeGroupText());
     }
 
+    /** Giữ nguyên trạng thái tìm kiếm rỗng để testcase có thể xuất chính tập kết quả đó. */
+    public AppliedEmptySearchSnapshot applyUnmatchedSearchForExport() {
+        String query = "NO_REWARD_TRANSACTION_EXPORT_987654321";
+        WebElement input = visible(By.cssSelector("[aria-label='search-name-phone-filter']"));
+        fill(input, query, "Tạo kết quả rỗng trước khi xuất Excel");
+        waitForTable();
+        return new AppliedEmptySearchSnapshot(query, isEmptyState(), mainText(), currentUrl());
+    }
+
     public FilterSnapshot firstAvailableFilter() {
         String ariaLabel = category.selectFilterAriaLabels().stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("Nhóm không có select filter."));
@@ -1194,13 +1281,7 @@ public class TransactionCategoryPage extends UniformUiPage {
                 }).findFirst().orElse(null));
         String openedUrl = currentUrl();
         String drawerText = elementText(drawer);
-        List<WebElement> drawerButtons = drawer.findElements(By.tagName("button")).stream()
-                .filter(WebElement::isDisplayed).filter(WebElement::isEnabled).toList();
-        WebElement close = drawerButtons.stream()
-                .filter(button -> "Hủy".equals(elementText(button).trim()))
-                .findFirst().orElseGet(() -> drawerButtons.stream().findFirst()
-                        .orElseThrow(() -> new IllegalStateException("Không thấy nút đóng chi tiết.")));
-        click(close, "Đóng chi tiết giao dịch");
+        click(overlayCloseButton(drawer), "Đóng chi tiết giao dịch");
         boolean closed = wait.until(d -> d.findElements(
                         By.cssSelector("[aria-label='drawer-Chi tiết giao dịch']")).stream()
                 .noneMatch(WebElement::isDisplayed));
@@ -1233,7 +1314,7 @@ public class TransactionCategoryPage extends UniformUiPage {
             if (!button.getAttribute("class").contains("cursor-pointer")) {
                 actual.add(header);
             }
-            click(button, "Thử click cột Fee không hỗ trợ sort: " + header);
+            click(button, "Thử click cột không hỗ trợ sort: " + header);
             settle(250);
         }
         return new CategoryNonSortableSnapshot(expected, actual, before,
@@ -1263,9 +1344,9 @@ public class TransactionCategoryPage extends UniformUiPage {
                     "nav[aria-label='pagination navigation'] [aria-label='next page button']"));
             if ("true".equals(next.getAttribute("aria-disabled"))
                     || "true".equals(next.getAttribute("data-disabled"))) {
-                throw new IllegalStateException("Không có trang 2 để kiểm tra navigation Fee.");
+                throw new IllegalStateException("Không có trang 2 để kiểm tra navigation.");
             }
-            click(next, "Chuyển sang trang 2 của Phí và doanh thu");
+            click(next, "Chuyển sang trang 2");
             waitForTable();
         }
     }
@@ -1282,7 +1363,7 @@ public class TransactionCategoryPage extends UniformUiPage {
         click(visible(By.xpath("//main//button[normalize-space()='Xuất Excel'"
                 + " or .//*[normalize-space()='Xuất Excel']]")), "Xuất Excel " + category.label());
         try {
-            Path file = new WebDriverWait(driver, TestConfig.exportDownloadTimeout())
+            Path file = Waits.withTimeout(driver, TestConfig.exportDownloadTimeout())
                     .pollingEvery(Duration.ofMillis(300))
                     .until(d -> {
                         Path downloaded = completedFileVersions(directory).entrySet().stream()
@@ -1488,9 +1569,8 @@ public class TransactionCategoryPage extends UniformUiPage {
     /** Chờ debounce/API tìm kiếm hoàn tất và không đọc nhầm các dòng cũ của bảng. */
     private List<TransactionRow> waitForSearchRows(String query) {
         String expected = normalizeSearchValue(query);
-        WebDriverWait resultWait = new WebDriverWait(driver, Duration.ofSeconds(12));
+        WebDriverWait resultWait = Waits.withTimeout(driver, Duration.ofSeconds(12));
         resultWait.pollingEvery(Duration.ofMillis(250));
-        resultWait.ignoring(StaleElementReferenceException.class);
         try {
             return resultWait.until(d -> {
                 if (tableIsLoading()) {
@@ -1513,9 +1593,8 @@ public class TransactionCategoryPage extends UniformUiPage {
     /** Chờ xóa từ khóa khôi phục đúng danh sách trước khi assertion. */
     private List<TransactionRow> waitForRestoredRows(List<TransactionRow> baseline) {
         List<String> expected = baseline.stream().map(TransactionRow::signature).toList();
-        WebDriverWait resultWait = new WebDriverWait(driver, Duration.ofSeconds(12));
+        WebDriverWait resultWait = Waits.withTimeout(driver, Duration.ofSeconds(12));
         resultWait.pollingEvery(Duration.ofMillis(250));
-        resultWait.ignoring(StaleElementReferenceException.class);
         try {
             return resultWait.until(d -> {
                 if (tableIsLoading()) {
@@ -1816,8 +1895,10 @@ public class TransactionCategoryPage extends UniformUiPage {
                                                       String closedUrl,
                                                       boolean closed) {}
     public record EmptySearchSnapshot(String query, boolean empty, String pageText,
-                                      List<TransactionRow> before, List<TransactionRow> restored,
-                                      String url, String activeText) {}
+                                       List<TransactionRow> before, List<TransactionRow> restored,
+                                       String url, String activeText) {}
+    public record AppliedEmptySearchSnapshot(String query, boolean empty,
+                                             String pageText, String url) {}
     public record FilterSnapshot(String ariaLabel, List<String> options,
                                  String beforeResetUrl, String afterResetUrl, String activeText) {}
     public record SelectOptionSnapshot(String selectedText, List<TransactionRow> rows,

@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -1557,7 +1558,7 @@ public final class UniformCatalogPage extends UniformUiPage {
         click(combo, step);
         List<WebElement> options;
         try {
-            options = new org.openqa.selenium.support.ui.WebDriverWait(
+            options = Waits.withTimeout(
                     driver, Duration.ofSeconds(5))
                     .until(d -> {
                         List<WebElement> visibleOptions =
@@ -1708,7 +1709,7 @@ public final class UniformCatalogPage extends UniformUiPage {
         click(combo, step);
         String selectedText;
         try {
-            WebElement option = new org.openqa.selenium.support.ui.WebDriverWait(
+            WebElement option = Waits.withTimeout(
                     driver, Duration.ofSeconds(5))
                     .until(d -> d.findElements(By.cssSelector("[role='option']")).stream()
                             .filter(WebElement::isDisplayed)
@@ -1862,7 +1863,7 @@ public final class UniformCatalogPage extends UniformUiPage {
         click(buttonIn(drawer, "Xác nhận"), step);
         try {
             org.openqa.selenium.Alert alert =
-                    new org.openqa.selenium.support.ui.WebDriverWait(
+                    Waits.withTimeout(
                             driver, Duration.ofSeconds(3))
                             .until(org.openqa.selenium.support.ui.ExpectedConditions
                                     .alertIsPresent());
@@ -1879,7 +1880,7 @@ public final class UniformCatalogPage extends UniformUiPage {
 
     private boolean waitForOverlayToClose(String ariaLabel) {
         try {
-            new org.openqa.selenium.support.ui.WebDriverWait(
+            Waits.withTimeout(
                     driver, Duration.ofSeconds(15))
                     .until(d -> d.findElements(By.cssSelector(
                                     "[aria-label='" + ariaLabel + "']"))

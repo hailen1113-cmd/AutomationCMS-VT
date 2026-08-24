@@ -1,5 +1,6 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
@@ -47,9 +48,8 @@ public class WorkerPostManagementPage {
 
     public WorkerPostManagementPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(30));
         this.wait.pollingEvery(Duration.ofMillis(250));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     public WorkerPostManagementPage openPendingDirectly() {

@@ -4,7 +4,10 @@ import com.vuatho.core.TestNgRunner;
 import com.vuatho.pages.TransactionCategoryPage;
 import com.vuatho.support.TransactionCategoryTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 /** Kiểm tra chuyên biệt nhóm Tiền rút trong Lịch sử giao dịch. */
 public class TransactionWithdrawTest extends TransactionCategoryTestSupport {
@@ -143,6 +146,144 @@ public class TransactionWithdrawTest extends TransactionCategoryTestSupport {
     @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_016)
     public void exportsSuccessStatusMatrixCell() {
         verifyStatusMatrixCellOnFirstSubtype("Thành công");
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_048)
+    public void directRewardAcceptActionIsAvailable() {
+        openSubtype(subtypeByType(13));
+        assertControl("Chấp nhận", 13);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_049)
+    public void regularWithdrawalCreatePaymentActionIsAvailable() {
+        openSubtype(subtypeByType(1));
+        assertControl("Tạo lệnh chi", 1);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_050)
+    public void bankWithdrawalCreatePaymentActionIsAvailable() {
+        openSubtype(subtypeByType(35));
+        assertControl("Tạo lệnh chi", 35);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_051)
+    public void cooperationEndConfirmAndCopyActionsAreAvailable() {
+        openSubtype(subtypeByType(23));
+        var result = advancedPage().inspectDetailControls(
+                List.of("Xác nhận giao dịch", "Sao chép"), "Sao chép");
+
+        Assert.assertTrue(result.openedUrl().contains("type=23"), result.openedUrl());
+        Assert.assertTrue(result.controls().stream().allMatch(control ->
+                control.present() && control.visible()));
+        Assert.assertTrue(result.controls().stream()
+                .filter(control -> control.label().equals("Sao chép"))
+                .allMatch(com.vuatho.pages.TransactionHistoryPage.DetailControlState::enabled));
+        Assert.assertTrue(result.safeActionPerformed());
+        Assert.assertTrue(result.closed());
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_052)
+    public void bankWithdrawalWarrantyOrdersCanBeExpanded() {
+        openSubtype(subtypeByType(35));
+        var result = advancedPage().expandWarrantyOrders();
+
+        Assert.assertTrue(result.openedUrl().contains("type=35"), result.openedUrl());
+        Assert.assertTrue(result.cardText().contains("Đơn còn bảo hành"), result.cardText());
+        Assert.assertTrue(result.cardText().contains("Bấm để xem danh sách"), result.cardText());
+        Assert.assertTrue(result.afterText().length() >= result.beforeText().length());
+        Assert.assertTrue(result.stayedOpen());
+        Assert.assertTrue(result.closed());
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_053)
+    public void bankWithdrawalRejectedTransactionLinkOpensExpectedDetail() {
+        openSubtype(subtypeByType(35));
+        assertRejectedTransactionLink(35);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_054)
+    public void regularWithdrawalRejectedTransactionLinkOpensExpectedDetail() {
+        openSubtype(subtypeByType(1));
+        assertRejectedTransactionLink(1);
+    }
+
+    private void assertControl(String label, int type) {
+        var result = advancedPage().inspectDetailControls(List.of(label), null);
+        Assert.assertTrue(result.openedUrl().contains("type=" + type), result.openedUrl());
+        Assert.assertEquals(result.controls().size(), 1);
+        Assert.assertTrue(result.controls().get(0).present());
+        Assert.assertTrue(result.controls().get(0).visible());
+        Assert.assertTrue(result.closed());
+    }
+
+    private void assertRejectedTransactionLink(int type) {
+        var result = advancedPage().openRejectedTransactionLink();
+        Assert.assertTrue(result.sourceUrl().contains("type=" + type), result.sourceUrl());
+        Assert.assertTrue(result.linkText().contains("Xem giao dịch bị từ chối"), result.linkText());
+        Assert.assertEquals(result.actualUrl(), result.expectedUrl());
+        Assert.assertTrue(result.actualUrl().contains("/vuatho/transaction?"), result.actualUrl());
+        Assert.assertTrue(result.actualUrl().contains("id="), result.actualUrl());
+        Assert.assertTrue(result.drawerText().contains("Chi tiết giao dịch"), result.drawerText());
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_055)
+    public void remainingSubtypesShowExpectedLayouts() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyLayout(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_056)
+    public void remainingSubtypeRowsHaveValidFormats() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyRowFormats();
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_057)
+    public void remainingSubtypesSearchAndResetRows() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifySearchAndReset(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_058)
+    public void remainingSubtypesKeepFilterOptionsAndRoute() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyFilterOptions(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_059)
+    public void remainingSubtypesSortAmountsBothDirections() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyAmountSort(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_060)
+    public void remainingSubtypesOpenAndCloseDetails() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyDetail(subtype);
+        });
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_061)
+    public void remainingSubtypesKeepPaginationAndResetRoute() {
+        remainingSubtypes().forEach(subtype -> {
+            openSubtype(subtype);
+            verifyPaginationAndReset(subtype);
+        });
+    }
+
+    private List<TransactionCategoryPage.Subtype> remainingSubtypes() {
+        return category().subtypes().stream().skip(1).toList();
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_WITHDRAW_017)

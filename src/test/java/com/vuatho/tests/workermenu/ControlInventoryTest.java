@@ -8,6 +8,7 @@ import com.vuatho.exploration.UiFeatureExplorer;
 import com.vuatho.pages.MenuDestinationPage;
 import com.vuatho.testdata.PartnerWorkerCase;
 import com.vuatho.testdata.PartnerWorkerTestData;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -52,7 +53,11 @@ public class ControlInventoryTest extends BaseTest {
     public void inventoryWorkerMenuControls(PartnerWorkerCase testCase) {
         // Mỗi case chủ động khôi phục điểm bắt đầu hợp lệ trước khi điều hướng.
         requireAuthenticatedSession("inventory menu Đối Tác - Thợ");
-        new MenuDestinationPage(driver).openAndWaitUntilLoaded(testCase.page(), false);
+        MenuDestinationPage page = new MenuDestinationPage(driver)
+                .openAndWaitUntilLoaded(testCase.page(), false);
+        Assert.assertTrue(page.isLoaded(), "Trang chưa tải xong: " + testCase.page());
+        Assert.assertTrue(page.urlMatchesExpectedDestination(),
+                "Sai route sau khi mở " + testCase.page() + ": " + page.currentUrl());
         // Kết quả inventory được in với tên case để dễ đối chiếu trong log TestNG.
         new UiFeatureExplorer(driver).printInventory(testCase.toString());
     }

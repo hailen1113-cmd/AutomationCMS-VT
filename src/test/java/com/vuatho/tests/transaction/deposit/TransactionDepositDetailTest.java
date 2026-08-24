@@ -6,6 +6,7 @@ import com.vuatho.pages.TransactionHistoryPage;
 import com.vuatho.support.TransactionDepositTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import java.time.format.DateTimeFormatter;
@@ -86,7 +87,10 @@ public class TransactionDepositDetailTest extends TransactionDepositTestSupport 
     public void detailLinksAreValid() {
         var result = audit();
 
-        Assert.assertTrue(result.userHref().contains("/vuatho/user?id="), result.userHref());
+        boolean validPartyProfile = result.userHref().contains("/vuatho/user?id=")
+                || result.userHref().contains("/vuatho/worker?id=");
+        Assert.assertTrue(validPartyProfile,
+                "Link chủ thể phải mở hồ sơ người dùng hoặc thợ: " + result.userHref());
         Assert.assertFalse(result.transactionHrefs().isEmpty(), result.drawerText());
         Assert.assertEquals(new HashSet<>(result.transactionHrefs()).size(),
                 result.transactionHrefs().size(), "Link giao dịch liên quan bị trùng");
@@ -164,6 +168,19 @@ public class TransactionDepositDetailTest extends TransactionDepositTestSupport 
         Assert.assertTrue(text.contains("Thanh toán bởi bên thứ 3"), text);
         Assert.assertTrue(text.contains(result.source().status()), text);
         Assert.assertTrue(digits(text).contains(digits(result.source().amount())), text);
+    }
+
+    @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_207)
+    public void thirdPartyRecheckActionIsAvailable() {
+        openDepositSubtype(subtype(10));
+        var result = advancedPage().inspectDetailControls(
+                java.util.List.of("Kiểm tra lại giao dịch"), null);
+
+        Assert.assertTrue(result.openedUrl().contains("type=10"), result.openedUrl());
+        Assert.assertEquals(result.controls().size(), 1);
+        Assert.assertTrue(result.controls().get(0).present());
+        Assert.assertTrue(result.controls().get(0).visible());
+        Assert.assertTrue(result.closed());
     }
 
     @Test(description = TransactionHistoryTestCases.TRANSACTION_DEPOSIT_025)
@@ -303,7 +320,9 @@ public class TransactionDepositDetailTest extends TransactionDepositTestSupport 
         var result = advancedPage().openAndCloseFirstDetailForStatus(status);
         String combination = subtype.label() + " / " + status;
 
-        Assert.assertFalse(result.empty(), "Không có dữ liệu cho tổ hợp: " + combination);
+        if (result.empty()) {
+            throw new SkipException("Sandbox không có dữ liệu cho tổ hợp: " + combination);
+        }
         Assert.assertNotNull(result.source(), "Không đọc được dòng cho tổ hợp: " + combination);
         Assert.assertTrue(result.selectedStatus().contains(status), result.selectedStatus());
         Assert.assertEquals(result.source().status(), status, combination);

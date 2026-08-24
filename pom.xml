@@ -60,7 +60,7 @@
                     <properties>
                         <property>
                             <name>listener</name>
-                            <value>com.vuatho.tests.conditions.TestCaseIdFilter,com.vuatho.reporting.ConsoleTestListener</value>
+                            <value>com.vuatho.tests.conditions.TestCaseIdFilter,com.vuatho.reporting.ConsoleTestListener,com.vuatho.core.DriverLifecycleListener</value>
                         </property>
                     </properties>
                     <suiteXmlFiles>
@@ -170,6 +170,30 @@
             <id>uniform-order-create</id>
             <properties>
                 <suiteXmlFile>uniform-order-create-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>uniform-order-filter</id>
+            <properties>
+                <suiteXmlFile>uniform-order-filter-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>transaction-history-all</id>
+            <properties>
+                <suiteXmlFile>transaction-history-all-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>sales-stock-import</id>
+            <properties>
+                <suiteXmlFile>sales-stock-import-testng.xml</suiteXmlFile>
+            </properties>
+        </profile>
+        <profile>
+            <id>sales-stock-import-validation</id>
+            <properties>
+                <suiteXmlFile>sales-stock-import-validation-testng.xml</suiteXmlFile>
             </properties>
         </profile>
     </profiles>

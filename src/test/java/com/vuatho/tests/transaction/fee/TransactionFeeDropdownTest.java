@@ -39,7 +39,10 @@ public class TransactionFeeDropdownTest extends TransactionFeeTestSupport {
     }
 
     private void verifyOpensEverySubtypeRouteForSubtype(TransactionCategoryPage.Subtype subtype) {
-        verifyGroupOptions();
+        var result = transactionPage.chooseSubtypeFromDropdown(subtype);
+        Assert.assertTrue(result.url().contains("tab=fee"), result.url());
+        Assert.assertTrue(result.url().contains("type=" + subtype.type()), result.url());
+        Assert.assertTrue(result.triggerText().contains(subtype.label()), result.triggerText());
     }
 
 
@@ -82,20 +85,15 @@ public class TransactionFeeDropdownTest extends TransactionFeeTestSupport {
     }
 
     private void verifySelectedSubtypeIsMarkedAndMenuClosesForSubtype(TransactionCategoryPage.Subtype subtype) {
-        var result = transactionPage.dropdownSemantics();
-        Assert.assertEquals(result.expandedBefore(), "false");
-        Assert.assertEquals(result.expandedAfter(), "true");
-        Assert.assertEquals(result.hasPopup(), "true");
-        Assert.assertEquals(result.menuId(), result.controls());
-        Assert.assertEquals(result.menuLabel(), "Phí & Doanh thu sub-types");
-        Assert.assertEquals(result.options().stream()
-                        .map(TransactionCategoryPage.DropdownOption::label).toList(),
-                List.of("Phí kết nối", "Phí liên kết ví", "Phí chia sẻ vật tư"));
-        Assert.assertEquals(result.options().stream()
-                        .map(TransactionCategoryPage.DropdownOption::key).toList(),
-                List.of("8", "9", "33"));
-        Assert.assertEquals(result.options().stream()
-                .filter(option -> "true".equals(option.checked())).count(), 1L);
+        var result = transactionPage.selectSubtypeFromDropdown(subtype);
+        Assert.assertTrue(result.url().contains("tab=fee"), result.url());
+        Assert.assertTrue(result.url().contains("type=" + subtype.type()), result.url());
+        Assert.assertTrue(result.triggerText().contains(subtype.label()), result.triggerText());
+        Assert.assertEquals(result.optionText(), subtype.label());
+        Assert.assertEquals(result.checked(), "true");
+        Assert.assertEquals(result.selected(), "true");
+        Assert.assertEquals(result.selectedCount(), 1L);
+        Assert.assertTrue(result.menuClosed(), "Dropdown không tự đóng sau khi chọn loại");
     }
 
 

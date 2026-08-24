@@ -1,12 +1,12 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.ElementActions;
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchWindowException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,6 +40,7 @@ public class LoginPage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+    private final ElementActions actions;
 
     /**
      * Khởi tạo LoginPage với các phụ thuộc cần thiết.
@@ -47,9 +48,8 @@ public class LoginPage {
      */
     public LoginPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        this.wait.pollingEvery(Duration.ofMillis(200));
-        this.wait.ignoring(StaleElementReferenceException.class);
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(20));
+        this.actions = new ElementActions(driver);
     }
 
     /**
@@ -97,7 +97,7 @@ public class LoginPage {
      */
     public boolean isDashboardVisible(Duration timeout) {
         try {
-            new WebDriverWait(driver, timeout).until(webDriver ->
+            Waits.withTimeout(driver, timeout).until(webDriver ->
                     webDriver.getCurrentUrl().contains("dashboard")
                             || hasVisibleText("Dashboard")
                             || hasVisibleText("Công ty Vua Thợ"));
@@ -220,7 +220,7 @@ public class LoginPage {
         }
         System.out.println("Google dang yeu cau mat khau/xac minh. Hay hoan tat thu cong trong Chrome...");
         try {
-            new WebDriverWait(driver, Duration.ofMinutes(2))
+            Waits.withTimeout(driver, Duration.ofMinutes(2))
                     .until(webDriver -> isOnErp() || firstVisible(GOOGLE_PASSWORD) == null);
         } catch (TimeoutException timeout) {
             throw new IllegalStateException(
@@ -252,11 +252,7 @@ public class LoginPage {
      * @param element phần tử cần thao tác
      */
     private void clickElement(WebElement element) {
-        try {
-            element.click();
-        } catch (ElementClickInterceptedException exception) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
-        }
+        actions.click(element);
     }
 
     /**
@@ -282,7 +278,7 @@ public class LoginPage {
      */
     private void returnToErpWindow(String erpWindow) {
         try {
-            new WebDriverWait(driver, Duration.ofMinutes(2)).until(webDriver -> {
+            Waits.withTimeout(driver, Duration.ofMinutes(2)).until(webDriver -> {
                 try {
                     return switchToAppWindowIfPresent()
                             || !webDriver.getWindowHandles().contains(webDriver.getWindowHandle());

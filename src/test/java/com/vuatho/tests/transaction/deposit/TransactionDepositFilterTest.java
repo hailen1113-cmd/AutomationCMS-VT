@@ -5,6 +5,7 @@ import com.vuatho.pages.TransactionCategoryPage;
 import com.vuatho.support.TransactionDepositTestSupport;
 import com.vuatho.testcases.TransactionHistoryTestCases;
 import org.testng.Assert;
+import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         forSubtype(subtype(0), subtype -> {
         openDepositSubtype(subtype);
         if (!transactionPage.hasSearchableUser()) {
-        return;
+            throw new SkipException("Không có người dùng để tìm kiếm trên loại đang chọn.");
         }
         verifySearchAndReset(subtype);
         });
@@ -34,7 +35,7 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         forSubtype(subtype(10), subtype -> {
         openDepositSubtype(subtype);
         if (!transactionPage.hasSearchableUser()) {
-        return;
+            throw new SkipException("Không có người dùng để tìm kiếm trên loại đang chọn.");
         }
         verifySearchAndReset(subtype);
         });
@@ -45,7 +46,7 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         forSubtype(subtype(19), subtype -> {
         openDepositSubtype(subtype);
         if (!transactionPage.hasSearchableUser()) {
-        return;
+            throw new SkipException("Không có người dùng để tìm kiếm trên loại đang chọn.");
         }
         verifySearchAndReset(subtype);
         });
@@ -56,7 +57,7 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         forSubtype(subtype(20), subtype -> {
         openDepositSubtype(subtype);
         if (!transactionPage.hasSearchableUser()) {
-        return;
+            throw new SkipException("Không có người dùng để tìm kiếm trên loại đang chọn.");
         }
         verifySearchAndReset(subtype);
         });
@@ -67,7 +68,7 @@ public class TransactionDepositFilterTest extends TransactionDepositTestSupport 
         forSubtype(subtype(34), subtype -> {
         openDepositSubtype(subtype);
         if (!transactionPage.hasSearchableUser()) {
-        return;
+            throw new SkipException("Không có người dùng để tìm kiếm trên loại đang chọn.");
         }
         verifySearchAndReset(subtype);
         });

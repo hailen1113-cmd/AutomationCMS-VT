@@ -2,6 +2,7 @@ package com.vuatho.pages;
 
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
+import com.vuatho.utils.Waits;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -68,9 +69,8 @@ public class CustomerWorkerOrderPage {
     /** Khởi tạo Page Object và cấu hình timeout/polling dùng chung cho React UI. */
     public CustomerWorkerOrderPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(90));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(90));
         this.wait.pollingEvery(Duration.ofMillis(350));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     /** Mở route Đơn Khách - Thợ và chờ dashboard cùng bảng dữ liệu tải xong. */
@@ -115,9 +115,7 @@ public class CustomerWorkerOrderPage {
 
     /** Trả về tổng số đơn mà màn hình công bố, không chỉ số dòng của trang hiện tại. */
     public int totalDisplayed() {
-        return new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        return Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     WebElement total = d.findElements(By.tagName("span")).stream()
                             .filter(WebElement::isDisplayed)
@@ -227,7 +225,7 @@ public class CustomerWorkerOrderPage {
                 input.dispatchEvent(new Event('input', {bubbles: true}));
                 """, input);
         new Actions(driver).sendKeys(service).perform();
-        boolean selected = new WebDriverWait(driver, Duration.ofSeconds(12))
+        boolean selected = Waits.withTimeout(driver, Duration.ofSeconds(12))
                 .pollingEvery(Duration.ofMillis(250)).until(d ->
                 Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript("""
                         const expected = arguments[0].trim();
@@ -259,8 +257,7 @@ public class CustomerWorkerOrderPage {
                         + TextNormalizer.normalize(service), 2);
         boolean clicked;
         try {
-            clicked = new WebDriverWait(driver, Duration.ofSeconds(6))
-                    .pollingEvery(Duration.ofMillis(200))
+            clicked = Waits.withTimeout(driver, Duration.ofSeconds(6))
                     .until(d -> Boolean.TRUE.equals(
                             ((JavascriptExecutor) d).executeScript("""
                                     const expected = arguments[0].trim();
@@ -340,8 +337,7 @@ public class CustomerWorkerOrderPage {
                 """, section, TestConfig.headless());
         pauseForFilterObservation(
                 "Da cuon xuong bo loc Thoi gian yeu cau", 2);
-        new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> d.findElements(CALENDAR_DAYS).stream()
                         .anyMatch(element -> {
                             try {
@@ -424,8 +420,7 @@ public class CustomerWorkerOrderPage {
                 + TextNormalizer.normalize(value));
         closeFilterIfOpen();
         openFilter();
-        boolean revealed = new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
+        boolean revealed = Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> Boolean.TRUE.equals(
                         locateDirectFilterOption(
                                 groupLabel, value, false)));
@@ -437,8 +432,7 @@ public class CustomerWorkerOrderPage {
                 "Chon " + TextNormalizer.normalize(groupLabel)
                         + " -> " + TextNormalizer.normalize(value), 2);
         openFilter();
-        new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     if (visibleFilterPanel() == null) {
                         openFilter();
@@ -448,7 +442,7 @@ public class CustomerWorkerOrderPage {
                 });
         waitForFilterResult();
         openFilter();
-        new WebDriverWait(driver, Duration.ofSeconds(8))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .pollingEvery(Duration.ofMillis(250))
                 .until(d -> directFilterChecked(groupLabel, value));
         closeFilterIfOpen();
@@ -530,7 +524,6 @@ public class CustomerWorkerOrderPage {
 
     /** Bấm Đặt lại ngay trong popup filter và chờ danh sách phục hồi. */
     public CustomerWorkerOrderPage resetInsideFilter() {
-        List<String> before = rowIds();
         WebElement panel = openFilter();
         WebElement reset = panel.findElements(By.xpath(
                         ".//button[normalize-space()='Đặt lại']"))
@@ -573,8 +566,7 @@ public class CustomerWorkerOrderPage {
                 "//button[normalize-space()='Xuất Excel']"));
         observe(button);
         button.click();
-        List<String> options = new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
+        List<String> options = Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     List<String> values = d.findElements(By.xpath(
                                     "//button[.//*[normalize-space()='Xuất chi tiết đơn hàng'"
@@ -599,7 +591,7 @@ public class CustomerWorkerOrderPage {
                 "//button[normalize-space()='Xuất Excel']"));
         observe(menu);
         menu.click();
-        WebElement option = new WebDriverWait(driver, Duration.ofSeconds(8))
+        WebElement option = Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> d.findElements(By.xpath(
                                 "//button[.//*[normalize-space()='"
                                         + optionText + "']]"))
@@ -647,7 +639,7 @@ public class CustomerWorkerOrderPage {
     private String waitForNewDownload(
             Path directory, Set<String> before) {
         try {
-            return new WebDriverWait(
+            return Waits.withTimeout(
                     driver, TestConfig.exportDownloadTimeout())
                     .pollingEvery(Duration.ofMillis(300))
                     .until(d -> {
@@ -708,8 +700,7 @@ public class CustomerWorkerOrderPage {
     /** Trả về danh sách báo cáo có trong menu Thống kê. */
     public List<String> statisticsMenuOptions() {
         clickFreshButton("Thống kê", false);
-        List<String> options = new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
+        List<String> options = Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     List<String> values = d.findElements(By.tagName("button"))
                             .stream().filter(WebElement::isDisplayed)
@@ -727,9 +718,7 @@ public class CustomerWorkerOrderPage {
 
     /** Trả về text của popup thống kê hiện tại sau khi dữ liệu đã tải. */
     public String statisticsText() {
-        return new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        return Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     WebElement dialog = statisticsDialog();
                     if (dialog == null) return null;
@@ -741,9 +730,8 @@ public class CustomerWorkerOrderPage {
     /** Chờ text popup thống kê khớp biểu thức chính quy rồi trả về text mới nhất. */
     public String waitStatisticsTextMatches(String regex) {
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(15))
+            return Waits.withTimeout(driver, Duration.ofSeconds(15))
                     .pollingEvery(Duration.ofMillis(250))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> {
                         WebElement dialog = statisticsDialog();
                         if (dialog == null) return null;
@@ -758,9 +746,7 @@ public class CustomerWorkerOrderPage {
     /** Đọc giá trị của các ô ngày tháng trong popup thống kê. */
     public List<String> statisticsInputValues() {
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(8))
-                    .pollingEvery(Duration.ofMillis(200))
-                    .ignoring(StaleElementReferenceException.class)
+            return Waits.withTimeout(driver, Duration.ofSeconds(8))
                     .until(d -> {
                         WebElement dialog = statisticsDialog();
                         if (dialog == null) return null;
@@ -804,7 +790,7 @@ public class CustomerWorkerOrderPage {
 
         List<String> expected = inputs.size() == 1
                 ? List.of(from + " - " + to) : List.of(from, to);
-        new WebDriverWait(driver, Duration.ofSeconds(15))
+        Waits.withTimeout(driver, Duration.ofSeconds(15))
                 .pollingEvery(Duration.ofMillis(250))
                 .until(d -> statisticsInputValues().equals(expected));
         pauseForStatisticsObservation(
@@ -853,7 +839,7 @@ public class CustomerWorkerOrderPage {
                         """, trigger);
             }
             try {
-                new WebDriverWait(driver, Duration.ofSeconds(3))
+                Waits.withTimeout(driver, Duration.ofSeconds(3))
                         .pollingEvery(Duration.ofMillis(150))
                         .until(d -> d.findElements(CALENDAR_DAYS)
                                 .stream().anyMatch(WebElement::isDisplayed));
@@ -867,7 +853,7 @@ public class CustomerWorkerOrderPage {
             throw new IllegalStateException(
                     "Click icon ngày nhưng calendar Trạng thái không mở.");
         }
-        new WebDriverWait(driver, Duration.ofSeconds(8))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> d.findElements(CALENDAR_DAYS)
                         .stream().anyMatch(WebElement::isDisplayed));
         navigateCalendar(YearMonth.now(), YearMonth.from(from));
@@ -876,7 +862,7 @@ public class CustomerWorkerOrderPage {
         clickCalendarDay(to);
 
         String expected = formatDate(from) + " - " + formatDate(to);
-        new WebDriverWait(driver, Duration.ofSeconds(15))
+        Waits.withTimeout(driver, Duration.ofSeconds(15))
                 .pollingEvery(Duration.ofMillis(250))
                 .until(d -> statisticsInputValues().equals(List.of(expected)));
         pauseForStatisticsObservation(
@@ -1021,9 +1007,8 @@ public class CustomerWorkerOrderPage {
         observe(button);
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].click();", button);
-        new WebDriverWait(driver, Duration.ofSeconds(15))
+        Waits.withTimeout(driver, Duration.ofSeconds(15))
                 .pollingEvery(Duration.ofMillis(250))
-                .ignoring(StaleElementReferenceException.class)
                 .until(d -> statisticsButtonSelected(label));
         String normalizedLabel = normalized(label);
         if (normalizedLabel.equals("don hoan thanh")
@@ -1131,8 +1116,7 @@ public class CustomerWorkerOrderPage {
                     """, path);
         }
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(8))
-                    .pollingEvery(Duration.ofMillis(200))
+            return Waits.withTimeout(driver, Duration.ofSeconds(8))
                     .until(d -> {
                         String tooltip = visibleTooltipText();
                         return tooltip.isBlank() ? null : tooltip;
@@ -1145,9 +1129,8 @@ public class CustomerWorkerOrderPage {
     /** Chọn cột cao nhất có dữ liệu để hover ổn định và dễ quan sát tooltip. */
     private WebElement tallestStatisticsBar(String dataName) {
         try {
-            return new WebDriverWait(driver, Duration.ofSeconds(8))
+            return Waits.withTimeout(driver, Duration.ofSeconds(8))
                     .pollingEvery(Duration.ofMillis(150))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> {
                         WebElement dialog = statisticsDialog();
                         if (dialog == null) return null;
@@ -1174,9 +1157,7 @@ public class CustomerWorkerOrderPage {
     private int statisticsElementCount(
             String selector, Integer minimumHeight, int minimumCount) {
         try {
-            Long result = new WebDriverWait(driver, Duration.ofSeconds(8))
-                    .pollingEvery(Duration.ofMillis(200))
-                    .ignoring(StaleElementReferenceException.class)
+            Long result = Waits.withTimeout(driver, Duration.ofSeconds(8))
                     .until(d -> {
                         WebElement dialog = statisticsDialog();
                         if (dialog == null) return null;
@@ -1231,7 +1212,7 @@ public class CustomerWorkerOrderPage {
         observe(close);
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].click();", close);
-        new WebDriverWait(driver, Duration.ofSeconds(8))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> statisticsDialog() == null);
         currentStatistic = "";
         return this;
@@ -1520,12 +1501,12 @@ public class CustomerWorkerOrderPage {
         Set<String> before = driver.getWindowHandles();
         observe(link);
         link.click();
-        String opened = new WebDriverWait(driver, Duration.ofSeconds(10))
+        String opened = Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .until(d -> d.getWindowHandles().stream()
                         .filter(handle -> !before.contains(handle))
                         .findFirst().orElse(null));
         driver.switchTo().window(opened);
-        new WebDriverWait(driver, Duration.ofSeconds(15))
+        Waits.withTimeout(driver, Duration.ofSeconds(15))
                 .until(d -> d.getCurrentUrl().contains(path));
         String url = driver.getCurrentUrl();
         pauseForDetailObservation(
@@ -1626,8 +1607,7 @@ public class CustomerWorkerOrderPage {
                         "Đơn hiện tại không có " + mediaType));
         observe(trigger);
         trigger.click();
-        WebElement media = new WebDriverWait(driver, Duration.ofSeconds(10))
-                .pollingEvery(Duration.ofMillis(200))
+        WebElement media = Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .until(d -> visibleMediaOutsideDrawer(mediaType));
         String source = media.getAttribute("src");
         pauseForDetailObservation(
@@ -1668,7 +1648,7 @@ public class CustomerWorkerOrderPage {
             new Actions(driver).sendKeys(Keys.ESCAPE).perform();
         }
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(3))
+            Waits.withTimeout(driver, Duration.ofSeconds(3))
                     .until(d -> visibleMediaOutsideDrawer("media") == null);
         } catch (TimeoutException ignored) {
             return false;
@@ -1686,7 +1666,7 @@ public class CustomerWorkerOrderPage {
                         "Drawer thiếu nút Xem chi tiết báo giá."));
         observe(button);
         button.click();
-        WebElement dialog = new WebDriverWait(driver, Duration.ofSeconds(10))
+        WebElement dialog = Waits.withTimeout(driver, Duration.ofSeconds(10))
                 .until(d -> visibleDialogContaining("báo giá"));
         pauseForDetailObservation("Da mo popup chi tiet bao gia");
         return dialog.getText().trim();
@@ -1695,7 +1675,7 @@ public class CustomerWorkerOrderPage {
     /** Đóng dialog con bằng ESC và xác nhận drawer phía sau vẫn còn. */
     public boolean closeDetailDialog() {
         new Actions(driver).sendKeys(Keys.ESCAPE).perform();
-        new WebDriverWait(driver, Duration.ofSeconds(8))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> visibleDialog() == null);
         return visibleDrawer() != null;
     }
@@ -1713,7 +1693,7 @@ public class CustomerWorkerOrderPage {
                         "Không có tab " + label));
         observe(tab);
         tab.click();
-        new WebDriverWait(driver, Duration.ofSeconds(8))
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> "true".equalsIgnoreCase(
                         tab.getAttribute("aria-selected")));
         pauseForDetailObservation(
@@ -1768,7 +1748,7 @@ public class CustomerWorkerOrderPage {
         observe(button);
         button.click();
         try {
-            boolean opened = new WebDriverWait(driver, Duration.ofSeconds(15)).until(d -> {
+            boolean opened = Waits.withTimeout(driver, Duration.ofSeconds(15)).until(d -> {
                 if (visibleDialog() != null
                         || d.getWindowHandles().size() > windowsBefore
                         || d.getCurrentUrl().toLowerCase().contains("map")) {
@@ -2049,7 +2029,7 @@ public class CustomerWorkerOrderPage {
     public void closeOverlay() {
         new Actions(driver).sendKeys(Keys.ESCAPE).perform();
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(5))
+            Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(d -> visibleDialog() == null && visibleDrawer() == null);
         } catch (TimeoutException ignored) {
             // Một ESC chỉ đóng lớp trên cùng; cleanup tiếp tục đóng lớp còn lại.
@@ -2072,10 +2052,8 @@ public class CustomerWorkerOrderPage {
         highlightForObservation(trigger);
         pauseForFilterObservation(
                 "Mo " + TextNormalizer.normalize(ariaLabel), 2);
-        WebElement freshTrigger = new WebDriverWait(
+        WebElement freshTrigger = Waits.withTimeout(
                 driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
                 .until(d -> {
                     WebElement currentPanel = visibleFilterPanel();
                     if (currentPanel == null) {
@@ -2086,9 +2064,7 @@ public class CustomerWorkerOrderPage {
                 });
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].click();", freshTrigger);
-        new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> {
                     WebElement currentPanel = visibleFilterPanel();
                     if (currentPanel == null) return false;
@@ -2112,10 +2088,8 @@ public class CustomerWorkerOrderPage {
             highlightForObservation(option);
             pauseForFilterObservation(
                     "Chon " + TextNormalizer.normalize(value), 2);
-            WebElement optionToClick = new WebDriverWait(
+            WebElement optionToClick = Waits.withTimeout(
                     driver, Duration.ofSeconds(8))
-                    .pollingEvery(Duration.ofMillis(200))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> visibleNestedFilterOption(value));
             optionToClick.click();
         } else {
@@ -2127,10 +2101,8 @@ public class CustomerWorkerOrderPage {
                     .sendKeys(Keys.ENTER)
                     .perform();
         }
-        WebElement selectionTrigger = new WebDriverWait(
+        WebElement selectionTrigger = Waits.withTimeout(
                 driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
                 .until(d -> {
                     WebElement currentPanel = visibleFilterPanel();
                     if (currentPanel == null) {
@@ -2154,9 +2126,7 @@ public class CustomerWorkerOrderPage {
         if ("true".equalsIgnoreCase(
                 selectedTrigger.getAttribute("aria-expanded"))) {
             selectedTrigger.click();
-            new WebDriverWait(driver, Duration.ofSeconds(5))
-                    .pollingEvery(Duration.ofMillis(200))
-                    .ignoring(StaleElementReferenceException.class)
+            Waits.withTimeout(driver, Duration.ofSeconds(5))
                     .until(d -> {
                         WebElement currentPanel = visibleFilterPanel();
                         if (currentPanel == null) return true;
@@ -2178,9 +2148,8 @@ public class CustomerWorkerOrderPage {
     private void waitForRowsMatchingStatus(String expectedStatus) {
         long emptyStateStartedAt = System.nanoTime();
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(20))
+            Waits.withTimeout(driver, Duration.ofSeconds(20))
                     .pollingEvery(Duration.ofMillis(250))
-                    .ignoring(StaleElementReferenceException.class)
                     .until(d -> {
                         List<OrderRow> currentRows = rows();
                         if (!currentRows.isEmpty()) {
@@ -2335,9 +2304,8 @@ public class CustomerWorkerOrderPage {
         String monthToken = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
         String dayClass = String.format(
                 "react-datepicker__day--%03d", date.getDayOfMonth());
-        new WebDriverWait(
+        Waits.withTimeout(
                 driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
                 .until(d -> Boolean.TRUE.equals(((JavascriptExecutor) d)
                         .executeScript("""
                                 const monthToken = arguments[0];
@@ -2456,9 +2424,7 @@ public class CustomerWorkerOrderPage {
         WebElement freshTrigger = shortVisible(
                 FILTER, Duration.ofSeconds(5));
         freshTrigger.click();
-        return new WebDriverWait(driver, Duration.ofSeconds(8))
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        return Waits.withTimeout(driver, Duration.ofSeconds(8))
                 .until(d -> visibleFilterPanel());
     }
 
@@ -2492,9 +2458,7 @@ public class CustomerWorkerOrderPage {
                 trigger.getAttribute("aria-expanded"))) {
             ((JavascriptExecutor) driver).executeScript("arguments[0].click();", trigger);
             try {
-                new WebDriverWait(driver, Duration.ofSeconds(5))
-                        .pollingEvery(Duration.ofMillis(200))
-                        .ignoring(StaleElementReferenceException.class)
+                Waits.withTimeout(driver, Duration.ofSeconds(5))
                         .until(d -> visibleFilterPanel() == null);
             } catch (TimeoutException ignored) {
                 new Actions(driver).sendKeys(Keys.ESCAPE).perform();
@@ -2590,7 +2554,7 @@ public class CustomerWorkerOrderPage {
     /** Chờ network/render sau filter hoàn tất và giữ kết quả để quan sát. */
     private void waitForFilterResult() {
         pauseLocally(Duration.ofMillis(1200));
-        new WebDriverWait(driver, Duration.ofSeconds(20))
+        Waits.withTimeout(driver, Duration.ofSeconds(20))
                 .pollingEvery(Duration.ofMillis(300))
                 .until(d -> !d.findElement(By.tagName("main")).getText()
                         .contains("Đang tải dữ liệu..."));
@@ -2605,7 +2569,7 @@ public class CustomerWorkerOrderPage {
     /** Chờ toast/loading sau thao tác thay đổi dữ liệu thật hoàn tất. */
     private void waitAfterMutation() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(30))
+            Waits.withTimeout(driver, Duration.ofSeconds(30))
                     .until(d -> visibleDialog() == null);
         } catch (TimeoutException ignored) {
             new Actions(driver).sendKeys(Keys.ESCAPE).perform();
@@ -2684,7 +2648,7 @@ public class CustomerWorkerOrderPage {
     /** Lấy lại button sau mỗi React render rồi click theo text chính xác/prefix. */
     private void clickFreshButton(String text, boolean startsWith) {
         RuntimeException lastFailure = null;
-        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(8));
+        WebDriverWait shortWait = Waits.withTimeout(driver, Duration.ofSeconds(8));
         shortWait.pollingEvery(Duration.ofMillis(250));
         for (int attempt = 0; attempt < 3; attempt++) {
             try {
@@ -2725,7 +2689,7 @@ public class CustomerWorkerOrderPage {
     private void clickFreshStatisticOption(String text) {
         By candidates = By.cssSelector(
                 "button,[role='menuitem'],[data-slot='base'],[data-slot='menu-item']");
-        WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(12));
+        WebDriverWait shortWait = Waits.withTimeout(driver, Duration.ofSeconds(12));
         shortWait.pollingEvery(Duration.ofMillis(250));
         WebElement option = shortWait.until(d -> d.findElements(candidates).stream()
                 .filter(element -> {
@@ -2789,13 +2753,6 @@ public class CustomerWorkerOrderPage {
         button.click();
     }
 
-    /** Đi từ text/icon tới ancestor có thể click gần nhất. */
-    private WebElement closestClickable(WebElement element) {
-        return (WebElement) ((JavascriptExecutor) driver).executeScript(
-                "return arguments[0].closest('button,label,[role=button],[role=option]')"
-                        + " || arguments[0];", element);
-    }
-
     /** Chờ và trả về element đầu tiên vừa hiển thị vừa khớp locator. */
     private WebElement exactVisible(By locator) {
         return wait.until(d -> d.findElements(locator).stream()
@@ -2804,9 +2761,7 @@ public class CustomerWorkerOrderPage {
 
     /** Phiên bản wait ngắn dùng cho control tùy chọn hoặc thao tác cleanup. */
     private WebElement shortVisible(By locator, Duration timeout) {
-        return new WebDriverWait(driver, timeout)
-                .pollingEvery(Duration.ofMillis(200))
-                .ignoring(StaleElementReferenceException.class)
+        return Waits.withTimeout(driver, timeout)
                 .until(d -> d.findElements(locator).stream()
                         .filter(WebElement::isDisplayed)
                         .findFirst().orElse(null));
@@ -2929,15 +2884,9 @@ public class CustomerWorkerOrderPage {
         pauseLocally(Duration.ofSeconds(seconds));
     }
 
-    /** Pause bằng Thread.sleep để tránh WebDriver Actions pause bị treo phiên. */
+    /** Pause cục bộ để tránh WebDriver Actions pause bị treo phiên. */
     private void pauseLocally(Duration duration) {
-        try {
-            Thread.sleep(duration.toMillis());
-        } catch (InterruptedException exception) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(
-                    "Luồng testcase bị ngắt trong thời gian quan sát.", exception);
-        }
+        Waits.pause(duration, "Luồng testcase bị ngắt trong thời gian quan sát.");
     }
 
     /** Trích mã số đơn từ text có định dạng dấu #. */

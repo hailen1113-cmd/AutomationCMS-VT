@@ -403,7 +403,6 @@ public class StockReceiptPage extends UniformUiPage {
             return new OldLotSwitchSnapshot(false, "", "", "", 0, 0);
         }
         String firstCode = oldLotCode(chips.get(0));
-        long firstPrice = longNumber(chips.get(0).getAttribute("title"));
         click(chips.get(0), "Chọn lô cũ thứ nhất " + firstCode);
         String secondCode = oldLotCode(chips.get(1));
         long secondPrice = longNumber(chips.get(1).getAttribute("title"));
@@ -1058,8 +1057,7 @@ public class StockReceiptPage extends UniformUiPage {
         addAvailableProduct();
         List<String> codes = fillRowsForSubmission(1, 1000, 80);
         String firstCode = codes.get(0);
-        String receiptText = submitCurrentReceipt(true,
-                "Nhấp đôi nút Nhập kho tổng");
+        submitCurrentReceipt(true, "Nhấp đôi nút Nhập kho tổng");
         int receiptRowCount = receiptRowsContaining(firstCode);
         click(exactMainButton("Tồn kho"), "Mở Tồn kho kiểm tra lô sau khi nhấp đôi");
         int stockQuantity = stockQuantity(firstCode);
@@ -1465,22 +1463,6 @@ public class StockReceiptPage extends UniformUiPage {
         clickFreshProductOption(name, option, "Thêm sản phẩm " + name);
         wait.until(d -> productCount() == productsBefore + 1);
         return name;
-    }
-
-    private VariantProductSnapshot addProductWithMinimumRows(int minimumRows) {
-        int attempts = 0;
-        while (attempts++ < 10) {
-            int rowsBefore = rowCount();
-            ProductSnapshot product = addAvailableProduct();
-            int addedRows = rowCount() - rowsBefore;
-            int cardIndex = productCount() - 1;
-            String cardText = selectedProductCardText(cardIndex);
-            if (addedRows >= minimumRows) {
-                return new VariantProductSnapshot(
-                        product.name(), addedRows, cardText, true);
-            }
-        }
-        return new VariantProductSnapshot("", 0, "", false);
     }
 
     private String selectedProductCardText(int index) {

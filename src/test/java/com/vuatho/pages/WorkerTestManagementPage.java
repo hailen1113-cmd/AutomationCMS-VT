@@ -1,11 +1,11 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -37,9 +37,8 @@ public class WorkerTestManagementPage {
 
     public WorkerTestManagementPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(90));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(90));
         this.wait.pollingEvery(Duration.ofMillis(300));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     public WorkerTestManagementPage open() {

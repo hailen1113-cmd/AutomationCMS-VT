@@ -1,11 +1,11 @@
 package com.vuatho.pages;
 
+import com.vuatho.utils.Waits;
 import com.vuatho.config.TestConfig;
 import com.vuatho.utils.TextNormalizer;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -40,9 +40,8 @@ public class WorkerStopRequestPage {
 
     public WorkerStopRequestPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(90));
+        this.wait = Waits.withTimeout(driver, Duration.ofSeconds(90));
         this.wait.pollingEvery(Duration.ofMillis(300));
-        this.wait.ignoring(StaleElementReferenceException.class);
     }
 
     public WorkerStopRequestPage open() {
@@ -361,7 +360,7 @@ public class WorkerStopRequestPage {
 
     private void waitAfterMutation() {
         try {
-            new WebDriverWait(driver, Duration.ofSeconds(20))
+            Waits.withTimeout(driver, Duration.ofSeconds(20))
                     .until(d -> visibleDialog() == null);
         } catch (TimeoutException ignored) {
             // Kết quả nghiệp vụ được xác nhận lại bằng requestId ở trạng thái đích.

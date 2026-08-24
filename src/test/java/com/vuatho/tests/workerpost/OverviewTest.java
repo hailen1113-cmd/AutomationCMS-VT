@@ -19,7 +19,7 @@ public class OverviewTest extends WorkerPostManagementTestSupport {
                 "Quản lý bài đăng thợ", "Tổng quan và dữ liệu bài đăng");
     }
 
-    @Test(groups = {"worker-post-management", "read-only"},
+    @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
             description = WorkerPostTestCases.WORKER_POST_013)
     public void pageHasFourRequiredStatusTabs() {
         Assert.assertTrue(workerPostManagementPage.isLoaded(), "Trang Quản lí bài đăng chưa tải xong.");
@@ -35,7 +35,7 @@ public class OverviewTest extends WorkerPostManagementTestSupport {
                 "URL không giữ trạng thái pending: " + driver.getCurrentUrl());
     }
 
-    @Test(groups = {"worker-post-management", "read-only"},
+    @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
             description = WorkerPostTestCases.WORKER_POST_014)
     public void pendingCardsHaveCoreInformation() {
         List<PostCard> cards = workerPostManagementPage.visiblePostCards();
@@ -52,7 +52,7 @@ public class OverviewTest extends WorkerPostManagementTestSupport {
         }
     }
 
-    @Test(groups = {"worker-post-management", "read-only"},
+    @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
             description = WorkerPostTestCases.WORKER_POST_015)
     public void pendingCardsExposeModerationActions() {
         Assert.assertTrue(workerPostManagementPage.hasPendingActionsOnEveryCard(),
@@ -99,7 +99,7 @@ public class OverviewTest extends WorkerPostManagementTestSupport {
                 "Bài đã xóa vẫn còn action Duyệt/Từ chối.");
     }
 
-    @Test(groups = {"worker-post-management", "read-only"},
+    @Test(groups = {"worker-post-management", "read-only", "data-interaction"},
             description = WorkerPostTestCases.WORKER_POST_019)
     public void cardsHaveValidTimestampAndMediaSummary() {
         Assert.assertTrue(workerPostManagementPage.cardsHaveValidTimestampAndMediaSummary(),
